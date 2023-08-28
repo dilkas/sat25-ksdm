@@ -20,14 +20,8 @@
 \usepackage[linesnumbered,ruled,vlined]{algorithm2e}
 \usepackage[capitalize,noabbrev]{cleveref}
 \usepackage{microtype}
-
-\lstset{breaklines=true}
-\lstset{language=C++,
-        basicstyle=\ttfamily,
-        stringstyle=\color{red},
-        commentstyle=\color{green},
-        breaklines=true,
-        showstringspaces=false}
+\usepackage{amsfonts}
+\usepackage{mathtools}
 
 % Comment out this line in the camera-ready submission
 \linenumbers
@@ -49,6 +43,21 @@
 \pdfinfo{
 /TemplateVersion (IJCAI.2023.0)
 }
+
+\lstset{breaklines=true}
+\lstset{language=C++,
+        basicstyle=\ttfamily,
+        stringstyle=\color{red},
+        commentstyle=\color{green},
+        breaklines=true,
+        showstringspaces=false}
+
+\crefname{line}{line}{lines}
+
+\DeclareMathOperator{\Dom}{Dom}
+\DeclareMathOperator{\Doms}{Doms}
+\DeclareMathOperator{\Preds}{Preds}
+\DeclareMathOperator{\Vars}{Vars}
 
 \title{Towards Practical First-Order Model Counting}
 
@@ -86,8 +95,6 @@
         library to the numerical evaluation part. Now, all functions take
         arguments (domain sizes) as unsigned integers and return
         \texttt{mpz\_class} objects (defined in the \texttt{gmpxx.h} header).
-  \item Added a CLI option \texttt{--sizes} to specify the domain sizes on the
-        command line.
   \item Converting the recursive equations into a \texttt{C++} program, which
         can then be compiled and executed to obtain numerical values.
   \item The translation of a set of equations($E$) into \texttt{C++} works as
@@ -178,12 +185,14 @@
         the universal and existential quantifiers over that domain, and then
         using crane. However, if a domain is set to contain some non-empty
         number of elements, we can apply GDR over that domain and proceed with
-        crane, substituting the known values of preveiously calculated model
+        crane, substituting the known values of previously calculated model
         counts in the process.
   \item Implemented a function to simplify functions (recursive and
         non-recursive) using the Wolfram Engine. Modified the wolfram
         simplification functions to incorporate binomial and indicator
         functions.
+  \item The report has some (long) examples of formulas being transformed into
+        programs perhaps suitable for supplementary material.
 \end{itemize}
 
 \subsection{Foo}
@@ -260,6 +269,10 @@ There are 2 ideas which we could think of to solve this -
 
 \section{Algorithms}
 
+For any dependency key, element signature, or clause $P$, argument or variable
+$x$, and number or constant $t$, we shall write $P[t / x]$ for the result of
+substituting $t$ for all occurrences of $x$ in $P$.
+
 \subsection{Algorithm to Find a Sufficient Set of Base Cases}
 
 \begin{algorithm}[t]
@@ -267,36 +280,27 @@ There are 2 ideas which we could think of to solve this -
   \KwIn{dependencies}
   \KwOut{base\_cases}
 
-        % Algorithm steps
-        base\_cases $\leftarrow$ Set()
-
-        \ForEach{dependency $\in$ dependencies}{
-          \ForEach{elem $\in$ dependency.value}{
-            \If{dependency.key.func\_name = elem.func\_name}{
-              \ForEach{arg $\in$ elem.args}{
-                \tcp{eg : lim is 2 for the arg (x-3)}
-                lim $\leftarrow$ arg.const\_subtracted - 1 \\
-                \For{l $\in$ 0 to lim}{
-                  \tcp{eg : for dependency.key = f(x,y), arg = x and l = 0, add f(0, y) to base\_cases}
-                  base\_cases += dependency.key.substitute\_arg(arg\_var, l)
-                }
-              }
-            }
-            \Else{
-              \ForEach{arg $\in$ elem.args}{
-                \tcp{eg : lim is 2 for the arg (x-3)}
-                lim $\leftarrow$ arg.const\_subtracted - 1 \\
-                \For{l $\in$ 0 to lim}{
-                  \tcp{eg : for dependency.key = f(x,y), arg = x and l = 0, add f(0, y) to base\_cases}
-                  base\_cases += dependency.key.substitute\_arg(arg, l)\\
-                  \tcp{signature for f(x-1, y-2) is f(x,y)}
-                  base\_cases += elem.signature.substitute\_arg(arg, l)
-                }
-              }
-            }
+  base\_cases $\gets \emptyset$\;
+  \ForEach{dependency $\in$ dependencies}{
+    \ForEach{elem $\in$ dependency.value}{
+      \ForEach{arg $\in$ elem.args}{
+        \For{l $\in$ 0 to arg.const\_subtracted - 1}{\label{line:lim}
+          base\_cases += dependency.key[l / arg]\;\label{line:insert}
+          \If{dependency.key.func\_name $\ne$ elem.func\_name}{
+            base\_cases += elem.signature[l / arg]\;\label{line:signature}
           }
         }
+      }
+    }
+  }
 \end{algorithm}
+
+\begin{itemize}
+  \item \cref{line:lim}: eg : the limit is 2 for the arg (x-3)
+  \item \cref{line:insert} eg : for dependency.key = f(x,y), arg = x and l = 0,
+        add f(0, y) to base\_cases
+  \item \cref{line:signature} signature for f(x-1, y-2) is f(x,y)
+\end{itemize}
 
 The pseudo-code of the algorithm is given as \cref{alg1}. Here,
 \texttt{dependencies} maps the function call on the lhs of each equation to the
@@ -318,37 +322,52 @@ the dependencies are
 \subsection{Algorithm to Transform CNF Based on Domain Sizes}
 
 \begin{algorithm}[t]
-  \caption{Algorithm For Transforming CNF Based on Domain Sizes}\label{alg2}
-  \KwIn{cnf, dom, dom\_size}
-  \KwOut{transformed\_cnf, multiplier}
-  removed\_predicates $\leftarrow$ Set()
-  retained\_predicates $\leftarrow$ Set()
-  \If{dom\_size = 0}{
-    \ForEach{clause $\in$ cnf}{
-      \If{dom $\in$ clause.domains}{
-        removed\_predicates += clause.predicates
+  \caption{Transforming Formulas Based on Domain Sizes}\label{alg2}
+  \KwIn{formula $\phi$, domain $\Delta$, target domain size $n \in \{\, 0, 1 \,\}$, domain size function $|\cdot|$}
+  \KwOut{formula $\phi'$, multiplier $m \in \mathbb{N}$}
+  $P^{-} \gets \emptyset$; $P^{+} \gets \emptyset$; $\phi' \gets \emptyset$; m $\gets 1$\;
+  \uIf{$|\Delta| = 0$}{
+    \ForEach{clause $C \in \phi$}{
+      \uIf{$\Delta \in \Doms(C)$}{
+        $P^{-} \gets P^{-} \cup \Preds(C)$\;
       }
       \Else{
-        retained\_predicates += clause.predicates
-        transformed\_cnf += clause
+        $P^{+} \gets P^{+} \cup \Preds(C)$\;
+        $\phi' \gets \phi' \cup \{\, C \,\}$\;
       }
     }
-    removed\_predicates = removed\_predicates $\setminus$ retained\_predicates
-    \ForEach{pred $\in$ removed\_predicates}{
-      multiplier *= $2^{(pred.domain\_sizes.join("*"))}$
+    $P^{-} \gets P^{-} \setminus P^{+}$\;
+    \ForEach{predicate $P \in P^{-}$}{
+      m *= $2^{(pred.domain\_sizes.join("*"))}$\;
     }
   }
-  \ElseIf{dom\_size = 1}{
-    const $\leftarrow$ newConst()
-    \ForEach{clause $\in$ cnf}{
-      transformed\_clause $\leftarrow$ clause
-      \ForEach{v $\in$ clause.vars | v.domain = dom}{
-        transformed\_cnf $\leftarrow$ transformed\_clause.substituteVar(v, const)
+  \ElseIf{$|\Delta| = 1$}{
+    $c \gets$ a new constant symbol\;
+    \ForEach{clause $C \in \phi$}{
+      $C' \gets C$\;
+      \ForEach{$v \in \Vars(C)$ with $\Dom(v) = \Delta$}{
+        $C' \gets C'[c / v]$\;
       }
-      transformed\_cnf += transformed\_clause
+      $\phi' \gets \phi' \cup \{\, C' \,\}$\;
     }
   }
 \end{algorithm}
+% TODO: either the target domain size or the domain size function needs to go
+
+\begin{itemize}
+  \item Formulas are in CNF. Formulas are (multi) sets of clauses.
+  \item $P^{-}$ --- removed predicates
+  \item $P^{+}$ --- retained predicates
+  \item $\phi'$ --- transformed version of $\phi$
+  \item $C'$ --- transformed version of clause $C$
+  \item For any clause $C$, let $\Doms(C)$, $\Preds(C)$, and $\Vars(C)$ denote
+        respectively the set of domains, predicates, and variables in $C$. For
+        any variable $v$, let $\Dom(v)$ denote its domain. Note that, for any
+        clause $C$, we have that
+        $\Doms(C) = \{\, \Dom(v) \mid v \in \Vars(C) \,\}$. Similarly, for any
+        predicate $P$, let $\Doms(P)$ denote the set of domains associated with
+        $P$.
+\end{itemize}
 
 The pseudo code is given as \cref{alg2}. We use \cref{alg2} to find the
 transformed CNF corresponding to each base case obtained using \cref{alg1} and
