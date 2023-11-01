@@ -1,0 +1,5 @@
+aima3==1.0.11
+python-sat==0.1.6.dev3
+networkx~=2.5
+python-flint==0.3.0
+gmpy2==2.0.8
