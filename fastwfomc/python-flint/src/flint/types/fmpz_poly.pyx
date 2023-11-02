@@ -71,6 +71,31 @@ cdef class fmpz_poly(flint_poly):
         (0, 6*x^4 + x^3 + x^2 + 2)
     """
 
+    @classmethod
+    def interpolate(cls, xs, ys):
+        """
+        Constructs the unique interpolating polynomial of length at most *n*
+        taking the values *ys* when evaluated at the *n* distinct points *xs*.
+        """
+        cdef fmpz_struct * xsv
+        cdef fmpz_struct * ysv
+        cdef long n
+        xs = [any_as_fmpz(x) for x in xs]
+        ys = [any_as_fmpz(y) for y in ys]
+        n = len(xs)
+        if len(ys) != n:
+            raise ValueError("xs and ys must have the same length")
+        xsv = <fmpz_struct *> libc.stdlib.malloc(sizeof(fmpz_struct) * n)
+        ysv = <fmpz_struct *> libc.stdlib.malloc(sizeof(fmpz_struct) * n)
+        for i in range(n):
+            xsv[i] = (<fmpz>(xs[i])).val[0]
+            ysv[i] = (<fmpz>(ys[i])).val[0]
+        u = fmpz_poly.__new__(fmpz_poly)
+        fmpz_poly_interpolate_fmpz_vec((<fmpz_poly>u).val, xsv, ysv, n)
+        libc.stdlib.free(xsv)
+        libc.stdlib.free(ysv)
+        return u
+
     def __cinit__(self):
         fmpz_poly_init(self.val)
 
