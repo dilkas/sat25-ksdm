@@ -106,6 +106,11 @@
 
 \section{Introduction}
 
+An important change to the compilation algorithm. We make the FCGs satisfy the
+following property. For every domain $\Delta$, for every directed path $P$
+without Ref nodes, the number of atom counting or (generalised) domain recursion
+operations on $\Delta$ on $P$ is at most one.
+
 \begin{figure*}[t]
   \centering
   \begin{tikzpicture}
@@ -276,11 +281,10 @@ See \cref{alg:main}
 
   $B \gets \emptyset$\;
   \ForEach{equation $(f(\mathbf{x}) = \expr{}) \in E$}{
-    \ForEach{function call $g(\mathbf{y} - \mathbf{c}) \in \expr{}$}{\label{line:functioncall}
+    \ForEach{function call $f(\mathbf{x} - \mathbf{c}) \in \expr{}$}{\label{line:functioncall}
       \ForEach{$c_{i} \in \mathbf{c}$}{
         \For{$n \gets 0$ \KwTo $c_{i} - 1$}{\label{line:lim}
           $B \gets B \cup \{\, f(\mathbf{x})[x_{i}/n] \,\}$\;\label{line:insert}
-          \lIf{$f \ne g$}{$B \gets B \cup \{\, g(\mathbf{y})[y_{i}/n] \,\}$}\label{line:signature}
         }
       }
     }
@@ -341,6 +345,31 @@ The algorithm is described as \cref{alg1}.
           $n = 0$, add $f(y, z)[y/0] = f(0, z)$ to $B$.
   \end{itemize}
 \end{example}
+
+TODO: I changed the algorithm
+
+\begin{theorem}
+  Under the following assumptions, \cref{alg1} is guaranteed to return a
+  sufficient set of base cases:
+  \begin{itemize}
+    \item there is no mutual recursion (i.e., cyclic dependencies between
+          functions);
+    \item each function $f$ has exactly one equation with $f$ on the LHS;
+    \item in the recursive definition of function $f(x_{1},\dots,x_{n})$, the
+          $i$-th argument of each call to $f$ on the RHS is of the form
+          $x_{i} - c_{i}$, where:
+          \begin{itemize}
+            \item $c_{i} \ge 0$ for all $i$, and
+            \item $c_{i} > 0$ for at least one $i$.
+          \end{itemize}
+  \end{itemize}
+\end{theorem}
+
+\begin{example}
+  For an equation $f(m, n) = 2 \times f(m-1, n)$, \cref{alg1} returns $f(0, n)$.
+\end{example}
+
+NOTE: function calls such as $f(n-m)$ and $f(n-m-1)$ are ignored.
 
 \section{Propagating Domain Size Assumptions}\label{sec:simplifying}
 
