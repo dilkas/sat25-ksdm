@@ -106,10 +106,28 @@
 
 \section{Introduction}
 
-An important change to the compilation algorithm. We make the FCGs satisfy the
-following property. For every domain $\Delta$, for every directed path $P$
-without Ref nodes, the number of atom counting or (generalised) domain recursion
-operations on $\Delta$ on $P$ is at most one.
+% TODO: (in Fig. 1) Crane2 doesn't use Crane, it uses itself.
+
+\paragraph{Changes to the compilation process.}
+\begin{itemize}
+  \item We make the FCGs satisfy the following property. For every domain
+        $\Delta$, for every directed path $P$ without Ref nodes, the number of
+        atom counting or (generalised) domain recursion or independent partial
+        grounding operations on $\Delta$ on $P$ is at most one.
+  \item when checking whether recursion is possible between a source and a
+        target formula, the target formula (maybe the source formula as well?)
+        must not include a domain as well as its subdomain. This might be
+        equivalent to the formula being `unshattered'. Such formulas could be
+        seen as transitory, and allowing such recursive calls leads to FCGs that
+        I cannot make sense of.
+  \item During smoothing, when unit clauses (a.k.a.\ variables) are propagated
+        in the opposite direction of the FCG arcs (i.e., `upwards'), when
+        visiting a \texttt{Ref} node, these clauses are translated using the
+        domain map of the \texttt{Ref} node. For example, we might have a
+        function $g$ that depends on $m$ (i.e., domain $a^{\top}$), which is
+        called as $g(n)$ (i.e., on domain $a$). When smoothing that function
+        call, we want to translate all mentions of $a^{\top}$ to $a$.
+\end{itemize}
 
 \begin{figure*}[t]
   \centering
