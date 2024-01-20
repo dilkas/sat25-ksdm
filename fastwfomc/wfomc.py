@@ -165,7 +165,7 @@ class WFOMC:
         self.i1_ind = g_ind - self.i2_ind
 
         self.ind = self.i1_ind.union(self.i2_ind)
-        self.nonind = g.nodes - self.i1_ind - self.i2_ind
+        self.nonind = set(g.nodes()) - self.i1_ind - self.i2_ind
         print("I1, I2, nonind:", self.i1_ind, self.i2_ind, self.nonind)
 
         self.i2_ind = list(self.i2_ind)
