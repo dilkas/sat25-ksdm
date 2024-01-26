@@ -106,7 +106,11 @@
 
 \section{Introduction}
 
+% TODO: mention/describe the arithmetic simplification code
+
 % TODO: (in Fig. 1) Crane2 doesn't use Crane, it uses itself.
+
+% TODO: describe which compilation rules are currently greedy or non-greedy.
 
 \paragraph{Changes to the compilation process.}
 \begin{itemize}
@@ -128,6 +132,37 @@
         called as $g(n)$ (i.e., on domain $a$). When smoothing that function
         call, we want to translate all mentions of $a^{\top}$ to $a$.
 \end{itemize}
+
+\paragraph{Proof of Correctness}
+\begin{enumerate}
+  \item Define what it means for a formula to be \emph{consistent}.
+        \begin{itemize}
+          \item The formula (including the mapping of constants to their
+                domains) does not mention a domain together with its subdomain
+                (i.e., all mentioned domains are pairwise disjoint).
+                Specifically, we can't have a subdomain together with its parent
+                domain or a subdomain together with a constant that belongs to
+                its parent domain.
+          \item The target of \texttt{Ref} must also be a consistent formula.
+          \item The initial formula is consistent by definition.
+        \end{itemize}
+  \item Aim to show that Crane works correctly on all consistent formulas.
+  \item Prove that, whenever some compilation rule makes the formula $\phi$
+        inconsistent, greedy compilation rules will make $\phi$ consistent again
+        before $\phi$ encounters non-greedy compilation rules that depend on
+        $\phi$ being consistent.
+        \begin{itemize}
+          \item In particular, prove that shattering and unit propagation will
+                always eliminate the parent domain of the domains introduced by
+                atom counting.
+          \item Constraint removal only applies when it can eliminate the parent
+                domain entirely.
+          \item Prove this for a particular assumption about which compilation
+                rules are set to be greedy. For the greedy algorithm, although
+                all rules are applied in a greedy manner, we still assume that
+                greedy rules will be applied before non-greedy rules.
+        \end{itemize}
+  \end{enumerate}
 
 \begin{figure*}[t]
   \centering

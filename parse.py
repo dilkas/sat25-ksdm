@@ -15,6 +15,7 @@ with open('sequences.csv', newline='') as f:
 
 rows = []
 for filename in os.listdir(RESULTS_DIR):
+    print('Parsing', filename)
     data = {}
     data['sequence'], data['algorithm'] = filename.split('.')
     domains = []
@@ -36,16 +37,17 @@ for filename in os.listdir(RESULTS_DIR):
         sequence = sequences[int(data['sequence'][1:])]
         if correct and int(count) != sequence[int(domain)]:
             correct = False
-            print('Sequence {} is incorrect:'.format(data['sequence']))
+            print('Sequence {} (algorithm {}) is incorrect:'.format(data['sequence'], data['algorithm']))
             print('Original:', sequence)
             print('Computed: ', [int(x) for x in counts])
             print()
-
         new_data = data.copy()
         new_data['domain.size'] = domain
         new_data['count'] = count
         new_data['inference.time'] = time
         rows.append(new_data)
+    if correct:
+        print('Sequence {} (algorithm {}) is CORRECT'.format(data['sequence'], data['algorithm']))
 
 with open(RESULTS_FILE, 'w', encoding='UTF8', newline='') as f:
     writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
