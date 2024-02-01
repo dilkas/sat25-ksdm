@@ -23,6 +23,7 @@
 \usepackage{amsfonts}
 \usepackage{mathtools}
 \usepackage{tikz}
+\usepackage[backgroundcolor=lightgray]{todonotes}
 
 % Comment out this line in the camera-ready submission
 \linenumbers
@@ -106,11 +107,13 @@
 
 \section{Introduction}
 
-% TODO: mention/describe the arithmetic simplification code
-
-% TODO: (in Fig. 1) Crane2 doesn't use Crane, it uses itself.
-
-% TODO: describe which compilation rules are currently greedy or non-greedy.
+\todo[inline,caption={}]{
+  \begin{itemize}
+    \item mention/describe the arithmetic simplification code
+    \item (in Fig. 1) Crane2 doesn't use Crane, it uses itself
+    \item describe which compilation rules are currently greedy or non-greedy
+  \end{itemize}
+}
 
 \paragraph{Changes to the compilation process.}
 \begin{itemize}
@@ -133,7 +136,7 @@
         call, we want to translate all mentions of $a^{\top}$ to $a$.
 \end{itemize}
 
-\paragraph{Proof of Correctness}
+\paragraph{Proof of correctness.}
 \begin{enumerate}
   \item Define what it means for a formula to be \emph{consistent}.
         \begin{itemize}
@@ -223,10 +226,11 @@ equations.
   \item Support for infinite precision integers using the GNU Multiple Precision
         Arithmetic Library.
   \item The experiments are (going to be) more comprehensive than any other
-        experimental study performed on (W)FOMC algorithms (TODO: references to
-        my previous paper and some of the \textsc{ForcLift} and
-        \textsc{FastWFOMC} papers that contain experimental results).
+        experimental study performed on (W)FOMC algorithms.
 \end{itemize}
+
+\todo[inline]{references to my previous paper and some of the \textsc{ForcLift}
+  and \textsc{FastWFOMC} papers that contain experimental results}
 
 \Cref{sec:identifying,sec:cpp} deal with algebraic constructs whereas
 \cref{sec:simplifying} deals with logic.
@@ -239,8 +243,13 @@ equations.
 We write $\expr{}$ for an arbitrary algebraic expression. For any signature or
 clause $C$, argument or variable $x$, and number or constant $t$, we shall write
 $C[t / x]$ for the result of substituting $t$ for all occurrences of $x$ in $C$.
-% TODO: check if I'm still using this notation in all these cases
-% TODO: explain how this works for function calls too
+
+\todo[inline,caption={}]{
+  \begin{itemize}
+    \item check if I'm still using this notation in all these cases
+    \item explain how this works for function calls too
+  \end{itemize}
+}
 
 \begin{definition}
   A \emph{function call} is a term of the form
@@ -248,8 +257,8 @@ $C[t / x]$ for the result of substituting $t$ for all occurrences of $x$ in $C$.
   for short), where $f$ is an $n$-ary function, each $x_{i}$ is a variable, and
   each $c_{i}$ is a non-negative constant.
 \end{definition}
-% TODO: do I ever use this term for the case when some of the variables don't
-% exist?
+\todo[inline]{do I ever use this term for the case when some of the variables
+  don't exist?}
 
 \begin{definition}
   A \emph{signature} is a term of the form $f(x_{1}, \dots, x_{n})$ (written
@@ -265,9 +274,15 @@ $C[t / x]$ for the result of substituting $t$ for all occurrences of $x$ in $C$.
   Henceforth, we call $f(\mathbf{x})$ and $\expr{}$ the left-hand side (LHS) and
   the right-hand side (RHS) of the equation, respectively.
 \end{definition}
-% TODO: give some examples of formulas that: 1) introduce new variables, 2) call
-% the function itself, 3) call some other function, 4) is more nested than just
-% a sum.
+\todo[inline,caption={}]{
+  give some examples of formulas that:
+  \begin{itemize}
+    \item introduce new variables,
+    \item call the function itself,
+    \item call some other function, and
+    \item is more nested than just a sum.
+  \end{itemize}
+}
 
 \begin{definition}
   A \emph{base case} is a function call where all arguments are either variables
@@ -277,10 +292,13 @@ $C[t / x]$ for the result of substituting $t$ for all occurrences of $x$ in $C$.
 
 \subsection{Logic}
 
-% TODO: what notation am I using for FOL? Colon after every quantifier?
-
-% TODO: (Similar to CNF, maybe QBF). Incomplete. Need (W)FOMC semantics. What is
-% an interpretation? What is a model?
+\todo[inline,caption={}]{
+  \begin{itemize}
+    \item What notation am I using for FOL? Colon after every quantifier?
+    \item (Similar to CNF, maybe QBF). Incomplete. Need (W)FOMC semantics. What
+          is an interpretation? What is a model?
+  \end{itemize}
+}
 
 A \emph{formula} is a set of clauses. A \emph{clause} is of the form
 $\forall x_{1} \in \Delta_{1}\forall x_{2} \in \Delta_{2}\dots\forall x_{n} \in \Delta_{n} \phi(x_{1}, x_{2}, \dots, x_{n})$,
@@ -289,8 +307,9 @@ $x_{1}, \dots, x_{n}$ (and any constants). A \emph{literal} is either an atom or
 its negation. An \emph{atom} is of the form $P(t_{1}, \dots, t_{m})$, where $P$
 is a predicate, and $t_{1}, \dots, t_{m}$ are terms. A \emph{term} is either a
 variable or a constant.
-% TODO: explain set-based notation for a clause (iterating over all literals,
-% maybe I should have a Lits() operator? No!!!)
+
+\todo[inline]{explain set-based notation for a clause (iterating over all
+  literals)}
 
 For any clause $C$, let $\Preds(C)$ denote the set of predicates in $C$. For any
 clause or literal $l$, let $\Vars(l)$ denote the set of variables in $l$.
@@ -312,18 +331,20 @@ clause $C$, let $\Doms(C) = \{\, \Dom(v) \mid v \in \Vars(C) \,\}$.
     \ForEach{$i$ such that $x_{i}$ is a constant}{
       $\psi \gets \Propagate{$\psi$, $\mathcal{D}(f, i)$, $x_i$}$\;
     }
-    $(E', \textunderscore, \textunderscore) \gets \Crane{$\psi$}$\;
+    $(E', \text{\textunderscore}, \text{\textunderscore}) \gets \Crane{$\psi$}$\;
     $E \gets E \cup E'$\;
   }
 \end{algorithm}
 
 See \cref{alg:main}
 
-% TODO: extend it to work with base cases that are themselves recursive
-
-% TODO: what does it mean for a set of equations to define a set of base cases?
-
-% TODO: for base cases, we will also use the f(\mathbf{x}) notation
+\todo[inline,caption={}]{
+  \begin{itemize}
+    \item extend it to work with base cases that are themselves recursive
+    \item what does it mean for a set of equations to define a set of base cases?
+    \item for base cases, we will also use the $f(\mathbf{x})$ notation
+  \end{itemize}
+}
 
 \section{Identifying a Sufficient Set of Base Cases}\label{sec:identifying}
 
@@ -354,14 +375,13 @@ we should calculate the base cases by finding the base cases up to
 $\max(c_{1}, c_{2}, \dots) - 1$. However, currently only empty and singleton
 domains are supported.
 
-\begin{itemize}
-  \item \cref{line:functioncall} iterates over all function calls in the
-        algebraic expression.
-  \item note that on \cref{line:signature} it is the signature and not the
-        original function call.
-\end{itemize}
-
-% TODO: remove the 'dependencies' data structure from the description
+\todo[inline,caption={}]{
+  \begin{itemize}
+    \item NOTE: \cref{line:functioncall} iterates over all function calls in the
+          algebraic expression
+    \item remove the `dependencies' data structure from the description
+  \end{itemize}
+}
 
 The following steps were followed while finding the base cases:
 
@@ -379,8 +399,8 @@ since there are $m-2$ and $m-3$ terms appearing in the arguments.
 
 The algorithm is described as \cref{alg1}.
 
-\begin{example}
-  TODO: add an example where \cref{alg1} runs on either
+\todo[inline,caption={}]{
+  add an example where \cref{alg1} runs on either
   \begin{align*}
     f_{0}(m, n) &= f_{1}(m-1, n) + f_{2}(m, n-1)\\
     f_{1}(m, n) &= f_{1}(m-1, n-1) \times f_{2}(m-2, n-1)\\
@@ -391,15 +411,15 @@ The algorithm is described as \cref{alg1}.
     f(m, n) &= g(m-1, n) + f(m-2, n-1)\\
     g(m, n) &= f(m-1, n-2) + g(m-1, n-1).
   \end{align*}
+}
 
-  \begin{itemize}
-    \item \cref{line:lim}: the limit is 2 for the arg $(x-3)$.
-    \item \cref{line:insert} for $f(\mathbf{x}) = f(y, z)$, $x_{i} = y$, and
-          $n = 0$, add $f(y, z)[y/0] = f(0, z)$ to $B$.
-  \end{itemize}
-\end{example}
+\begin{itemize}
+  \item \cref{line:lim}: the limit is 2 for the arg $(x-3)$.
+  \item \cref{line:insert} for $f(\mathbf{x}) = f(y, z)$, $x_{i} = y$, and
+        $n = 0$, add $f(y, z)[y/0] = f(0, z)$ to $B$.
+\end{itemize}
 
-TODO: I changed the algorithm
+\todo[inline]{I changed the algorithm. Update the description.}
 
 \begin{theorem}
   Under the following assumptions, \cref{alg1} is guaranteed to return a
@@ -492,7 +512,8 @@ $y \in \Gamma \setminus \Gamma'$ or $z \in \Gamma \setminus \Gamma'$.
     }
   }
 \end{algorithm}
-% TODO: it would be easy to extend the second part to an arbitrary constant
+
+\todo[inline]{it would be easy to extend the second part to an arbitrary constant}
 
 We use \cref{alg2} to find the transformed formula corresponding to each base
 case obtained using \cref{alg1} and call \textsc{Crane} on the formula to obtain
@@ -507,8 +528,8 @@ the required base cases.
 
 \section{Generating C++ Code}\label{sec:cpp}
 
-% TODO: The report has some (long) examples of formulas being transformed into
-% programs perhaps suitable for supplementary material.
+\todo[inline]{the report has some (long) examples of formulas being transformed
+  into programs perhaps suitable for supplementary material}
 
 The target is to generate C++ code that can evaluate numerical values of the
 model counts based on the equations generated by \textsc{Crane}. We achieve this
