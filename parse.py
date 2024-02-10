@@ -15,8 +15,11 @@ with open('sequences.csv', newline='') as f:
         sequences[int(row['id'])] = [int(x) for x in row['sequence'].split(',')]
 
 rows = []
+incorrect_count = 0
+total_count = 0
 for filename in os.listdir(RESULTS_DIR):
-    print('Parsing', filename)
+    total_count += 1
+    # print('Parsing', filename)
     data = {}
     data['sequence'], data['algorithm'] = filename.split('.')
     domains = []
@@ -38,22 +41,23 @@ for filename in os.listdir(RESULTS_DIR):
     assert len(domains) == len(counts)
     assert len(domains) == len(times)
 
-    correct = True
+    sequence = [str(x) for x in sequences[int(data['sequence'][1:])][:len(counts) + 1]]
+    if not (counts == sequence[:-1] or counts == sequence[1:]):
+        incorrect_count += 1
+        print('Sequence {} (algorithm {}) is incorrect:'.format(data['sequence'], data['algorithm']))
+        print('Original:', [int(x) for x in sequence])
+        print('Computed: ', [int(x) for x in counts if x != ''])
+        print()
+
     for (domain, count, time) in zip(domains, counts, times):
-        sequence = sequences[int(data['sequence'][1:])]
-        if count == '' or correct and int(count) != sequence[int(domain)]:
-            correct = False
-            print('Sequence {} (algorithm {}) is incorrect:'.format(data['sequence'], data['algorithm']))
-            print('Original:', sequence)
-            print('Computed: ', [int(x) for x in counts if x != ''])
-            print()
         new_data = data.copy()
         new_data['domain.size'] = domain
         new_data['count'] = count
         new_data['inference.time'] = time
         rows.append(new_data)
-    if correct:
-        print('Sequence {} (algorithm {}) is CORRECT'.format(data['sequence'], data['algorithm']))
+
+print('Correct: {:.0f}% ({} out of {})'.format(100 * (total_count - incorrect_count) / total_count,
+                                               total_count - incorrect_count, total_count))
 
 with open(RESULTS_FILE, 'w', encoding='UTF8', newline='') as f:
     writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
