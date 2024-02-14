@@ -135,6 +135,16 @@
         function $g$ that depends on $m$ (i.e., domain $a^{\top}$), which is
         called as $g(n)$ (i.e., on domain $a$). When smoothing that function
         call, we want to translate all mentions of $a^{\top}$ to $a$.
+  \item Implemented an if-then-else arithmetic operation as the interpretation
+        of the new domain recursion node (i.e., there is one branch for when the
+        domain is empty and another branch for any other domain size).
+  \item Smoothing for domain recursion now works the same way as smoothing for
+        disjunction: both sides must have the same atoms. Almost all of
+        \cref{sec:simplifying} is now outdated because smoothing makes the
+        ``tautology insertion'' unnecessary.
+  \item \Cref{sec:main,sec:identifying} might also be outdated: there is
+        probably no need to search for base cases given the new version of
+        domain recursion.
 \end{itemize}
 
 \paragraph{Proof of correctness.}
@@ -322,7 +332,8 @@ quantified. For a literal $l$,
 $\Doms(l) \coloneqq \{\, \Dom(v) \mid v \in \Vars(l) \,\}$. Similarly, for any
 clause $C$, let $\Doms(C) = \{\, \Dom(v) \mid v \in \Vars(C) \,\}$.
 
-\section{The Main Algorithm: Finding the Definitions of the Base Cases}
+\section{The Main Algorithm: Finding the Definitions of the Base
+  Cases}\label{sec:main}
 
 \begin{algorithm}[t]
   \caption{Finding the definitions of the base cases}\label{alg:main}
@@ -590,6 +601,19 @@ Third, to translate the RHS, we convert $\sum_{x=a}^{b} \expr{}$ to
 where $y, z, \dots$ are the free variables present in $\expr{}$.
 
 \section{Experiments}
+
+\paragraph{Remarks on comparing the model counts of the formulas with their
+  corresponding OEIS sequences.}
+Disregarding differences where the OEIS sequence starts with one or two numbers
+that are not included in model counts (which is somewhat justified since we
+start with domains of size one rather than zero), two differences remain:
+\begin{itemize}
+  \item on A62971, the OEIS sequence starts as $1, 2, 16,\dots$, but the model
+        counts start as $1, 16,\dots$ (with the rest exactly the same);
+  \item similarly, on A62971, the OEIS sequence starts as $32, 290,\dots$, but
+        the model counts start as $2, 32, 290,\dots$ (with the rest exactly the
+        same).
+\end{itemize}
 
 \section{Conclusion}
 

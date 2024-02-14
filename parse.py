@@ -19,17 +19,18 @@ incorrect_count = 0
 total_count = 0
 for filename in os.listdir(RESULTS_DIR):
     total_count += 1
-    # print('Parsing', filename)
+    print('Parsing', filename)
     data = {}
     data['sequence'], data['algorithm'] = filename.split('.')
     domains = []
     counts = []
     times = []
+    total_times = []
     with open(RESULTS_DIR + '/' + filename) as f:
         for line in f.readlines():
-            if line.startswith('Compilation time:'):
+            if line.startswith('Compilation time:'): # Crane
                 data['compilation.time'] = line.split()[2]
-            elif line.startswith('The model count'):
+            elif line.startswith('The model count'): # Crane
                 tokens = line.split()
                 domains.append(tokens[7][:-1])
                 if tokens[8] == 'TIMEOUT':
@@ -38,22 +39,50 @@ for filename in os.listdir(RESULTS_DIR):
                 else:
                     counts.append(tokens[8].translate({ord(','): None}))
                     times.append(tokens[10])
+            elif line.startswith('Domain size:'): # ForcLift
+                domains.append(line.split()[2])
+            elif line.startswith('Z = '): # ForcLift
+                counts.append(int(round(float(line.split()[4]))))
+            elif line.startswith('Inference took'): # ForcLift
+                times.append(line.split()[2])
+            elif line.startswith('Elapsed:'): # ForcLift
+                total_times.append(float(line.split()[1]) * 1000)
+
+    # If the algorithm fails to compile, output no domains
+    if len(domains) == 1:
+        domains = []
+        total_times = []
+
+    print('Domains:', domains)
+    print('Counts:', counts)
+    if len(total_times) > 0:
+        print('Total runtimes:', total_times)
+    print()
+
     assert len(domains) == len(counts)
     assert len(domains) == len(times)
+    assert len(total_times) == 0 or len(total_times) == len(domains)
 
-    sequence = [str(x) for x in sequences[int(data['sequence'][1:])][:len(counts) + 1]]
-    if not (counts == sequence[:-1] or counts == sequence[1:]):
-        incorrect_count += 1
-        print('Sequence {} (algorithm {}) is incorrect:'.format(data['sequence'], data['algorithm']))
-        print('Original:', [int(x) for x in sequence])
-        print('Computed: ', [int(x) for x in counts if x != ''])
-        print()
+    # Check correctness of Crane
+    if data['algorithm'] != 'forclift':
+        sequence = [str(x) for x in sequences[int(data['sequence'][1:])][:len(counts) + 2]]
+        mutual_len = min(len(counts), len(sequence))
+        if not (counts[:mutual_len] == sequence[:mutual_len] or
+                counts[:mutual_len] == sequence[1:mutual_len + 1] or
+                counts[:mutual_len] == sequence[2:mutual_len + 2]):
+            incorrect_count += 1
+            print('Sequence {} (algorithm {}) is incorrect:'.format(data['sequence'], data['algorithm']))
+            print('Original:', [int(x) for x in sequence])
+            print('Computed: ', [int(x) for x in counts if x != ''])
+            print()
 
-    for (domain, count, time) in zip(domains, counts, times):
+    for i in range(len(domains)):
         new_data = data.copy()
-        new_data['domain.size'] = domain
-        new_data['count'] = count
-        new_data['inference.time'] = time
+        new_data['domain.size'] = domains[i]
+        new_data['count'] = counts[i]
+        new_data['inference.time'] = times[i]
+        if len(total_times) > 0:
+            new_data['compilation.time'] = total_times[i] - float(times[i])
         rows.append(new_data)
 
 print('Correct: {:.0f}% ({} out of {})'.format(100 * (total_count - incorrect_count) / total_count,
