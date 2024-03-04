@@ -128,20 +128,9 @@
         equivalent to the formula being `unshattered'. Such formulas could be
         seen as transitory, and allowing such recursive calls leads to FCGs that
         I cannot make sense of.
-  \item During smoothing, when unit clauses (a.k.a.\ variables) are propagated
-        in the opposite direction of the FCG arcs (i.e., `upwards'), when
-        visiting a \texttt{Ref} node, these clauses are translated using the
-        domain map of the \texttt{Ref} node. For example, we might have a
-        function $g$ that depends on $m$ (i.e., domain $a^{\top}$), which is
-        called as $g(n)$ (i.e., on domain $a$). When smoothing that function
-        call, we want to translate all mentions of $a^{\top}$ to $a$.
   \item Implemented an if-then-else arithmetic operation as the interpretation
         of the new domain recursion node (i.e., there is one branch for when the
         domain is empty and another branch for any other domain size).
-  \item Smoothing for domain recursion now works the same way as smoothing for
-        disjunction: both sides must have the same atoms. Almost all of
-        \cref{sec:simplifying} is now outdated because smoothing makes the
-        ``tautology insertion'' unnecessary.
   \item \Cref{sec:main,sec:identifying} might also be outdated: there is
         probably no need to search for base cases given the new version of
         domain recursion.
@@ -336,6 +325,54 @@ For any (bound) variable $v$, let $\Dom(v)$ denote the domain over which $v$ is
 quantified. For a literal $l$,
 $\Doms(l) \coloneqq \{\, \Dom(v) \mid v \in \Vars(l) \,\}$. Similarly, for any
 clause $C$, let $\Doms(C) = \{\, \Dom(v) \mid v \in \Vars(C) \,\}$.
+
+\section{Smoothing}
+
+Goal of smoothing: whenever rules such as unit propagation or
+inclusion-exclusion (maybe just these two?) eliminate the consideration of some
+ground atoms, smoothing nodes should be inserted `at the same level' so that
+these ground atoms are still considered when counting. Note that conjunction
+nodes are irrelevant here because multiplication is associative. `At the same
+level' means that, e.g., if some ground atoms were eliminated from consideration
+before/after performing independent partial grounding, then the smoothing node
+should also appear before/after the independent partial grounding node.
+
+\todo[inline]{ Can I prove that the additions to smoothing outlined in the rest
+  of this section `do the right thing'? }
+
+\subsection{Stage 1: Propagating Unit Clauses `Upwards'}
+
+\begin{description}
+  \item[\texttt{Ref}:] during smoothing, when unit clauses (a.k.a.\ variables)
+        are propagated in the opposite direction of the FCG arcs (i.e.,
+        `upwards'), when visiting a \texttt{Ref} node, these clauses are
+        translated using the domain map of the \texttt{Ref} node. For example,
+        if the domain map include $\Delta \mapsto \Delta'$, and the unit clause
+        mentions $\Delta$, then replace it by $\Delta'$.
+  \item[Constraint removal:] do reverse constraint removal. Assuming that
+        domain $\Delta$ with constraints $X \ne c$ (for some constant
+        $c \in \Delta$) were replaced with domain $\Delta'$, replace each
+        $\forall X \in \Delta'\text{. }\phi(X)$ with
+        $\forall X \in \Delta\text{. }X \ne c \Rightarrow \phi(X)$.
+  \item[Domain recursion:] nothing special needs to be done (just propagate the
+        union of the two sets of unit clauses upwards), assuming that $P(c)$ and
+        $\forall X \in \Delta\text{. }X \ne c \Rightarrow P(X)$ are
+        automatically combined into $\forall X \in \Delta\text{. }P(X)$.
+\end{description}
+
+\subsection{Stage 2: Adding Smoothing Nodes}
+
+\begin{description}
+  \item[\texttt{Ref}:] nothing.
+  \item[Constraint removal:] nothing.
+  \item[Domain recursion:] Smoothing for domain recursion now works the same way
+        as smoothing for disjunction: both sides must have the same atoms EXCEPT
+        the `base case' side need not include unit clauses that mention the
+        constant introduced by this domain recursion node or its domain (since
+        this branch assumes that this domain is empty). NOTE: As a consequence,
+        almost all of \cref{sec:simplifying} is now outdated because smoothing
+        makes the ``tautology insertion'' unnecessary.
+\end{description}
 
 \section{The Main Algorithm: Finding the Definitions of the Base
   Cases}\label{sec:main}
