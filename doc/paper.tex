@@ -113,6 +113,8 @@
     \item (in Fig. 1) Crane2 doesn't use Crane, it uses itself
     \item describe which compilation rules are currently greedy or non-greedy
     \item my agenda has a plan for proving completeness for $\mathbf{C}^{2}$
+    \item Can I prove that Crane's domain recursion can always simulate
+          ForcLift's domain recursion?
   \end{itemize}
 }
 
@@ -326,7 +328,7 @@ quantified. For a literal $l$,
 $\Doms(l) \coloneqq \{\, \Dom(v) \mid v \in \Vars(l) \,\}$. Similarly, for any
 clause $C$, let $\Doms(C) = \{\, \Dom(v) \mid v \in \Vars(C) \,\}$.
 
-\section{Smoothing}
+\section{Smoothing (only relevant for domain recursion v3)}
 
 Goal of smoothing: whenever rules such as unit propagation or
 inclusion-exclusion (maybe just these two?) eliminate the consideration of some
@@ -337,8 +339,14 @@ level' means that, e.g., if some ground atoms were eliminated from consideration
 before/after performing independent partial grounding, then the smoothing node
 should also appear before/after the independent partial grounding node.
 
-\todo[inline]{ Can I prove that the additions to smoothing outlined in the rest
-  of this section `do the right thing'? }
+\todo[inline,caption={}]{
+  \begin{itemize}
+    \item Can I prove that the additions to smoothing outlined in the rest of
+          this section `do the right thing'?
+    \item I could include more info about the smoothing algorithm that didn't
+          make it into the previous paper.
+  \end{itemize}
+}
 
 \subsection{Stage 1: Propagating Unit Clauses `Upwards'}
 
@@ -354,10 +362,10 @@ should also appear before/after the independent partial grounding node.
         $c \in \Delta$) were replaced with domain $\Delta'$, replace each
         $\forall X \in \Delta'\text{. }\phi(X)$ with
         $\forall X \in \Delta\text{. }X \ne c \Rightarrow \phi(X)$.
-  \item[Domain recursion:] nothing special needs to be done (just propagate the
-        union of the two sets of unit clauses upwards), assuming that $P(c)$ and
-        $\forall X \in \Delta\text{. }X \ne c \Rightarrow P(X)$ are
-        automatically combined into $\forall X \in \Delta\text{. }P(X)$.
+  \item[Domain recursion:] we merge $P(c)$ and $\forall X \in \Delta\text{.
+        }X \ne c \Rightarrow P(X)$ into $\forall X \in \Delta\text{. }P(X)$.
+        NOTE: the clauses may have other constraints, variables, etc. I could
+        describe this more formally.
 \end{description}
 
 \subsection{Stage 2: Adding Smoothing Nodes}

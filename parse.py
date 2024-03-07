@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from collections import defaultdict
 import csv
 import os
 
@@ -7,6 +8,7 @@ RESULTS_DIR = 'results'
 RESULTS_FILE = 'results.csv'
 FIELDNAMES = ['algorithm', 'sequence', 'domain.size', 'count', 'compilation.time', 'inference.time']
 TIMEOUT = 3600000
+VERBOSE = False
 
 sequences = {}
 with open('sequences.csv', newline='') as f:
@@ -16,10 +18,10 @@ with open('sequences.csv', newline='') as f:
 
 rows = []
 incorrect_count = 0
-total_count = 0
+failed_count = defaultdict(lambda: 0)
 for filename in os.listdir(RESULTS_DIR):
-    total_count += 1
-    print('Parsing', filename)
+    if VERBOSE:
+        print('Parsing', filename)
     data = {}
     data['sequence'], data['algorithm'] = filename.split('.')
     domains = []
@@ -42,7 +44,12 @@ for filename in os.listdir(RESULTS_DIR):
             elif line.startswith('Domain size:'): # ForcLift
                 domains.append(line.split()[2])
             elif line.startswith('Z = '): # ForcLift
-                counts.append(int(round(float(line.split()[4]))))
+                try:
+                    counts.append(int(round(float(line.split()[4]))))
+                except ValueError: # Record 'NaN' as a compilation error
+                    domains = []
+                    total_times = []
+                    break
             elif line.startswith('Inference took'): # ForcLift
                 times.append(line.split()[2])
             elif line.startswith('Elapsed:'): # ForcLift
@@ -52,12 +59,15 @@ for filename in os.listdir(RESULTS_DIR):
     if len(domains) == 1:
         domains = []
         total_times = []
+    if len(domains) == 0:
+        failed_count[data['algorithm']] += 1
 
-    print('Domains:', domains)
-    print('Counts:', counts)
-    if len(total_times) > 0:
-        print('Total runtimes:', total_times)
-    print()
+    if VERBOSE:
+        print('Domains:', domains)
+        print('Counts:', counts)
+        if len(total_times) > 0:
+            print('Total runtimes:', total_times)
+        print()
 
     assert len(domains) == len(counts)
     assert len(domains) == len(times)
@@ -85,8 +95,13 @@ for filename in os.listdir(RESULTS_DIR):
             new_data['compilation.time'] = total_times[i] - float(times[i])
         rows.append(new_data)
 
-print('Correct: {:.0f}% ({} out of {})'.format(100 * (total_count - incorrect_count) / total_count,
-                                               total_count - incorrect_count, total_count))
+
+print('Correct (treating unsolved as correct): {:.0f}% ({} out of {})'.format(100 * (len(sequences) - incorrect_count) / len(sequences),
+                                                                              len(sequences) - incorrect_count, len(sequences)))
+
+for algorithm, count in failed_count.items():
+    print('{} solved: {:.0f}% ({} out of {})'.format(algorithm, 100 * (len(sequences) - count) / len(sequences),
+                                                     int(len(sequences) - count), len(sequences)))
 
 with open(RESULTS_FILE, 'w', encoding='UTF8', newline='') as f:
     writer = csv.DictWriter(f, fieldnames=FIELDNAMES)

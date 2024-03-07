@@ -80,12 +80,20 @@ df$compilation.time[is.na(df$compilation.time)] <- TIMEOUT
 df$inference.time[is.na(df$inference.time)] <- TIMEOUT
 rm(df2)
 
+# Sanity check: are all combinations in the table?
+nrow(df) == n_distinct(df$algorithm) * n_distinct(df$sequence) *
+  n_distinct(df$domain.size)
+
 # Sanity check: do the counts match (should return an empty tibble)?
+# TODO: require Crane-BFS and Crane-Greedy answers to match and
+# show ForcLift relative error
 df %>% group_by(sequence, domain.size) %>%
   filter(min(count, na.rm = TRUE) != max(count, na.rm = TRUE))
 
 # Part 0: success rates per algorithm
 # TODO: along with 'total', add 'uniquely' and 'fastest' columns
+# NOTE: the first number is the number of benchmarks that were solved by at
+# least one algorithm (out of 155)
 length(unique(df$sequence))
 df[df$compilation.time < TIMEOUT,] %>% group_by(algorithm) %>%
   summarize(total = n_distinct(sequence))
@@ -105,8 +113,9 @@ cumulative_plot(df2)
 # size that all algorithms could handle)
 # TODO: unfinished, but the experimental data is not complete enough to
 # properly test this (do both scatter and cumulative plots like above)
-df[!is.na(df$count),] %>% group_by(sequence) %>%
+df2 <- df[!is.na(df$count),] %>% group_by(sequence) %>%
   filter(domain.size == max(domain.size))
+cumulative_plot(df2)
 
 # TODO Part 3: for each algorithm and instance, find the degree of the
 # polynomial that best matches the increase in inference time (use that
