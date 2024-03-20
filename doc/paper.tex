@@ -2,8 +2,9 @@
 \pdfpagewidth=8.5in
 \pdfpageheight=11in
 
-\usepackage{ijcai23}
+\usepackage{kr}
 
+% Use the postscript times font!
 \usepackage{times}
 \usepackage{soul}
 \usepackage{url}
@@ -14,24 +15,22 @@
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{booktabs}
-\usepackage[switch]{lineno}
+%\usepackage{algorithm}
+%\usepackage{algorithmic}
+\urlstyle{same}
 
+\usepackage[backgroundcolor=lightgray]{todonotes}
 \usepackage{listings}
 \usepackage[linesnumbered,ruled,vlined]{algorithm2e}
 \usepackage[capitalize,noabbrev]{cleveref}
 \usepackage{microtype}
-\usepackage{amsfonts}
 \usepackage{mathtools}
-\usepackage{tikz}
-\usepackage[backgroundcolor=lightgray]{todonotes}
+\usepackage{forest}
 
-% Comment out this line in the camera-ready submission
-\linenumbers
-
-\urlstyle{same}
-
-% the following package is optional:
-%\usepackage{latexsym}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{positioning}
+\usetikzlibrary{shapes}
+\usetikzlibrary{fit}
 
 % See https://www.overleaf.com/learn/latex/theorems_and_proofs
 % for a nice explanation of how to define new theorems, but keep
@@ -42,11 +41,15 @@
 \newtheorem{definition}{Definition}
 \newtheorem*{remark}{Remark}
 \newtheorem{fact}{Fact}
+% TODO: fix styling, check if everything in the header is still needed
+% TODO: make sure forest arrows match non-forest arrows
 
-% PDF Info Is REQUIRED.
-% Please **do not** include Title and Author information
 \pdfinfo{
-/TemplateVersion (IJCAI.2023.0)
+/TemplateVersion (KR.2022.0, KR.2023.0, KR.2024.0)
+}
+
+\forestset{
+sn edges/.style={for tree={edge={-Latex}}}
 }
 
 \lstset{breaklines=true}
@@ -67,30 +70,27 @@
 \DeclareMathOperator{\Preds}{Preds}
 \DeclareMathOperator{\Vars}{Vars}
 \DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator{\GDR}{GDR}
+
 \newcommand{\expr}{\mathtt{expr}}
+\newcommand{\FOtwo}{$\mathsf{FO}^{2}$}
 
 \SetKwFunction{Crane}{Crane}
 \SetKwFunction{Propagate}{Propagate}
 \SetKwFunction{FindBaseCases}{FindBaseCases}
 
-\usetikzlibrary{arrows.meta}
-\usetikzlibrary{positioning}
-\usetikzlibrary{shapes}
-\usetikzlibrary{fit}
+\title{TBD}
 
-\title{Towards Practical First-Order Model Counting}
-
-% \author{
-% First Author$^1$
-% \and
+% \author{%
+% First Author$^1$\and
 % Second Author$^2$\and
-% Third Author$^{2,3}$\And
-% Fourth Author$^4$
+% Third Author$^{2,3}$\and
+% Fourth Author$^4$ \\
 % \affiliations
 % $^1$First Affiliation\\
 % $^2$Second Affiliation\\
 % $^3$Third Affiliation\\
-% $^4$Fourth Affiliation
+% $^4$Fourth Affiliation \\
 % \emails
 % \{first, second\}@example.com,
 % third@other.example.com,
@@ -101,7 +101,6 @@
 
 \maketitle
 
-% <= 200 words
 \begin{abstract}
 \end{abstract}
 
@@ -138,7 +137,7 @@
         domain recursion.
 \end{itemize}
 
-\paragraph{Proof of correctness.}
+\paragraph{Proof of correctness (leave for later).}
 \begin{enumerate}
   \item Define what it means for a formula to be \emph{consistent}.
         \begin{itemize}
@@ -191,16 +190,16 @@
     \node[draw,fit={(alg1) (simplification) (compilation) (crane) (alg2) (alg3)},inner ysep=7pt,yshift=5pt] {};
     \node at (1.1, 0.5) {\textsc{Crane2}};
 
-    \draw[->] (formula) -- (alg1);
-    \draw[->] (alg1) -- node[above] {$E$} (simplification);
-    \draw[->] (simplification) -- node[above] {$E'$} (compilation);
-    \draw[->] (compilation) -- (cpp);
-    \draw[->] (sizes) -- (cpp);
-    \draw[->] (cpp) -- (count);
+    \draw[-Latex] (formula) -- (alg1);
+    \draw[-Latex] (alg1) -- node[above] {$E$} (simplification);
+    \draw[-Latex] (simplification) -- node[above] {$E'$} (compilation);
+    \draw[-Latex] (compilation) -- (cpp);
+    \draw[-Latex] (sizes) -- (cpp);
+    \draw[-Latex] (cpp) -- (count);
 
-    \draw[->,dashed] (alg1) -- node[midway,left] {uses} (crane);
-    \draw[->,dashed] (alg1) -- node[midway] {uses} (alg2);
-    \draw[->,dashed] (alg1) -- node[midway,right] {uses} (alg3);
+    \draw[-Latex,dashed] (alg1) -- node[midway,left] {uses} (crane);
+    \draw[-Latex,dashed] (alg1) -- node[midway] {uses} (alg2);
+    \draw[-Latex,dashed] (alg1) -- node[midway,right] {uses} (alg3);
   \end{tikzpicture}
   \caption{Using \textsc{Crane2} to compute the model count of formula $\phi$.\
     The formula is compiled into a set of equations $E$, which are then
@@ -221,7 +220,7 @@ that, we change the function names and variable to make it consistent with the
 previous domain to variable mapping, and append these base cases to the set of
 equations.
 
-\paragraph{Contributions.}
+\paragraph{Contributions (outdated).}
 \begin{itemize}
   \item \Cref{sec:identifying}
   \item \Cref{sec:simplifying}
@@ -327,6 +326,44 @@ For any (bound) variable $v$, let $\Dom(v)$ denote the domain over which $v$ is
 quantified. For a literal $l$,
 $\Doms(l) \coloneqq \{\, \Dom(v) \mid v \in \Vars(l) \,\}$. Similarly, for any
 clause $C$, let $\Doms(C) = \{\, \Dom(v) \mid v \in \Vars(C) \,\}$.
+
+\section{Theoretical Results}
+
+\begin{theorem}
+  The domain recursion by Dilkas and Belle~\shortcite{DBLP:conf/kr/DilkasB23}
+  can simulate the domain recursion by Van den
+  Broeck~\shortcite{DBLP:conf/nips/Broeck11}. This proves that Crane can (still)
+  handle \FOtwo.
+\end{theorem}
+
+\begin{figure}
+  \centering
+  \begin{forest}
+    for tree={sn edges}
+    [$\land_{r}$,circle,draw,name=dr
+    [$n_{r}$],
+    [$n_{x}$]
+    ]
+    \draw[-Latex] (dr) to [loop right] node {$\Delta \gets \Delta \setminus \{\,x\,\}$} ();
+  \end{forest}
+  \begin{forest}
+    for tree={sn edges}
+    [$\GDR(x \in \Delta)$,ellipse,draw,
+    [$\land$,circle,draw,
+    [$\bigwedge_{y \in \Delta}$,ellipse,draw]
+    [$\land$,circle,draw]
+    ]
+    ]
+  \end{forest}
+\end{figure}
+
+\begin{proof}
+  `A theory allows for domain recursion when the theory is shattered, the theory
+  contains no independent subtheories, and there exists a root binding class.'
+
+  Stuck on some weird cases. Need to prove that the model count of $n_{x}$ will
+  never depend on $|\Delta|$.
+\end{proof}
 
 \section{Smoothing (only relevant for domain recursion v3)}
 
@@ -667,7 +704,7 @@ start with domains of size one rather than zero), two differences remain:
 
 \section{Conclusion}
 
-\bibliographystyle{named}
+\bibliographystyle{kr}
 \bibliography{paper}
 
 \end{document}
