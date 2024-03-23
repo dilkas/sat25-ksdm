@@ -74,7 +74,7 @@ for filename in os.listdir(RESULTS_DIR):
     assert len(total_times) == 0 or len(total_times) == len(domains)
 
     # Check correctness of Crane
-    if data['algorithm'] != 'forclift':
+    if data['sequence'].isnumeric() and data['algorithm'] != 'forclift':
         sequence = [str(x) for x in sequences[int(data['sequence'][1:])][:len(counts) + 2]]
         mutual_len = min(len(counts), len(sequence))
         if not (counts[:mutual_len] == sequence[:mutual_len] or
@@ -96,12 +96,11 @@ for filename in os.listdir(RESULTS_DIR):
         rows.append(new_data)
 
 
-print('Correct (treating unsolved as correct): {:.0f}% ({} out of {})'.format(100 * (len(sequences) - incorrect_count) / len(sequences),
-                                                                              len(sequences) - incorrect_count, len(sequences)))
-
-for algorithm, count in failed_count.items():
-    print('{} solved: {:.0f}% ({} out of {})'.format(algorithm, 100 * (len(sequences) - count) / len(sequences),
-                                                     int(len(sequences) - count), len(sequences)))
+# print('Correct (treating unsolved as correct): {:.0f}% ({} out of {})'.format(100 * (len(sequences) - incorrect_count) / len(sequences),
+#                                                                               len(sequences) - incorrect_count, len(sequences)))
+# for algorithm, count in failed_count.items():
+#     print('{} solved: {:.0f}% ({} out of {})'.format(algorithm, 100 * (len(sequences) - count) / len(sequences),
+#                                                      int(len(sequences) - count), len(sequences)))
 
 with open(RESULTS_FILE, 'w', encoding='UTF8', newline='') as f:
     writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
