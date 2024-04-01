@@ -1,0 +1,280 @@
+Domain size: 1
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(0.0) = 1.0
+Inference took 67 ms
+Elapsed: 0.27
+Domain size: 2
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(1.3862943611198904) = 3.999999999999999
+Inference took 67 ms
+Elapsed: 0.27
+Domain size: 3
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(3.2958368660043287) = 26.99999999999999
+Inference took 68 ms
+Elapsed: 0.28
+Domain size: 4
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(5.5451774444795605) = 255.9999999999995
+Inference took 71 ms
+Elapsed: 0.29
+Domain size: 5
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(8.047189562170502) = 3124.999999999999
+Inference took 70 ms
+Elapsed: 0.28
+Domain size: 6
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(10.750556815368332) = 46656.00000000011
+Inference took 65 ms
+Elapsed: 0.28
+Domain size: 7
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(13.621371043387194) = 823543.0000000008
+Inference took 67 ms
+Elapsed: 0.28
+Domain size: 8
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(16.63553233343869) = 1.6777216000000034E7
+Inference took 67 ms
+Elapsed: 0.28
+Domain size: 9
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(19.775021196025982) = 3.8742048900000286E8
+Inference took 68 ms
+Elapsed: 0.28
+Domain size: 10
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(23.025850929940468) = 1.000000000000011E10
+Inference took 73 ms
+Elapsed: 0.32
+Domain size: 11
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(26.376848000782058) = 2.853116706109948E11
+Inference took 67 ms
+Elapsed: 0.29
+Domain size: 12
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(29.81887979745602) = 8.916100448256146E12
+Inference took 69 ms
+Elapsed: 0.28
+Domain size: 13
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(33.34434164699998) = 3.0287510659225344E14
+Inference took 73 ms
+Elapsed: 0.30
+Domain size: 14
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(36.946802614613624) = 1.1112006825558052E16
+Inference took 72 ms
+Elapsed: 0.29
+Domain size: 15
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(40.62075301653316) = 4.3789389038086227E17
+Inference took 71 ms
+Elapsed: 0.29
+Domain size: 16
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(44.361419555836505) = 1.8446744073709654E19
+Inference took 68 ms
+Elapsed: 0.28
+Domain size: 17
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(48.16462684895566) = 8.272402618863284E20
+Inference took 67 ms
+Elapsed: 0.28
+Domain size: 18
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(52.02669164213091) = 3.934640807529453E22
+Inference took 69 ms
+Elapsed: 0.28
+Domain size: 19
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(55.9443406041624) = 1.978419655660373E24
+Inference took 71 ms
+Elapsed: 0.29
+Domain size: 20
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(59.91464547107981) = 1.0485759999999878E26
+Inference took 66 ms
+Elapsed: 0.29
+Domain size: 21
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(63.93497119219188) = 5.842587018385971E27
+Inference took 67 ms
+Elapsed: 0.28
+Domain size: 22
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(68.00293397388303) = 3.4142787736424785E29
+Inference took 70 ms
+Elapsed: 0.28
+Domain size: 23
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(72.11636696637044) = 2.0880467999847757E31
+Inference took 71 ms
+Elapsed: 0.29
+Domain size: 24
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(76.27329192835076) = 1.333735776850369E33
+Inference took 70 ms
+Elapsed: 0.28
+Domain size: 25
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(80.47189562170499) = 8.881784197000978E34
+Inference took 73 ms
+Elapsed: 0.32
+Domain size: 26
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(84.71050998855857) = 6.156119580207386E36
+Inference took 69 ms
+Elapsed: 0.28
+Domain size: 27
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(88.9875953821169) = 4.434264882430415E38
+Inference took 70 ms
+Elapsed: 0.29
+Domain size: 28
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(93.30172628490567) = 3.3145523113252026E40
+Inference took 72 ms
+Elapsed: 0.29
+Domain size: 29
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(97.65157906960776) = 2.5676861531612528E42
+Inference took 65 ms
+Elapsed: 0.28
+Domain size: 30
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(102.03592144986473) = 2.0589113209466325E44
+Inference took 69 ms
+Elapsed: 0.28
+Domain size: 31
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(106.45360333903962) = 1.706917413072466E46
+Inference took 65 ms
+Elapsed: 0.28
+Domain size: 32
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(110.9035488895911) = 1.4615016373306743E48
+Inference took 71 ms
+Elapsed: 0.28
+Domain size: 33
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(115.38474952839407) = 1.2911004008778938E50
+Inference took 72 ms
+Elapsed: 0.28
+Domain size: 34
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(119.89625783694963) = 1.1756638905370293E52
+Inference took 71 ms
+Elapsed: 0.29
+Domain size: 35
+Reading model using MLN syntax.
+Starting to run inference
+Computing weighted model count/partition function Z
+Running first-order knowledge compilation
+Z = exp(124.4371821521294) = 1.1025074993540567E54
+Inference took 72 ms
+Elapsed: 0.28

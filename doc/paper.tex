@@ -388,36 +388,63 @@ should also appear before/after the independent partial grounding node.
 \subsection{Stage 1: Propagating Unit Clauses `Upwards'}
 
 \begin{description}
-  \item[\texttt{Ref}:] during smoothing, when unit clauses (a.k.a.\ variables)
+  \item[\texttt{Ref}.] During smoothing, when unit clauses (a.k.a.\ variables)
         are propagated in the opposite direction of the FCG arcs (i.e.,
         `upwards'), when visiting a \texttt{Ref} node, these clauses are
         translated using the domain map of the \texttt{Ref} node. For example,
         if the domain map include $\Delta \mapsto \Delta'$, and the unit clause
         mentions $\Delta$, then replace it by $\Delta'$.
-  \item[Constraint removal:] do reverse constraint removal. Assuming that
+  \item[Constraint removal.] Do reverse constraint removal. Assuming that
         domain $\Delta$ with constraints $X \ne c$ (for some constant
         $c \in \Delta$) were replaced with domain $\Delta'$, replace each
         $\forall X \in \Delta'\text{. }\phi(X)$ with
         $\forall X \in \Delta\text{. }X \ne c \Rightarrow \phi(X)$.
-  \item[Domain recursion:] we merge $P(c)$ and $\forall X \in \Delta\text{.
-        }X \ne c \Rightarrow P(X)$ into $\forall X \in \Delta\text{. }P(X)$.
-        NOTE: the clauses may have other constraints, variables, etc. I could
-        describe this more formally.
+  \item[Domain recursion.] Suppose the domain recursion node introduces constant
+        $x \in \Delta$. For each unit clause received from the child node,
+        replace each occurrence of $\phi(x)$ or $\forall X \in \Delta\text{.
+        } X \ne x \Rightarrow \phi(X)$ with $\forall X \in \Delta\text{.
+        }\phi(X)$. This can be seen as a claim about what ground atoms the
+        domain recursion node \emph{should} cover (or a temporary assumption).
+        If the relevant subgraph indeed covers those ground atoms, Stage~2 will
+        do nothing. Otherwise, smoothing nodes will be added below the domain
+        recursion node to cover the difference between what was propagated from
+        the domain recursion node and what was received from the child node.
 \end{description}
+\todo[inline]{Add examples of both cases, with figures.}
 
 \subsection{Stage 2: Adding Smoothing Nodes}
+
+% TODO
+% \item Whenever the set of unit clauses received from the child node contains two
+% formulas $\phi(x)$ and $\forall X \in \Delta\text{.
+% } X \ne x \Rightarrow \phi(X)$ (i.e., the only difference between the two
+% formulas is that one has the constant $x$ whereas the other one has a variable
+% $X \ne x$), merge them into $\forall X \in \Delta\text{. }\phi(X)$.
 
 \begin{description}
   \item[\texttt{Ref}:] nothing.
   \item[Constraint removal:] nothing.
-  \item[Domain recursion:] Smoothing for domain recursion now works the same way
-        as smoothing for disjunction: both sides must have the same atoms EXCEPT
-        the `base case' side need not include unit clauses that mention the
-        constant introduced by this domain recursion node or its domain (since
-        this branch assumes that this domain is empty). NOTE: As a consequence,
-        almost all of \cref{sec:simplifying} is now outdated because smoothing
-        makes the ``tautology insertion'' unnecessary.
+  \item[Domain recursion:]
+        \begin{enumerate}
+          \item Whenever the set of unit clauses of the child node contains two
+                formulas $\phi(x)$ and $\forall X \in \Delta\text{.
+                } X \ne x \Rightarrow \phi(X)$ (i.e., the only difference
+                between the two formulas is that one has the constant $x$
+                whereas the other one has a variable $X \ne x$), merge them into
+                $\forall X \in \Delta\text{. }\phi(X)$.
+          \item Add smoothing nodes below the domain recursion node for the
+                difference between the unit clauses assigned to the domain
+                recursion node during Stage 1 and the unit clauses of the child
+                node post-processed by the step above. For example, if the child
+                node `covers' only $p(x)$, then Stage 1 assigns
+                $\forall X \in \Delta\text{. }p(X)$ to the domain recursion
+                node. The smoothing node below the domain recursion node then
+                has the clause $\forall X \in \Delta\text{.
+                } X \ne x \Rightarrow p(X)$.
+        \end{enumerate}
 \end{description}
+
+\todo[inline]{Can I formally define what is meant by `difference'?}
 
 \section{The Main Algorithm: Finding the Definitions of the Base
   Cases}\label{sec:main}

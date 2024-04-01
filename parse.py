@@ -41,7 +41,7 @@ for filename in os.listdir(RESULTS_DIR):
                 else:
                     counts.append(tokens[8].translate({ord(','): None}))
                     times.append(tokens[10])
-            elif line.startswith('Domain size:'): # ForcLift
+            elif line.startswith('Domain size:'): # ForcLift and FastWFOMC
                 domains.append(line.split()[2])
             elif line.startswith('Z = '): # ForcLift
                 try:
@@ -52,8 +52,13 @@ for filename in os.listdir(RESULTS_DIR):
                     break
             elif line.startswith('Inference took'): # ForcLift
                 times.append(line.split()[2])
-            elif line.startswith('Elapsed:'): # ForcLift
-                total_times.append(float(line.split()[1]) * 1000)
+            elif line.startswith('Elapsed:'): # ForcLift and FastWFOMC
+                t = float(line.split()[1]) * 1000
+                total_times.append(t)
+                if data['algorithm'] == 'fastwfomc':
+                    times.append(t)
+            elif line.strip().isnumeric():
+                counts.append(line.strip())
 
     # If the algorithm fails to compile, output no domains
     if len(domains) == 1:

@@ -2,8 +2,7 @@ import argparse
 import json
 from collections import defaultdict
 
-from aima3.logic import to_cnf
-from aima3.utils import expr, Expr
+from aima3.utils import expr
 
 from wfomc_cc import WFOMCWithCC
 
@@ -19,10 +18,13 @@ def main():
     args = parser.parse_args()
     with open(args.instance) as f:
         instance = json.load(f)
-    counter = WFOMCWithCC(instance['formula'],
-                          args.domainsize, instance['cardinalities'])
+    cardinalities = [(x, args.domainsize * y)
+                     for (x, y) in instance['cardinalities']]
+    counter = WFOMCWithCC(expr(instance['formula']),
+                          args.domainsize, cardinalities)
     print(counter.get_wfomc(
-        instance['weights'] if instance['weights'] else defaultdict(lambda: (1, 1))))
+        instance['weights'] if instance['weights']
+        else defaultdict(lambda: (1, 1))))
 
 
 if __name__ == "__main__":

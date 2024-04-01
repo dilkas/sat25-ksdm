@@ -1,0 +1,113 @@
+Reading model using MLN syntax.
+
+Compiling formula:
+sef_{1}(X) ∨ zef_{1}(X)
+sef_{1}(X) ∨ ¬p(X,Y)
+sef_{2} ∨ zef_{1}(X)
+sef_{2} ∨ zef_{2}
+sef_{3}(X) ∨ zef_{3}(X)
+sef_{3}(X) ∨ ¬p(Y,X)
+sef_{4} ∨ zef_{3}(X)
+sef_{4} ∨ zef_{4}
+zef_{1}(X) ∨ zef_{2}
+zef_{1}(X) ∨ ¬p(X,Y)
+zef_{3}(X) ∨ zef_{4}
+zef_{3}(X) ∨ ¬p(Y,X)
+¬p(X,Y) ∨ ¬p(X,Z), Z≠Y
+¬p(X,Y) ∨ ¬p(Z,Y), Z≠X
+¬zef_{2}
+¬zef_{4}
+
+Starting breadth-first search.
+Undoing domain recursion for p(x,X) with x
+Result: p(X,Y), X ∈ a_{1}^{ \top }
+Undoing domain recursion for sef_{3}(X) with x
+Result: sef_{3}(X)
+Undoing domain recursion for p(X,Y), X≠x, X ∈ a_{1}^{ \top } with x
+Result: p(X,Y), X ∈ a_{1}^{ \top }
+Applying substitution Map(b -> b_{7}^{ \bot }, a_{1}^{ \top } -> a_{1,a}^{ \top ,1}) to p(X,Y), X ∈ a_{1}^{ \top }
+Applying substitution Map(b -> b_{7}^{ \bot }, a_{1}^{ \top } -> a_{1,a}^{ \top ,1}) to sef_{3}(X)
+Undoing domain recursion for p(X,Y), X≠x, X ∈ a_{1}^{ \top } with x
+Result: p(X,Y), X ∈ a_{1}^{ \top }
+Undoing domain recursion for p(x,X) with x
+Result: p(X,Y), X ∈ a_{1}^{ \top }
+Undoing domain recursion for sef_{3}(X) with x
+Result: sef_{3}(X)
+Applying substitution Map(b -> b_{7}^{ \bot }, a_{1}^{ \top } -> a_{1,a}^{ \top ,1}) to p(X,Y), X ∈ a_{1}^{ \top }
+Applying substitution Map(b -> b_{7}^{ \bot }, a_{1}^{ \top } -> a_{1,a}^{ \top ,1}) to sef_{3}(X)
+Undoing domain recursion for p(X,Y), X≠x, X ∈ a_{1}^{ \top } with x
+Result: p(X,Y), X ∈ a_{1}^{ \top }
+Undoing domain recursion for p(x,X) with x
+Result: p(X,Y), X ∈ a_{1}^{ \top }
+Undoing domain recursion for sef_{3}(X) with x
+Result: sef_{3}(X)
+
+Trying to find a base case for f1[0,x0]
+
+
+Compiling formula:
+sef_{3}(X) ∨ ¬sef_{3}(X)
+
+Starting breadth-first search.
+
+Trying to find a base case for f1[x2,0]
+
+Compilation time: 1037 ms
+The model count for domain(s) of size 1: 1 (in 4 ms)
+The model count for domain(s) of size 2: 2 (in 2 ms)
+The model count for domain(s) of size 3: 6 (in 2 ms)
+The model count for domain(s) of size 4: 24 (in 1 ms)
+The model count for domain(s) of size 5: 120 (in 1 ms)
+The model count for domain(s) of size 6: 720 (in 1 ms)
+The model count for domain(s) of size 7: 5,040 (in 1 ms)
+The model count for domain(s) of size 8: 40,320 (in 2 ms)
+The model count for domain(s) of size 9: 362,880 (in 2 ms)
+The model count for domain(s) of size 10: 3,628,800 (in 1 ms)
+The model count for domain(s) of size 11: 39,916,800 (in 1 ms)
+The model count for domain(s) of size 12: 479,001,600 (in 1 ms)
+The model count for domain(s) of size 13: 6,227,020,800 (in 1 ms)
+The model count for domain(s) of size 14: 87,178,291,200 (in 1 ms)
+The model count for domain(s) of size 15: 1,307,674,368,000 (in 2 ms)
+The model count for domain(s) of size 16: 20,922,789,888,000 (in 2 ms)
+The model count for domain(s) of size 17: 355,687,428,096,000 (in 2 ms)
+The model count for domain(s) of size 18: 6,402,373,705,728,000 (in 2 ms)
+The model count for domain(s) of size 19: 121,645,100,408,832,000 (in 1 ms)
+The model count for domain(s) of size 20: 2,432,902,008,176,640,000 (in 2 ms)
+The model count for domain(s) of size 21: 51,090,942,171,709,440,000 (in 2 ms)
+The model count for domain(s) of size 22: 1,124,000,727,777,607,680,000 (in 1 ms)
+The model count for domain(s) of size 23: 25,852,016,738,884,976,640,000 (in 2 ms)
+The model count for domain(s) of size 24: 620,448,401,733,239,439,360,000 (in 2 ms)
+The model count for domain(s) of size 25: 15,511,210,043,330,985,984,000,000 (in 2 ms)
+The model count for domain(s) of size 26: 403,291,461,126,605,635,584,000,000 (in 2 ms)
+The model count for domain(s) of size 27: 10,888,869,450,418,352,160,768,000,000 (in 1 ms)
+The model count for domain(s) of size 28: 304,888,344,611,713,860,501,504,000,000 (in 2 ms)
+The model count for domain(s) of size 29: 8,841,761,993,739,701,954,543,616,000,000 (in 2 ms)
+The model count for domain(s) of size 30: 265,252,859,812,191,058,636,308,480,000,000 (in 2 ms)
+The model count for domain(s) of size 31: 8,222,838,654,177,922,817,725,562,880,000,000 (in 2 ms)
+The model count for domain(s) of size 32: 263,130,836,933,693,530,167,218,012,160,000,000 (in 2 ms)
+The model count for domain(s) of size 33: 8,683,317,618,811,886,495,518,194,401,280,000,000 (in 2 ms)
+The model count for domain(s) of size 34: 295,232,799,039,604,140,847,618,609,643,520,000,000 (in 2 ms)
+The model count for domain(s) of size 35: 10,333,147,966,386,144,929,666,651,337,523,200,000,000 (in 2 ms)
+	Command being timed: "java -jar target/scala-2.11/crane-assembly-1.0.jar -t 3600 -e 35 --format-in mln ../practical-fomc/data/MLNs/functions/bijections.mln"
+	User time (seconds): 2.86
+	System time (seconds): 0.30
+	Percent of CPU this job got: 238%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.32
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 271024
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 48633
+	Voluntary context switches: 15134
+	Involuntary context switches: 45
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 16
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

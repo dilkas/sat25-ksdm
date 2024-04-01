@@ -1,0 +1,5 @@
+{
+    "formula": "S(x) | ~P(x, y)",
+    "cardinalities": [["P", 1]],
+    "weights": {"S": [1, -1], "P": [1, 1]}
+}

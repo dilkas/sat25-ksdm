@@ -1,18 +1,13 @@
-TIMEOUT = 60
-MAX_MEMORY_KB = 33554432
-MAX_DOMAIN_SIZE = 10
+TIMEOUT = 3600
+MAX_DOMAIN_SIZE = 35
 
-RUN = cd ../crane-dev && ulimit -Sv $(MAX_MEMORY_KB) &&
 CRANE = /usr/bin/time -v java -jar target/scala-2.11/crane-assembly-1.0.jar -t $(TIMEOUT) -e $(MAX_DOMAIN_SIZE) --format-in mln
 
-all: $(addsuffix /TARGET,$(wildcard data/functions/*.mln))
-clean: $(addsuffix /CLEAN,$(wildcard data/functions/*.mln))
+all: bijections/TARGET functions/TARGET
 
-data/functions/%.mln/TARGET:
-	-ulimit -Sv $(MAX_MEMORY_KB) && ./forclift_wrapper.sh $(MAX_DOMAIN_SIZE) "../data/functions/$*.mln" $(TIMEOUT) > results/$(subst /,_,$*).forclift 2>&1
-	sed -i "s/\.\.\.,[[:digit:]]\+/\.\.\.,3/g" data/functions/$*.mln
-	-$(RUN) $(CRANE) "../practical-fomc/data/functions/$*.mln" > ../practical-fomc/results/$(subst /,_,$*).greedy 2>&1
-	-$(RUN) GREEDY=false $(CRANE) "../practical-fomc/data/functions/$*.mln" > ../practical-fomc/results/$(subst /,_,$*).bfs 2>&1
-
-data/functions/%.mln/CLEAN:
-	sed -i "s/\.\.\.,[[:digit:]]\+/\.\.\.,3/g" data/functions/$*.mln
+%/TARGET:
+	-./forclift_wrapper.sh $(MAX_DOMAIN_SIZE) "../data/MLNs/functions/$*.mln" $(TIMEOUT) > results/$(subst /,_,$*).forclift 2>&1
+	sed -i "s/\.\.\.,[[:digit:]]\+/\.\.\.,3/g" data/MLNs/functions/$*.mln
+	-./fastwfomc_wrapper.sh $(MAX_DOMAIN_SIZE) "../data/JSON/$*.json" $(TIMEOUT) > results/$(subst /,_,$*).fastwfomc 2>&1
+	-cd ../crane-dev && $(CRANE) "../practical-fomc/data/MLNs/functions/$*.mln" > ../practical-fomc/results/$(subst /,_,$*).greedy 2>&1
+	-cd ../crane-dev && GREEDY=false $(CRANE) "../practical-fomc/data/MLNs/functions/$*.mln" > ../practical-fomc/results/$(subst /,_,$*).bfs 2>&1
