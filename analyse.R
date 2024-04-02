@@ -1,123 +1,99 @@
 library(tidyverse)
 library(scales)
+library(tikzDevice)
 
-TIMEOUT <- 60
-breaks <- c(0.3, 1, 3, 10, 30, 60) # TODO: update this and TIMEOUT later
+K <- 5
+degree <- 10
+
 df <- read.csv("results.csv")
-df$algorithm[df$algorithm == "bfs"] <- "Crane-BFS" # TODO: make these \textsc{}
-df$algorithm[df$algorithm == "greedy"] <- "Crane-Greedy"
-df$algorithm[df$algorithm == "forclift"] <- "ForcLift"
-algorithms <- sort(unique(df$algorithm))
-
-# Random stuff
-# summary(df)
-# n <- length(df$inference.time)
-# sort(df$inference.time, decreasing = TRUE)
-
-# Functions
-scatter <- function(data, x_var, y_var) {
-  limits <- c(min(df$compilation.time), TIMEOUT)
-  ggplot(data, aes(.data[[x_var]], .data[[y_var]])) +
-    geom_count() +
-    scale_size_area() +
-    geom_abline(slope = 1, intercept = 0, colour = "#989898") +
-    scale_x_continuous(trans = log10_trans(), breaks = breaks, labels = breaks,
-                       limits = limits) +
-    scale_y_continuous(trans = log10_trans(), breaks = breaks, labels = breaks,
-                       limits = limits) +
-    coord_fixed() +
-    annotation_logticks(colour = "#b3b3b3") +
-    theme_light(base_size = 9) +
-    theme(legend.title=element_blank()) +
-    scale_size_continuous(breaks = round)
-} # TODO (later): have the same legend for all scatter plots
-
-cumulative_plot <- function(df) {
-  times <- vector(mode = "list", length = length(algorithms))
-  names(times) <- algorithms
-  for (algorithm in algorithms) {
-    times[[algorithm]] <- unique(df$time[df$algorithm == algorithm])
-  }
-
-  chunks <- vector(mode = "list", length = length(algorithms))
-  names(chunks) <- algorithms
-  for (algorithm in algorithms) {
-    chunks[[algorithm]] <- cbind(times[[algorithm]], algorithm,
-                             unlist(times[[algorithm]] %>%
-                                      map(function(x)
-                                        sum(df$time[df$algorithm == algorithm]
-                                            <= x))))
-  }
-
-  cumulative <- as.data.frame(do.call(rbind, as.list(chunks)))
-  names(cumulative) <- c("time", "algorithm", "count")
-  cumulative$algorithm <- as.factor(cumulative$algorithm)
-  cumulative$time <- as.numeric(cumulative$time)
-  cumulative$count <- as.numeric(cumulative$count)
-
-  ggplot(cumulative, aes(x = time, y = count, color = .data$algorithm)) +
-    geom_line(aes(linetype = algorithm)) +
-    scale_x_continuous(trans = log10_trans(), breaks = breaks,
-                       labels = breaks) +
-    scale_y_continuous(breaks = pretty_breaks()) +
-    xlab("Compilation time (s)") +
-    ylab("Instances solved") +
-    annotation_logticks(sides = "b", colour = "#b3b3b3") +
-    labs(color = "Algorithm", linetype = "Algorithm") +
-    scale_color_brewer(palette = "Dark2") +
-    scale_linetype_manual(breaks = sort(algorithms),
-                          values = 1:length(algorithms)) +
-    theme_light(base_size = 9) +
-    theme(legend.title=element_blank())
-}
-
-# Preprocessing
-df2 <- df %>% expand(algorithm, sequence, domain.size)
-df <- df %>% right_join(df2)
 df$compilation.time <- df$compilation.time / 1000
 df$inference.time <- df$inference.time / 1000
-df$compilation.time[is.na(df$compilation.time)] <- TIMEOUT
-df$inference.time[is.na(df$inference.time)] <- TIMEOUT
-rm(df2)
+df$time <- df$compilation.time + df$inference.time
+df$algorithm[df$algorithm == "bfs"] <- "\\textsc{Crane-BFS}"
+df$algorithm[df$algorithm == "greedy"] <- "\\textsc{Crane-Greedy}"
+df$algorithm[df$algorithm == "forclift"] <- "\\textsc{ForcLift}"
+df$algorithm[df$algorithm == "fastwfomc"] <- "\\textsc{FastWFOMC}"
 
-# Sanity check: are all combinations in the table?
-nrow(df) == n_distinct(df$algorithm) * n_distinct(df$sequence) *
-  n_distinct(df$domain.size)
+# Sanity check: differences between max and min counts as a percentage of the
+# min count
+#differences <- df %>% group_by(sequence, domain.size) %>%
+#  summarise(diff = 100 * (max(count) - min(count)) / min(count))
 
-# Sanity check: do the counts match (should return an empty tibble)?
-# TODO: require Crane-BFS and Crane-Greedy answers to match and
-# show ForcLift relative error
-df %>% group_by(sequence, domain.size) %>%
-  filter(min(count, na.rm = TRUE) != max(count, na.rm = TRUE))
+tikz(file = "doc/plot.tex", width = 3.32492194445, height = 1.8702685937531252)
+ggplot(df, aes(domain.size, time, colour = algorithm, linetype = sequence)) +
+  geom_line() +
+  scale_y_continuous(trans = log10_trans()) +
+  annotation_logticks(sides = "l", colour = "#b3b3b3") +
+  ylab("Total runtime (s)") +
+  xlab("Domain size") +
+  labs(color = "", linetype = "") +
+  scale_color_brewer(palette = "Dark2") +
+  theme_light(base_size = 9)
+dev.off()
 
-# Part 0: success rates per algorithm
-# TODO: along with 'total', add 'uniquely' and 'fastest' columns
-# NOTE: the first number is the number of benchmarks that were solved by at
-# least one algorithm (out of 155)
-length(unique(df$sequence))
-df[df$compilation.time < TIMEOUT,] %>% group_by(algorithm) %>%
-  summarize(total = n_distinct(sequence))
+# ============== DEGREE FINDING (not doing this right now) ================
 
-# Part 1: compilation time per algorithm per instance (taking the median for
-# ForcLift)
-df2 <- df %>% group_by(algorithm, sequence) %>%
-  summarize(time = median(compilation.time))
-compilation.times <- df2 %>% pivot_wider(names_from = algorithm,
-                                         values_from = time)
-scatter(compilation.times, "Crane-BFS", "ForcLift")
-scatter(compilation.times, "Crane-Greedy", "ForcLift")
-scatter(compilation.times, "Crane-Greedy", "Crane-BFS")
-cumulative_plot(df2)
+df1 <- df[df$algorithm == "\\textsc{FastWFOMC}" & df$sequence == "bijections",]
+df1 <- df[df$algorithm == "\\textsc{FastWFOMC}" & df$sequence == "functions",]
 
-# Part 2: inference time per algorithm per instance (taking the largest domain
-# size that all algorithms could handle)
-# TODO: unfinished, but the experimental data is not complete enough to
-# properly test this (do both scatter and cumulative plots like above)
-df2 <- df[!is.na(df$count),] %>% group_by(sequence) %>%
-  filter(domain.size == max(domain.size))
-cumulative_plot(df2)
+df.shuffled <- df1[sample(nrow(df1)),]
+folds <- cut(seq(1,nrow(df.shuffled)),breaks=K,labels=FALSE)
+mse <- matrix(data=NA,nrow=K,ncol=degree)
+for(i in 1:K){
+  testIndexes <- which(folds==i,arr.ind=TRUE)
+  testData <- df.shuffled[testIndexes, ]
+  trainData <- df.shuffled[-testIndexes, ]
+  for (j in 1:degree){
+    fit.train = lm(time ~ poly(domain.size,j), data=trainData)
+    fit.test = predict(fit.train, newdata=testData)
+    mse[i,j] = mean((fit.test-testData$time)^2)
+  }
+}
+means <- colMeans(mse)
+means
 
-# TODO Part 3: for each algorithm and instance, find the degree of the
-# polynomial that best matches the increase in inference time (use that
-# external package for this) (both cumulative and scatter plots? or something
-# else?)
+best <- lm(time ~ poly(domain.size, 3), data = df1)
+summary(best)
+
+linear <- lm(time ~ n, data = head(df1, TRAINING_N))
+
+#cubic <- lm(time ~ poly(n, 3), data = head(df, TRAINING_N))
+#exponential <- lm(log(time) ~ n, data = df)
+#summary(exponential)
+#exponential.df <- data.frame(n = df$n, time = exp(fitted(exponential)))
+
+colours <- c("#1b9e77", "#d95f02")
+for_labels <- data.frame(x = max(df$n),
+                         y = c(predict(best, data.frame(n = max(df$n))),
+                               predict(linear, data.frame(n = max(df$n)))),
+                         label = c(NAME, "Linear"))
+tikz(file = "../../doc/paper/plot.tex", width = 3.31, height = 2.05,
+     standAlone = TRUE)
+ggplot(df, aes(x = n, y = time)) +
+  geom_point() +
+  stat_smooth(method = 'lm', se = FALSE, formula = y ~ poly(x, BEST_DEGREE),
+              aes(color = NAME), fill = colours[2]) +
+  stat_smooth(method = 'lm', formula = y ~ x, data = head(df, TRAINING_N),
+              se = FALSE, fullrange = TRUE, aes(color = "Linear")) +
+  xlab('Domain size') +
+  ylab('Runtime (s)') +
+  theme_set(theme_gray(base_size = 9)) +
+  theme_minimal() +
+  scale_color_manual(name = "Model fit", values = colours, guide = FALSE) +
+  geom_label_repel(data = for_labels, aes(x = x, y = y, label = label,
+                                          color = label),
+                   min.segment.length = Inf)
+dev.off()
+
+tikz(file = "../../doc/talks/3_long/plot.tex", width = 2.13, height = 1.32,
+     standAlone = TRUE)
+ggplot(df, aes(x = n, y = time)) +
+  geom_point() +
+  stat_smooth(method = 'lm', se = FALSE, formula = y ~ poly(x, BEST_DEGREE),
+              aes(color = NAME), fill = colours[2]) +
+  xlab('Domain size') +
+  ylab('Runtime (s)') +
+  theme_set(theme_gray(base_size = 9)) +
+  theme_minimal() +
+  scale_color_manual(name = "Model fit", values = colours, guide = FALSE)
+dev.off()

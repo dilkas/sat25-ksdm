@@ -26,6 +26,10 @@
 \usepackage{microtype}
 \usepackage{mathtools}
 \usepackage{forest}
+\usepackage{siunitx}
+\usepackage{amsfonts}
+\usepackage{pifont}
+\usepackage[inline]{enumitem}
 
 \usetikzlibrary{arrows.meta}
 \usetikzlibrary{positioning}
@@ -72,8 +76,14 @@ sn edges/.style={for tree={edge={-Latex}}}
 \DeclareMathOperator*{\argmin}{argmin}
 \DeclareMathOperator{\GDR}{GDR}
 
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
 \newcommand{\expr}{\mathtt{expr}}
+\newcommand{\Ctwo}{$\mathsf{C}^{2}$}
+\newcommand{\FO}{$\mathsf{FO}$}
 \newcommand{\FOtwo}{$\mathsf{FO}^{2}$}
+\newcommand{\UFO}{$\mathsf{UFO}^{2} + \mathsf{EQ}$}
 
 \SetKwFunction{Crane}{Crane}
 \SetKwFunction{Propagate}{Propagate}
@@ -252,10 +262,22 @@ We write $\expr{}$ for an arbitrary algebraic expression. For any signature or
 clause $C$, argument or variable $x$, and number or constant $t$, we shall write
 $C[t / x]$ for the result of substituting $t$ for all occurrences of $x$ in $C$.
 
+\begin{itemize}
+  \item Variables in uppercase
+  \item Domains in uppercase Greek
+  \item Constant and predicate symbols in lowercase
+  \item Clauses written on separate lines are implicitly conjoined
+  \item For weights, for any predicate symbol $p$, we write
+        $w^{+}(p), w^{-}(p) \in \mathbb{R}$ for its positive and negative
+        weights, respectively. All weights not explicitly acknowledged are
+        assumed to be equal to one.
+\end{itemize}
+
 \todo[inline,caption={}]{
   \begin{itemize}
     \item check if I'm still using this notation in all these cases
     \item explain how this works for function calls too
+    \item introduce WFOMC as a problem
   \end{itemize}
 }
 
@@ -302,11 +324,62 @@ $C[t / x]$ for the result of substituting $t$ for all occurrences of $x$ in $C$.
 
 \todo[inline,caption={}]{
   \begin{itemize}
-    \item What notation am I using for FOL? Colon after every quantifier?
-    \item (Similar to CNF, maybe QBF). Incomplete. Need (W)FOMC semantics. What
-          is an interpretation? What is a model?
+    \item What notation am I using for FOL? Introduce equality cardinality
+          constraints, counting quantifiers, etc.
+    \item Need (W)FOMC semantics. What is an interpretation? What is a model?
+    \item Should table caption go above or below the table?
+    \item Define terms.
+    \item Maybe say ``structure'' instead of interpretation?
+    \item What's the right table heading capitalization for KR?
+    \item Should I say ``sort'' instead of domain everywhere?
   \end{itemize}
 }
+
+\begin{table*}
+  \centering
+  \begin{tabular}{llllll}
+    \toprule
+    Logic & Sorts & Constants & Variables & Quantifiers & Additional atomic constraints\\
+    \midrule
+    \FO & one or more & \cmark & unlimited & $\forall$, $\exists$ & $s = t$\\
+    \Ctwo & one & \xmark & two & $\forall$, $\exists$, $\exists^{= k}$, $\exists^{\le k}$, $\exists^{\ge k}$ & ---\\
+    \UFO & one & \xmark & two & $\forall$ & $|p| = m$\\
+    \bottomrule
+  \end{tabular}
+  \caption[]{A comparison of the three logics used in WFOMC in terms of:
+    \begin{enumerate*}[label=(\roman*)]
+      \item the number of sorts,
+      \item support for constants,
+      \item the maximum number of variables,
+      \item allowed quantifiers, and
+      \item atomic constructions in addition to those of the form $p(t_{1}, \dots, t_{n})$ for some predicate symbol $p$ and terms $t_{1}, \dots, t_{n}$.
+    \end{enumerate*}
+    Here:
+    \begin{enumerate*}[label=(\roman*)]
+      \item $k$ and $m$ are non-negative integers, the latter of which can depend on the domain size,
+      \item $p$ is a predicate symbol, and
+      \item $s$ and $t$ are terms.
+    \end{enumerate*}
+  }\label{tbl:logics}
+\end{table*}
+
+\paragraph{Three types of logics}
+\begin{itemize}
+  \item All three logics are function-free.
+  \item Domains are always assumed to be finite.
+  \item See \cref{tbl:logics} for a detailed comparison. \FO{} is used as the
+        input format for \textsc{Crane} and \textsc{ForcLift}. \Ctwo{} is used
+        in the literature on \textsc{FastWFOMC} and related methods (TODO:
+        citations). \UFO{} is the input format supported by a privately-obtained
+        version of \textsc{FastWFOMC}. Note that the publicly available version
+        does not support any cardinality constraints.
+  \item In the case of \textsc{Crane} and \textsc{ForcLift}, support for a
+        formula as valid input does not imply that the algorithm will be able to
+        compile the formula into a circuit or graph suitable for lifted model
+        counting. However, it is known that \textsc{ForcLift} compilation is
+        guaranteed to succeed on any \FO{} formula without constants and with at
+        most two variables (TODO: citation).
+\end{itemize}
 
 A \emph{formula} is a set of clauses. A \emph{clause} is of the form
 $\forall x_{1} \in \Delta_{1}\forall x_{2} \in \Delta_{2}\dots\forall x_{n} \in \Delta_{n} \phi(x_{1}, x_{2}, \dots, x_{n})$,
@@ -716,18 +789,108 @@ where $y, z, \dots$ are the free variables present in $\expr{}$.
 
 \section{Experiments}
 
-\paragraph{Remarks on comparing the model counts of the formulas with their
-  corresponding OEIS sequences.}
-Disregarding differences where the OEIS sequence starts with one or two numbers
-that are not included in model counts (which is somewhat justified since we
-start with domains of size one rather than zero), two differences remain:
+Comparing \textsc{Crane} and \textsc{FastWFOMC} on a larger set of benchmarks is
+challenging because there is no automated way to translate a formula in \FO{} or
+\Ctwo{} into \UFO{} (or even check if such an encoding is possible).
+
+\paragraph{Benchmarks (probably for supplementary material).}
 \begin{itemize}
-  \item on A62971, the OEIS sequence starts as $1, 2, 16,\dots$, but the model
-        counts start as $1, 16,\dots$ (with the rest exactly the same);
-  \item similarly, on A62971, the OEIS sequence starts as $32, 290,\dots$, but
-        the model counts start as $2, 32, 290,\dots$ (with the rest exactly the
-        same).
+  \item Functions
+        \begin{itemize}
+          \item In \Ctwo: $\forall X \in \Delta\text{.
+                }\exists^{=1} Y \in \Delta\text{. }p(X, Y)$
+          \item In \UFO:
+                \begin{gather*}
+                  \forall X, Y \in \Delta\text{. } s(X) \lor \neg p(X, Y)\\
+                  |p| = |\Delta|
+                \end{gather*}
+          \item In \FO:
+                \begin{gather*}
+                  \forall X \in \Delta\text{. }\exists Y \in \Delta\text{. } p(X, Y)\\
+                  \forall X, Y, Z \in \Delta\text{. } p(X, Y) \land p(X, Z) \Rightarrow Y = Z
+                \end{gather*}
+        \end{itemize}
+  \item Permutations
+        \begin{itemize}
+          \item In \Ctwo:
+                \begin{gather*}
+                  \forall X \in \Delta\text{. }\exists^{=1} Y \in \Delta\text{. }p(X, Y)\\
+                  \forall Y \in \Delta\text{. }\exists^{=1} X \in \Delta\text{. }p(X, Y)
+                \end{gather*}
+          \item In \UFO:
+                \begin{gather*}
+                  \forall X, Y \in \Delta\text{. } r(X) \lor \neg p(X, Y)\\
+                  \forall X, Y \in \Delta\text{. } s(X) \lor \neg p(Y, X)\\
+                  |p| = |\Delta|
+                \end{gather*}
+                with weights $w^{-}(r) = w^{-}(s) = -1$
+          \item In \FO:
+                \begin{gather*}
+                  \forall X \in \Delta\text{. }\exists Y \in \Delta\text{. } p(X, Y)\\
+                  \forall Y \in \Delta\text{. }\exists X \in \Delta\text{. } p(X, Y)\\
+                  \forall X, Y, Z \in \Delta\text{. } p(X, Y) \land p(X, Z) \Rightarrow Y = Z\\
+                  \forall X, Y, Z \in \Delta\text{. } p(X, Y) \land p(Z, Y) \Rightarrow X = Z
+                \end{gather*}
+        \end{itemize}
 \end{itemize}
+
+\paragraph{Setup.}
+\begin{itemize}
+  \item The experiments were run on an AMD~Ryzen~7~5800H processor with
+        \SI{16}{\gibi\byte} of memory and Arch Linux~6.8.2-arch2-1 operating
+        system. \textsc{FastWFOMC} was run using Python~3.8.19 with
+        Python-FLINT~0.5.0.
+\end{itemize}
+
+\begin{figure}
+  \centering
+  \input{plot}
+  \caption{The runtime data of WFOMC algorithms on bijection- and
+    function-counting problems on domains of sizes
+    $1, 2, \dots, 35$}\label{fig:plot}
+\end{figure}
+
+\paragraph{Results.}
+\begin{itemize}
+  \item the runtime appears constant because compilation time dominates
+        inference time for small domain sizes. Indeed, the maximum inference
+        time of both \textsc{Crane-BFS} and \textsc{Crane-Greedy} is only
+        \SI{4}{\milli\second}.
+  \item describe \cref{fig:plot}
+  \item On bijection counting, \textsc{FastWFOMC} takes about \SI{124}{\second}
+        on a domain of size 35, whereas \textsc{Crane-BFS} scales up to
+        \num{e4} in \SI{34}{\second}
+  \item On function counting, \textsc{FastWFOMC} takes about \SI{78}{\second} on
+        a domain of size 35, whereas both \textsc{Crane-BFS} and
+        \textsc{Crane-Greedy} scale up to \num{3e5} in \SI{41}{\second}.
+  \item Note that, both model counts are huge (TODO: add details)
+\end{itemize}
+% ** bijections max time: 123.870
+% *** Crane-BFS scales up to 10k in 34 s
+% **** answer = 10k! = a number with 35660 digits
+% ** functions max time: 78.330
+% *** both Crane-BFS and Crane-Greedy scale up to 300k in 41 s
+% **** the count of this is 300k^300k is a number with over 1 million digits
+
+\todo[inline,caption={}]{
+  Some reproducibility requirements to keep in mind:
+  \begin{itemize}
+    \item A motivation is given for why the experiments are conducted on the
+          selected datasets.
+    \item All novel datasets introduced in this paper are included in a data
+          appendix.
+    \item All datasets drawn from the existing literature (potentially including
+          authors’ own previously published work) are accompanied by appropriate
+          citations. (mention the counting quantifier paper and my KR paper)
+    \item All source code implementing new methods have comments detailing the
+          implementation, with references to the paper where each step comes
+          from.
+    \item This paper formally describes evaluation metrics used and explains the
+          motivation for choosing these metrics.
+    \item This paper states the number of algorithm runs used to compute each
+          reported result.
+  \end{itemize}
+}
 
 \section{Conclusion}
 
