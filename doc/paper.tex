@@ -4,7 +4,6 @@
 
 \usepackage{kr}
 
-% Use the postscript times font!
 \usepackage{times}
 \usepackage{soul}
 \usepackage{url}
@@ -15,8 +14,6 @@
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{booktabs}
-%\usepackage{algorithm}
-%\usepackage{algorithmic}
 \urlstyle{same}
 
 \usepackage[backgroundcolor=lightgray]{todonotes}
@@ -32,28 +29,21 @@
 \usepackage[inline]{enumitem}
 
 \usetikzlibrary{arrows.meta}
-\usetikzlibrary{positioning}
-\usetikzlibrary{shapes}
-\usetikzlibrary{fit}
 
-% See https://www.overleaf.com/learn/latex/theorems_and_proofs
-% for a nice explanation of how to define new theorems, but keep
-% in mind that the amsthm package is already included in this
-% template and that you must *not* alter the styling.
-\newtheorem{example}{Example}
 \newtheorem{theorem}{Theorem}
-\newtheorem{definition}{Definition}
-\newtheorem*{remark}{Remark}
 \newtheorem{fact}{Fact}
-% TODO: fix styling, check if everything in the header is still needed
-% TODO: make sure forest arrows match non-forest arrows
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
+
+% TODO: 9 pages!!!
 
 \pdfinfo{
 /TemplateVersion (KR.2022.0, KR.2023.0, KR.2024.0)
 }
 
 \forestset{
-sn edges/.style={for tree={edge={-Latex}}}
+  sn edges/.style={for tree={edge={-Latex}}}
 }
 
 \lstset{breaklines=true}
@@ -71,7 +61,6 @@ sn edges/.style={for tree={edge={-Latex}}}
 
 \DeclareMathOperator{\Dom}{Dom}
 \DeclareMathOperator{\Doms}{Doms}
-\DeclareMathOperator{\Preds}{Preds}
 \DeclareMathOperator{\Vars}{Vars}
 \DeclareMathOperator*{\argmin}{argmin}
 \DeclareMathOperator{\GDR}{GDR}
@@ -82,30 +71,31 @@ sn edges/.style={for tree={edge={-Latex}}}
 \newcommand{\expr}{\mathtt{expr}}
 \newcommand{\Ctwo}{$\mathsf{C}^{2}$}
 \newcommand{\FO}{$\mathsf{FO}$}
-\newcommand{\FOtwo}{$\mathsf{FO}^{2}$}
 \newcommand{\UFO}{$\mathsf{UFO}^{2} + \mathsf{EQ}$}
 
-\SetKwFunction{Crane}{Crane}
+\newcommand{\Cranetwo}{\textsc{Crane}~2}
+
+\SetKwFunction{Crane}{Compile}
 \SetKwFunction{Propagate}{Propagate}
 \SetKwFunction{FindBaseCases}{FindBaseCases}
 
-\title{TBD}
+\title{Towards Efficient First-Order Model Counting}
 
-% \author{%
-% First Author$^1$\and
-% Second Author$^2$\and
-% Third Author$^{2,3}$\and
-% Fourth Author$^4$ \\
-% \affiliations
-% $^1$First Affiliation\\
-% $^2$Second Affiliation\\
-% $^3$Third Affiliation\\
-% $^4$Fourth Affiliation \\
-% \emails
-% \{first, second\}@example.com,
-% third@other.example.com,
-% fourth@example.com
-% }
+% TODO: check if this follows the formatting guidelines
+\author{%
+Ananth K. Kidambi$^1$\and
+Guramrit Singh$^1$\and
+Paulius Dilkas$^2$\and
+Kuldeep S. Meel$^3$ \\
+\affiliations
+$^1$Indian Institute of Technology Bombay, India\\
+$^2$National University of Singapore, Singapore\\
+$^3$University of Toronto, Canada\\
+\emails
+\{210051002, 210050061\}@iitb.ac.in,
+paulius.dilkas@nus.edu.sg,
+meel@cs.toronto.edu
+}
 
 \begin{document}
 
@@ -118,14 +108,41 @@ sn edges/.style={for tree={edge={-Latex}}}
 
 \todo[inline,caption={}]{
   \begin{itemize}
-    \item mention/describe the arithmetic simplification code
-    \item (in Fig. 1) Crane2 doesn't use Crane, it uses itself
     \item describe which compilation rules are currently greedy or non-greedy
     \item my agenda has a plan for proving completeness for $\mathbf{C}^{2}$
-    \item Can I prove that Crane's domain recursion can always simulate
-          ForcLift's domain recursion?
+    \item Can I prove that my domain recursion can always simulate the domain
+          recursion of \textsc{ForcLift}?
   \end{itemize}
 }
+
+\paragraph{Papers to cite.}
+\begin{itemize}
+  \item original domain recursion~\cite{DBLP:conf/nips/Broeck11}
+  \item recent overview paper~\cite{DBLP:conf/ijcai/Kuzelka23}
+  \item conjecturing recurrence relations~\cite{DBLP:conf/ilp/BarvinekB0ZK21}
+  \item algorithms
+  \begin{itemize}
+    \item \textsc{ForcLift}~\cite{DBLP:conf/ijcai/BroeckTMDR11}
+    \item \textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23}
+    \item \textsc{FastWFOMC}~\cite{DBLP:conf/uai/BremenK21}
+    \item approximate~\cite{DBLP:conf/ijcai/BremenK20}
+  \end{itemize}
+  \item liftable fragments (TODO: perhaps good sources of benchmarks?)
+  \begin{itemize}
+    \item \Ctwo~\cite{DBLP:journals/jair/Kuzelka21}
+    \item tree axioms~\cite{DBLP:journals/ai/BremenK23}
+    \item linear order axioms~\cite{DBLP:conf/aaai/TothK23}
+  \end{itemize}
+  \item applications
+  \begin{itemize}
+    \item extensions to
+          sampling~\cite{DBLP:conf/aaai/WangB0K22,DBLP:conf/lics/WangP0K23}
+    \item discovery of combinatorial
+          sequences~\cite{DBLP:conf/ijcai/SvatosJT0K23}
+  \end{itemize}
+\end{itemize}
+
+% TODO: make sure to not call \Crane2 \textsc{Crane}
 
 \paragraph{Changes to the compilation process.}
 \begin{itemize}
@@ -139,12 +156,6 @@ sn edges/.style={for tree={edge={-Latex}}}
         equivalent to the formula being `unshattered'. Such formulas could be
         seen as transitory, and allowing such recursive calls leads to FCGs that
         I cannot make sense of.
-  \item Implemented an if-then-else arithmetic operation as the interpretation
-        of the new domain recursion node (i.e., there is one branch for when the
-        domain is empty and another branch for any other domain size).
-  \item \Cref{sec:main,sec:identifying} might also be outdated: there is
-        probably no need to search for base cases given the new version of
-        domain recursion.
 \end{itemize}
 
 \paragraph{Proof of correctness (leave for later).}
@@ -160,7 +171,7 @@ sn edges/.style={for tree={edge={-Latex}}}
           \item The target of \texttt{Ref} must also be a consistent formula.
           \item The initial formula is consistent by definition.
         \end{itemize}
-  \item Aim to show that Crane works correctly on all consistent formulas.
+  \item Aim to show that \Cranetwo{} works correctly on all consistent formulas.
   \item Prove that, whenever some compilation rule makes the formula $\phi$
         inconsistent, greedy compilation rules will make $\phi$ consistent again
         before $\phi$ encounters non-greedy compilation rules that depend on
@@ -180,6 +191,10 @@ sn edges/.style={for tree={edge={-Latex}}}
         two classical rules that require the formula to be shattered.
   \end{enumerate}
 
+ % TODO: Crane2 uses itself instead of Crane. Not really. By 'Crane', here I
+ % mean the process of turning logical formulas into equations. Later on, I use
+ % 'Crane' to refer to Crane2. Maybe rename this use of 'Crane' to something
+ % else?
 \begin{figure*}[t]
   \centering
   \begin{tikzpicture}
@@ -198,11 +213,11 @@ sn edges/.style={for tree={edge={-Latex}}}
     \node[draw,rounded rectangle,right = 0.1cm of alg2] (alg3) {\Cref{alg2}};
 
     \node[draw,fit={(alg1) (simplification) (compilation) (crane) (alg2) (alg3)},inner ysep=7pt,yshift=5pt] {};
-    \node at (1.1, 0.5) {\textsc{Crane2}};
+    \node at (1.1, 0.5) {\Cranetwo};
 
     \draw[-Latex] (formula) -- (alg1);
-    \draw[-Latex] (alg1) -- node[above] {$E$} (simplification);
-    \draw[-Latex] (simplification) -- node[above] {$E'$} (compilation);
+    \draw[-Latex] (alg1) -- node[above] {$\mathcal{E}$} (simplification);
+    \draw[-Latex] (simplification) -- node[above] {$\mathcal{E}'$} (compilation);
     \draw[-Latex] (compilation) -- (cpp);
     \draw[-Latex] (sizes) -- (cpp);
     \draw[-Latex] (cpp) -- (count);
@@ -211,24 +226,12 @@ sn edges/.style={for tree={edge={-Latex}}}
     \draw[-Latex,dashed] (alg1) -- node[midway] {uses} (alg2);
     \draw[-Latex,dashed] (alg1) -- node[midway,right] {uses} (alg3);
   \end{tikzpicture}
-  \caption{Using \textsc{Crane2} to compute the model count of formula $\phi$.\
-    The formula is compiled into a set of equations $E$, which are then
+  \caption{Using \Cranetwo{} to compute the model count of formula $\phi$.\ The
+    formula is compiled into a set of equations $\mathcal{E}$, which are then
     algebraically simplified and compiled to a C++ program. This program can
     then be run with different command line arguments to compute the model count
     of $\phi$ for various domain sizes.}
 \end{figure*}
-
-The evaluation of base cases is done by simplifying the clauses and then using
-\textsc{Crane} to find the base cases. First, while traversing the graph to find
-the equations, we store two maps: $\mathcal{F}$ (which stores the mapping from
-the function names to the formulae, whose model count they represent) and
-$\mathcal{D}$ (which stores the mapping from the variable names to the domains
-whose sizes they represent). Then, a particular domain is selected (using the
-algorithm described in previous reports), and the clauses are simplified. Then,
-\textsc{Crane} is called on those clauses to evaluate the base cases. After
-that, we change the function names and variable to make it consistent with the
-previous domain to variable mapping, and append these base cases to the set of
-equations.
 
 \paragraph{Contributions (outdated).}
 \begin{itemize}
@@ -238,17 +241,9 @@ equations.
         compiled and executed to obtain numerical values (see \cref{sec:cpp}).
   \item Support for infinite precision integers using the GNU Multiple Precision
         Arithmetic Library.
-  \item A new set of benchmarks.
-  \item The experiments for Crane and ForcLift are (going to be) more
-        comprehensive than any other experimental study performed on (W)FOMC
-        algorithms.
   \item Some experiments vs FastWFOMC
-  \item A proof of correctness
   \item A proof of completeness
 \end{itemize}
-
-\todo[inline]{references to my previous paper and some of the \textsc{ForcLift}
-  and \textsc{FastWFOMC} papers that contain experimental results}
 
 \Cref{sec:identifying,sec:cpp} deal with algebraic constructs whereas
 \cref{sec:simplifying} deals with logic.
@@ -317,7 +312,8 @@ $C[t / x]$ for the result of substituting $t$ for all occurrences of $x$ in $C$.
 \begin{definition}
   A \emph{base case} is a function call where all arguments are either variables
   or constants (i.e., there is no subtraction within any argument), and there is
-  at least one constant.
+  at least one constant. We denote a base case in the same way as a signature,
+  e.g., $f(\mathbf{x})$.
 \end{definition}
 
 \subsection{Logic}
@@ -337,7 +333,7 @@ $C[t / x]$ for the result of substituting $t$ for all occurrences of $x$ in $C$.
 
 \begin{table*}
   \centering
-  \begin{tabular}{llllll}
+  \begin{tabular}{llclll}
     \toprule
     Logic & Sorts & Constants & Variables & Quantifiers & Additional atomic constraints\\
     \midrule
@@ -368,12 +364,12 @@ $C[t / x]$ for the result of substituting $t$ for all occurrences of $x$ in $C$.
   \item All three logics are function-free.
   \item Domains are always assumed to be finite.
   \item See \cref{tbl:logics} for a detailed comparison. \FO{} is used as the
-        input format for \textsc{Crane} and \textsc{ForcLift}. \Ctwo{} is used
-        in the literature on \textsc{FastWFOMC} and related methods (TODO:
-        citations). \UFO{} is the input format supported by a privately-obtained
-        version of \textsc{FastWFOMC}. Note that the publicly available version
-        does not support any cardinality constraints.
-  \item In the case of \textsc{Crane} and \textsc{ForcLift}, support for a
+        input format for \textsc{ForcLift} and its extensions \textsc{Crane} and
+        \Cranetwo{}. \Ctwo{} is used in the literature on \textsc{FastWFOMC} and
+        related methods (TODO: citations). \UFO{} is the input format supported
+        by a privately-obtained version of \textsc{FastWFOMC}. Note that the
+        publicly available version does not support any cardinality constraints.
+  \item In the case of \textsc{ForcLift} and its extensions, support for a
         formula as valid input does not imply that the algorithm will be able to
         compile the formula into a circuit or graph suitable for lifted model
         counting. However, it is known that \textsc{ForcLift} compilation is
@@ -392,53 +388,160 @@ variable or a constant.
 \todo[inline]{explain set-based notation for a clause (iterating over all
   literals)}
 
-For any clause $C$, let $\Preds(C)$ denote the set of predicates in $C$. For any
-clause or literal $l$, let $\Vars(l)$ denote the set of variables in $l$.
+For any clause or literal $l$, let $\Vars(l)$ denote the set of variables in
+$l$.
 
 For any (bound) variable $v$, let $\Dom(v)$ denote the domain over which $v$ is
 quantified. For a literal $l$,
 $\Doms(l) \coloneqq \{\, \Dom(v) \mid v \in \Vars(l) \,\}$. Similarly, for any
 clause $C$, let $\Doms(C) = \{\, \Dom(v) \mid v \in \Vars(C) \,\}$.
 
-\section{Theoretical Results}
+\section{Completing the Definitions of Recursive Functions}\label{sec:main}
+
+\begin{algorithm}[t]
+  \caption{The core part of \Cranetwo{} that compiles a formula...}\label{alg:main}% TODO: start here
+  \KwIn{formula $\phi$}
+  \KwOut{set $\mathcal{E}$ of equations}
+  $(\mathcal{E}, \mathcal{F}, \mathcal{D}) \gets \Crane{$\phi$}$\;
+  \ForEach{base case $f(\mathbf{x}) \in \FindBaseCases{$\mathcal{E}$}$}{
+    $\psi \gets \mathcal{F}(f)$\;
+    \ForEach{$i$ such that $x_{i}$ is a constant}{
+      $\psi \gets \Propagate{$\psi$, $\mathcal{D}(f, i)$, $x_i$}$\;
+    }
+    $(\mathcal{E}', \text{\textunderscore}, \text{\textunderscore}) \gets \Crane{$\psi$}$\;
+    $\mathcal{E} \gets \mathcal{E} \cup \mathcal{E}'$\;
+  }
+\end{algorithm}
+
+See \cref{alg:main}.
+
+We write \Crane for a slight modification of the original \textsc{Crane} that
+compiles a formula $\phi$ into:
+\begin{itemize}
+  \item a set $\mathcal{E}$ of equations,
+  \item a map $\mathcal{F}$ from function names to formulas, and
+  \item a map $\mathcal{D}$ from function names and parameter indices to
+        domains.
+\end{itemize}
+
+% TODO: update: crane or crane2
+The evaluation of base cases is done by simplifying the clauses and then using
+\textsc{Crane} to find the base cases. A particular domain is selected, and the
+clauses are simplified. Then, \textsc{Crane} is called on those clauses to
+evaluate the base cases. After that, we change the function names and variable
+to make it consistent with the previous domain to variable mapping, and append
+these base cases to the set of equations.
+
+\todo[inline,caption={}]{extend it to work with base cases that are themselves
+  recursive}
+
+\subsection{Identifying a Sufficient Set of Base Cases}\label{sec:identifying}
+
+\begin{algorithm}[t]
+  \caption{\protect\FindBaseCases{$\mathcal{E}$}}\label{alg1}
+  \KwIn{set $\mathcal{E}$ of equations}
+  \KwOut{set $\mathcal{B}$ of base cases}
+
+  $\mathcal{B} \gets \emptyset$\;
+  \ForEach{equation $(f(\mathbf{x}) = \expr{}) \in \mathcal{E}$}{
+    \ForEach{function call $f(\mathbf{x} - \mathbf{c}) \in \expr{}$}{\label{line:functioncall}
+      \ForEach{$c_{i} \in \mathbf{c}$}{
+        \For{$n \gets 0$ \KwTo $c_{i} - 1$}{\label{line:lim}
+          $\mathcal{B} \gets \mathcal{B} \cup \{\, f(\mathbf{x})[x_{i}/n] \,\}$\;\label{line:insert}
+        }
+      }
+    }
+  }
+\end{algorithm}
+
+The algorithm is described as \cref{alg1}. We know that if, say, on the RHS of
+all equations, the domain size appears as $m - c_1, m - c_2, \dots, m - c_k$,
+then finding $f(0, x_1, x_2, \dots)$, $f(1, x_1, x_2, \dots)$,
+$\dots f(m_0, x_1, x_2, \dots)$ for every function $f$, where
+$m_0 = \max(c_1, c_2, \dots c_k) - 1$ forms a sufficient set of base cases.
+Hence, in order to do the same efficiently, we can take that domain for which
+$m_0$ is the minimum, i.e. $\argmin(\max(c_1, c_2, \dots c_k))$. Ideally, we
+should calculate the base cases by finding the base cases up to
+$\max(c_{1}, c_{2}, \dots) - 1$. However, currently only empty and singleton
+domains are supported.
+
+First, expand the summations in each equation. Here we expand the summations of
+the form: $\sum_{x=0}^{x_{1}} \expr{} \cdot [a \le x < b]$ or similar
+inequalities where $x$ is bounded by constants and $a$ and $b$ are constants, by
+substituting the value of $x$ from $a$ to $b-1$. For example, we replace
+$\sum_{x=0}^{x_1} \binom{x_{1}}{x} f(x_1 - x) \cdot [0 \le x < 2]$ by
+$\binom{x_{1}}{0} f(x_1) + \binom{x_{1}}{1} f(x_1-1)$.
+
+\begin{itemize}
+  \item \cref{line:insert} for $f(\mathbf{x}) = f(y, z)$, $x_{i} = y$, and
+        $n = 0$, add $f(y, z)[y/0] = f(0, z)$ to $\mathcal{B}$.
+\end{itemize}
 
 \begin{theorem}
-  The domain recursion by Dilkas and Belle~\shortcite{DBLP:conf/kr/DilkasB23}
-  can simulate the domain recursion by Van den
-  Broeck~\shortcite{DBLP:conf/nips/Broeck11}. This proves that Crane can (still)
-  handle \FOtwo.
+  Under the following assumptions, \cref{alg1} is guaranteed to return a
+  sufficient set of base cases:
+  \begin{itemize}
+    \item there is no mutual recursion
+    \item each function $f$ has exactly one equation with $f$ on the LHS;
+    \item in the recursive definition of function $f(x_{1},\dots,x_{n})$, the
+          $i$-th argument of each call to $f$ on the RHS is of the form
+          $x_{i} - c_{i}$, where:
+          \begin{itemize}
+            \item $c_{i} \ge 0$ for all $i$, and
+            \item $c_{i} > 0$ for at least one $i$.
+          \end{itemize}
+  \end{itemize}
 \end{theorem}
 
-\begin{figure}
-  \centering
-  \begin{forest}
-    for tree={sn edges}
-    [$\land_{r}$,circle,draw,name=dr
-    [$n_{r}$],
-    [$n_{x}$]
-    ]
-    \draw[-Latex] (dr) to [loop right] node {$\Delta \gets \Delta \setminus \{\,x\,\}$} ();
-  \end{forest}
-  \begin{forest}
-    for tree={sn edges}
-    [$\GDR(x \in \Delta)$,ellipse,draw,
-    [$\land$,circle,draw,
-    [$\bigwedge_{y \in \Delta}$,ellipse,draw]
-    [$\land$,circle,draw]
-    ]
-    ]
-  \end{forest}
-\end{figure}
+\begin{example}
+  For an equation $f(m, n) = 2 \times f(m-1, n)$, \cref{alg1} returns $f(0, n)$.
+\end{example}
 
-\begin{proof}
-  `A theory allows for domain recursion when the theory is shattered, the theory
-  contains no independent subtheories, and there exists a root binding class.'
+NOTE: function calls such as $f(n-m)$ and $f(n-m-1)$ are ignored.
 
-  Stuck on some weird cases. Need to prove that the model count of $n_{x}$ will
-  never depend on $|\Delta|$.
-\end{proof}
+\subsection{Propagating Domain Size Assumptions}\label{sec:simplifying}
 
-\section{Smoothing (only relevant for domain recursion v3)}
+\begin{algorithm}[t]
+  \caption{\protect\Propagate{$\phi$, $\Delta$, $n$} TODO: find the source code and check: (1) what we're doing with unit clauses, (2) whether we just randomly pick any literal to negate}\label{alg2}
+  \KwIn{formula $\phi$, domain $\Delta$, domain size $n \in \{\, 0, 1 \,\}$}
+  \KwOut{formula $\phi'$}
+  $\phi' \gets \emptyset$\;
+  \uIf{$n = 0$}{
+    \ForEach{clause $C \in \phi$}{
+      \lIf{$\Delta \not\in \Doms(C)$}{$\phi' \gets \phi' \cup \{\, C \,\}$}
+      $C' \gets \{\, l \in C \mid \Delta \not\in \Doms(l) \,\}$\;
+      \If{$\Delta \in \Doms(C)$ {\bf and} $C' \ne \emptyset$}{
+        $l \gets \text{an arbitrary literal in } C'$\;\label{line:smoothing1}
+        $\phi' \gets \phi' \cup \{\, C' \cup \{\, \neg l \,\} \,\} $\;\label{line:smoothing2}
+      }
+    }
+  }
+  \Else{
+    $c \gets$ a new constant symbol\;
+    \ForEach{clause $C \in \phi$}{
+      $C' \gets C$\;
+      \ForEach{$v \in \Vars(C)$ with $\Dom(v) = \Delta$}{
+        $C' \gets C'[c / v]$\;
+      }
+      $\phi' \gets \phi' \cup \{\, C' \,\}$\;
+    }
+  }
+\end{algorithm}
+
+We use \cref{alg2} to find the transformed formula corresponding to each base
+case obtained using \cref{alg1} and call \textsc{Crane} on the formula to obtain
+the required base cases.
+% TODO: or crane 2?
+
+\begin{itemize}
+  \item Clauses where all literals have variables quantified over the empty
+        domain are still removed.
+  \item $C'$ is guaranteed to be non-empty.
+  \item \Cref{line:smoothing1,line:smoothing2} are explained in
+        \cref{sec:smoothingbase}.
+\end{itemize}
+
+\section{Smoothing}
 
 Goal of smoothing: whenever rules such as unit propagation or
 inclusion-exclusion (maybe just these two?) eliminate the consideration of some
@@ -457,6 +560,50 @@ should also appear before/after the independent partial grounding node.
           make it into the previous paper.
   \end{itemize}
 }
+
+\subsection{Smoothing for Base Cases}\label{sec:smoothingbase}
+
+\paragraph{Key point.}
+If there is a predicate $p$ that has nothing to do with domain $\Delta$, make
+sure that $p$ remains as part of the formula even if all clauses with $p$ can be
+removed. Which literal is picked on \cref{line:smoothing1} of \cref{alg2} is not
+important because any choice achieves the same goal: constructing a clause that
+mentions the same predicates as $C'$ and is satisfied by any interpretation.
+
+\begin{fact}
+  Assuming that domain $\Delta$ is empty, any clause that contains
+  `$\forall x \in \Delta$' (for any variable $x$) is vacuously satisfied by all
+  interpretations.
+\end{fact}
+
+For example, consider the formula
+\begin{align}
+  \forall x \in \Delta \forall y, z \in \Gamma &: P(x) \lor Q(y, z)\label[formula]{eq:example1}\\
+  \forall y, z \in \Gamma' &: Q(y, z)\label[formula]{eq:example2}
+\end{align}
+and assume that $\Gamma' \subseteq \Gamma$. In this case, if we set $|\Delta|$
+to zero and remove clauses with variables quantified over $\Delta$, we get
+\begin{equation}\label[formula]{eq:simplified}
+  \forall y, z \in \Gamma' : Q(y, z),
+\end{equation}
+but the model count of \cref{eq:simplified} is one. However, the actual model
+count should be $2^{|\Gamma|^2 - |\Gamma'|^2}$. That is, $Q$ as a relation is a
+subset of $\Gamma \times \Gamma$. While \cref{eq:example1} becomes vacuously
+true, \cref{eq:example2} fixes the value of $Q$ over
+$\Gamma' \times \Gamma' \subseteq \Gamma \times \Gamma$. Hence, the number of
+different values that $Q$ can take is
+$|(\Gamma \times \Gamma) \setminus (\Gamma' \times \Gamma')| = |\Gamma|^{2} - |\Gamma'|^{2}$.
+
+We address this issue by converting clauses with universal quantifiers over the
+empty domain to tautologies, hence retaining all the predicates that have no
+argument assigned to the empty domain. For example, we would convert
+\cref{eq:example1,eq:example2} to
+\begin{align*}
+  \forall y, z \in \Gamma &: Q(y, z) \lor \neg Q(y, z) \\
+  \forall y, z \in \Gamma' &: Q(y, z).
+\end{align*}
+The model count returned by this will also consider the truth value of $Q$ over
+$y \in \Gamma \setminus \Gamma'$ or $z \in \Gamma \setminus \Gamma'$.
 
 \subsection{Stage 1: Propagating Unit Clauses `Upwards'}
 
@@ -519,218 +666,7 @@ should also appear before/after the independent partial grounding node.
 
 \todo[inline]{Can I formally define what is meant by `difference'?}
 
-\section{The Main Algorithm: Finding the Definitions of the Base
-  Cases}\label{sec:main}
-
-\begin{algorithm}[t]
-  \caption{Finding the definitions of the base cases}\label{alg:main}
-  \KwIn{formula $\phi$}
-  \KwOut{a set $E$ of equations that define $B$}
-  $(E, \mathcal{F}, \mathcal{D}) \gets \Crane{$\phi$}$\;
-  \ForEach{base case $f(\mathbf{x}) \in \FindBaseCases{$E$}$}{
-    $\psi \gets \mathcal{F}(f)$\;
-    \ForEach{$i$ such that $x_{i}$ is a constant}{
-      $\psi \gets \Propagate{$\psi$, $\mathcal{D}(f, i)$, $x_i$}$\;
-    }
-    $(E', \text{\textunderscore}, \text{\textunderscore}) \gets \Crane{$\psi$}$\;
-    $E \gets E \cup E'$\;
-  }
-\end{algorithm}
-
-See \cref{alg:main}
-
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item extend it to work with base cases that are themselves recursive
-    \item what does it mean for a set of equations to define a set of base cases?
-    \item for base cases, we will also use the $f(\mathbf{x})$ notation
-  \end{itemize}
-}
-
-\section{Identifying a Sufficient Set of Base Cases}\label{sec:identifying}
-
-\begin{algorithm}[t]
-  \caption{\protect\FindBaseCases{$E$}}\label{alg1}
-  \KwIn{set $E$ of equations}
-  \KwOut{set $B$ of base cases}
-
-  $B \gets \emptyset$\;
-  \ForEach{equation $(f(\mathbf{x}) = \expr{}) \in E$}{
-    \ForEach{function call $f(\mathbf{x} - \mathbf{c}) \in \expr{}$}{\label{line:functioncall}
-      \ForEach{$c_{i} \in \mathbf{c}$}{
-        \For{$n \gets 0$ \KwTo $c_{i} - 1$}{\label{line:lim}
-          $B \gets B \cup \{\, f(\mathbf{x})[x_{i}/n] \,\}$\;\label{line:insert}
-        }
-      }
-    }
-  }
-\end{algorithm}
-
-We know that if, say, on the RHS of all equations, the domain size appears as
-$m - c_1, m - c_2, \dots, m - c_k$, then finding $f(0, x_1, x_2, \dots)$,
-$f(1, x_1, x_2, \dots)$, $\dots f(m_0, x_1, x_2, \dots)$ for every function $f$,
-where $m_0 = \max(c_1, c_2, \dots c_k) - 1$ forms a sufficient set of base
-cases. Hence, in order to do the same efficiently, we can take that domain for
-which $m_0$ is the minimum, i.e. $\argmin(\max(c_1, c_2, \dots c_k))$. Ideally,
-we should calculate the base cases by finding the base cases up to
-$\max(c_{1}, c_{2}, \dots) - 1$. However, currently only empty and singleton
-domains are supported.
-
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item NOTE: \cref{line:functioncall} iterates over all function calls in the
-          algebraic expression
-    \item remove the `dependencies' data structure from the description
-  \end{itemize}
-}
-
-The following steps were followed while finding the base cases:
-
-First, expand the summations in each equation. Here we expand the summations of
-the form: $\sum_{x=0}^{x_{1}} \expr{} \cdot [a \le x < b]$ or similar
-inequalities where $x$ is bounded by constants and $a$ and $b$ are constants, by
-substituting the value of $x$ from $a$ to $b-1$. For example, we replace
-$\sum_{x=0}^{x_1} \binom{x_{1}}{x} f(x_1 - x) \cdot [0 \le x < 2]$ by
-$\binom{x_{1}}{0} f(x_1) + \binom{x_{1}}{1} f(x_1-1)$.
-
-Now, we find a domain that has only terms of the form $x-1$ appearing on the RHS
-of the dependencies. The base cases are then calculated by setting this domain
-size to zero. For the above example, $n$ is the selected domain, and not $m$
-since there are $m-2$ and $m-3$ terms appearing in the arguments.
-
-The algorithm is described as \cref{alg1}.
-
-\todo[inline,caption={}]{
-  add an example where \cref{alg1} runs on either
-  \begin{align*}
-    f_{0}(m, n) &= f_{1}(m-1, n) + f_{2}(m, n-1)\\
-    f_{1}(m, n) &= f_{1}(m-1, n-1) \times f_{2}(m-2, n-1)\\
-    f_{2}(m, n) &= 2 \times f_{1}(m-3, n-1)
-  \end{align*}
-  or
-  \begin{align*}
-    f(m, n) &= g(m-1, n) + f(m-2, n-1)\\
-    g(m, n) &= f(m-1, n-2) + g(m-1, n-1).
-  \end{align*}
-}
-
-\begin{itemize}
-  \item \cref{line:lim}: the limit is 2 for the arg $(x-3)$.
-  \item \cref{line:insert} for $f(\mathbf{x}) = f(y, z)$, $x_{i} = y$, and
-        $n = 0$, add $f(y, z)[y/0] = f(0, z)$ to $B$.
-\end{itemize}
-
-\todo[inline]{I changed the algorithm. Update the description.}
-
-\begin{theorem}
-  Under the following assumptions, \cref{alg1} is guaranteed to return a
-  sufficient set of base cases:
-  \begin{itemize}
-    \item there is no mutual recursion (i.e., cyclic dependencies between
-          functions);
-    \item each function $f$ has exactly one equation with $f$ on the LHS;
-    \item in the recursive definition of function $f(x_{1},\dots,x_{n})$, the
-          $i$-th argument of each call to $f$ on the RHS is of the form
-          $x_{i} - c_{i}$, where:
-          \begin{itemize}
-            \item $c_{i} \ge 0$ for all $i$, and
-            \item $c_{i} > 0$ for at least one $i$.
-          \end{itemize}
-  \end{itemize}
-\end{theorem}
-
-\begin{example}
-  For an equation $f(m, n) = 2 \times f(m-1, n)$, \cref{alg1} returns $f(0, n)$.
-\end{example}
-
-NOTE: function calls such as $f(n-m)$ and $f(n-m-1)$ are ignored.
-
-\section{Propagating Domain Size Assumptions}\label{sec:simplifying}
-
-\subsection{Motivation: Why Tautologies Are Needed and Simply Removing The
-  Clauses Does Not Work}
-
-\begin{fact}
-  Assuming that domain $\Delta$ is empty, any clause that contains
-  `$\forall x \in \Delta$' (for any variable $x$) is vacuously satisfied by all
-  interpretations.
-\end{fact}
-
-For example, consider the formula
-\begin{align}
-  \forall x \in \Delta \forall y, z \in \Gamma &: P(x) \lor Q(y, z)\label[formula]{eq:example1}\\
-  \forall y, z \in \Gamma' &: Q(y, z)\label[formula]{eq:example2}
-\end{align}
-and assume that $\Gamma' \subseteq \Gamma$. In this case, if we set $|\Delta|$
-to zero and remove clauses with variables quantified over $\Delta$, we get
-\begin{equation}\label[formula]{eq:simplified}
-  \forall y, z \in \Gamma' : Q(y, z),
-\end{equation}
-but the model count of \cref{eq:simplified} is one. However, the actual model
-count should be $2^{|\Gamma|^2 - |\Gamma'|^2}$. That is, $Q$ as a relation is a
-subset of $\Gamma \times \Gamma$. While \cref{eq:example1} becomes vacuously
-true, \cref{eq:example2} fixes the value of $Q$ over
-$\Gamma' \times \Gamma' \subseteq \Gamma \times \Gamma$. Hence, the number of
-different values that $Q$ can take is
-$|(\Gamma \times \Gamma) \setminus (\Gamma' \times \Gamma')| = |\Gamma|^{2} - |\Gamma'|^{2}$.
-
-We address this issue by converting clauses with universal quantifiers over the
-empty domain to tautologies, hence retaining all the predicates that have no
-argument assigned to the empty domain. For example, we would convert
-\cref{eq:example1,eq:example2} to
-\begin{align*}
-  \forall y, z \in \Gamma &: Q(y, z) \lor \neg Q(y, z) \\
-  \forall y, z \in \Gamma' &: Q(y, z).
-\end{align*}
-The model count returned by this will also consider the truth value of $Q$ over
-$y \in \Gamma \setminus \Gamma'$ or $z \in \Gamma \setminus \Gamma'$.
-
-\subsection{The Solution}
-
-\begin{algorithm}[t]
-  \caption{\protect\Propagate{$\phi$, $\Delta$, $n$}}\label{alg2}
-  \KwIn{formula $\phi$, domain $\Delta$, domain size $n \in \{\, 0, 1 \,\}$}
-  \KwOut{formula $\phi'$}
-  $\phi' \gets \emptyset$\;
-  \uIf{$n = 0$}{
-    \ForEach{clause $C \in \phi$}{
-      \lIf{$\Delta \not\in \Doms(C)$}{$\phi' \gets \phi' \cup \{\, C \,\}$}
-      $C' \gets \{\, l \in C \mid \Delta \not\in \Doms(l) \,\}$\;
-      \If{$\Delta \in \Doms(C)$ {\bf and} $C' \ne \emptyset$}{
-        $l \gets \text{an arbitrary literal in } C'$\;
-        $\phi' \gets \phi' \cup \{\, C' \cup \{\, \neg l \,\} \,\} $\;
-      }% TODO: find the source code and check: 1) what we're doing with unit clauses, 2) whether we just randomly pick any literal to negate
-    }
-  }
-  \Else{
-    $c \gets$ a new constant symbol\;
-    \ForEach{clause $C \in \phi$}{
-      $C' \gets C$\;
-      \ForEach{$v \in \Vars(C)$ with $\Dom(v) = \Delta$}{
-        $C' \gets C'[c / v]$\;
-      }
-      $\phi' \gets \phi' \cup \{\, C' \,\}$\;
-    }
-  }
-\end{algorithm}
-
-\todo[inline]{it would be easy to extend the second part to an arbitrary constant}
-
-We use \cref{alg2} to find the transformed formula corresponding to each base
-case obtained using \cref{alg1} and call \textsc{Crane} on the formula to obtain
-the required base cases.
-
-\begin{itemize}
-  \item Similar to generalised domain recursion (what's the difference?).
-  \item Clauses where all literals have variables quantified over the empty
-        domain are still removed.
-  \item $C'$ is guaranteed to be non-empty.
-\end{itemize}
-
 \section{Generating C++ Code}\label{sec:cpp}
-
-\todo[inline]{the report has some (long) examples of formulas being transformed
-  into programs perhaps suitable for supplementary material}
 
 The target is to generate C++ code that can evaluate numerical values of the
 model counts based on the equations generated by \textsc{Crane}. We achieve this
@@ -741,26 +677,28 @@ the
 \href{https://en.wikipedia.org/wiki/Shunting_yard_algorithm#:~:text=In%20computer%20science%2C%20the%20shunting,abstract%20syntax%20tree%20(AST).}{Shunting
   Yard Algorithm}.
 
-The translation of a set $E$ of equations into a C++ program works as follows.
+The translation of a set $\mathcal{E}$ of equations into a C++ program works as
+follows.
 
-First, we create a cache for each function in $E$. This is implemented as a
-multi-dimensional vector containing objects of \texttt{class cache\_elem}
+First, we create a cache for each function in $\mathcal{E}$. This is implemented
+as a multi-dimensional vector containing objects of \texttt{class cache\_elem}
 defined as shown in the example code. The default initialization of this object
 is to $-1$ which is useful for recognizing unevaluated cases.
 
-Next, we create a function definition for the LHS of each equation in $E$,
-including all functions and base cases. The signatures of these functions is
-decided as follows. A function call containing only variable arguments is named
-as the function itself, and ones with constants in their arguments are suffixed
-with a string that contains \texttt{'x'} at the $i$th place if the $i$th
-argument is variable and the $i$th argument if that argument is a constant. For
-example, $f(x_{1}, x_{2}, x_{3})$ is declared as \texttt{int f(int x1, int x2,
-  int x3);} and $f(1, x_{2}, x_{3})$ is declared as \texttt{int f\_1xx(int x2,
-  int x3);} (the constant arguments are removed from the signature).
+Next, we create a function definition for the LHS of each equation in
+$\mathcal{E}$, including all functions and base cases. The signatures of these
+functions is decided as follows. A function call containing only variable
+arguments is named as the function itself, and ones with constants in their
+arguments are suffixed with a string that contains \texttt{'x'} at the $i$th
+place if the $i$th argument is variable and the $i$th argument if that argument
+is a constant. For example, $f(x_{1}, x_{2}, x_{3})$ is declared as \texttt{int
+  f(int x1, int x2, int x3);} and $f(1, x_{2}, x_{3})$ is declared as
+\texttt{int f\_1xx(int x2, int x3);} (the constant arguments are removed from
+the signature).
 
-The RHS of each equation in $E$ is used to define the body of the equation
-corresponding to the LHS of that equation. The function body (for a function
-\texttt{func} corresponding to equation $e$) is formed as follows.
+The RHS of each equation in $\mathcal{E}$ is used to define the body of the
+equation corresponding to the LHS of that equation. The function body (for a
+function \texttt{func} corresponding to equation $e$) is formed as follows.
 
 First, we check if the evaluation is already present in the cache. If so, then
 we return the cache element. The cache accesses are done using the
@@ -845,32 +783,37 @@ challenging because there is no automated way to translate a formula in \FO{} or
 \begin{figure}
   \centering
   \input{plot}
-  \caption{The runtime data of WFOMC algorithms on bijection- and
-    function-counting problems on domains of sizes
-    $1, 2, \dots, 35$}\label{fig:plot}
+  \caption{The runtime data of WFOMC algorithms on permutation- and
+    function-counting problems on domains of sizes $1, 2, \dots, 35$. Note that
+    the $y$ axis is on a logarithmic scale.}\label{fig:plot}
 \end{figure}
 
 \paragraph{Results.}
 \begin{itemize}
-  \item the runtime appears constant because compilation time dominates
-        inference time for small domain sizes. Indeed, the maximum inference
-        time of both \textsc{Crane-BFS} and \textsc{Crane-Greedy} is only
-        \SI{4}{\milli\second}.
-  \item describe \cref{fig:plot}
-  \item On bijection counting, \textsc{FastWFOMC} takes about \SI{124}{\second}
-        on a domain of size 35, whereas \textsc{Crane-BFS} scales up to
-        \num{e4} in \SI{34}{\second}
-  \item On function counting, \textsc{FastWFOMC} takes about \SI{78}{\second} on
-        a domain of size 35, whereas both \textsc{Crane-BFS} and
-        \textsc{Crane-Greedy} scale up to \num{3e5} in \SI{41}{\second}.
-  \item Note that, both model counts are huge (TODO: add details)
+  \item As shown in \cref{fig:plot}, the runtimes of all compilation-based
+        algorithms remain practically constant in contrast to the rapidly
+        increasing runtimes of \textsc{FastWFOMC}.
+  \item Note that \textsc{Crane-BFS} is able to handle more instances than
+        \textsc{ForcLift} (e.g., the permutation-counting problem in our
+        experiments and other problems in my previous work).
+  \item Although the search/compilation part is slower in \textsc{Crane} than in
+        \textsc{ForcLift}, the difference is negligible.
+  \item The runtimes of three out of four WFOMC algorithms appear constant
+        because---for these counting problems and domain sizes---compilation
+        time dominates inference time (recall that compilation time is
+        independent of domain sizes). Indeed, the maximum inference time of both
+        \textsc{Crane-BFS} and \textsc{Crane-Greedy} across these experiments is
+        only \SI{4}{\milli\second}.
+  \item The runtimes of \textsc{Crane} have lower variation than those of
+        \textsc{ForcLift} because with \textsc{ForcLift} we compile the formula
+        anew for each domain size whereas with \textsc{Crane} we compile it once
+        and reuse the resulting C++ program for all domain sizes.
+  \item As another point of comparison,---in at most
+        \SI{41}{\second}---\textsc{Crane} scales up to domains of sizes \num{e4}
+        and \num{3e5} in permutation- and function-counting problems,
+        respectively (whereas \textsc{FastWFOMC} already takes longer with
+        domains of sizes\dots)
 \end{itemize}
-% ** bijections max time: 123.870
-% *** Crane-BFS scales up to 10k in 34 s
-% **** answer = 10k! = a number with 35660 digits
-% ** functions max time: 78.330
-% *** both Crane-BFS and Crane-Greedy scale up to 300k in 41 s
-% **** the count of this is 300k^300k is a number with over 1 million digits
 
 \todo[inline,caption={}]{
   Some reproducibility requirements to keep in mind:
@@ -896,6 +839,12 @@ challenging because there is no automated way to translate a formula in \FO{} or
 
 \bibliographystyle{kr}
 \bibliography{paper}
+
+% TODO: for references, maybe fix the spelling of Kuzelka's name
+
+% TODO: the report has some (long) examples of formulas being transformed into
+% programs perhaps suitable for supplementary material
+
 
 \end{document}
 

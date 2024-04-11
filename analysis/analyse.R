@@ -2,10 +2,7 @@ library(tidyverse)
 library(scales)
 library(tikzDevice)
 
-K <- 5
-degree <- 10
-
-df <- read.csv("results.csv")
+df <- read.csv("../results/processed/results.csv")
 df$compilation.time <- df$compilation.time / 1000
 df$inference.time <- df$inference.time / 1000
 df$time <- df$compilation.time + df$inference.time
@@ -13,13 +10,14 @@ df$algorithm[df$algorithm == "bfs"] <- "\\textsc{Crane-BFS}"
 df$algorithm[df$algorithm == "greedy"] <- "\\textsc{Crane-Greedy}"
 df$algorithm[df$algorithm == "forclift"] <- "\\textsc{ForcLift}"
 df$algorithm[df$algorithm == "fastwfomc"] <- "\\textsc{FastWFOMC}"
+df$sequence[df$sequence == "bijections"] <- "permutations"
 
 # Sanity check: differences between max and min counts as a percentage of the
 # min count
 #differences <- df %>% group_by(sequence, domain.size) %>%
 #  summarise(diff = 100 * (max(count) - min(count)) / min(count))
 
-tikz(file = "doc/plot.tex", width = 3.32492194445, height = 1.8702685937531252)
+tikz(file = "../doc/plot.tex", width = 3.32492194445, height = 1.8702685937531252)
 ggplot(df, aes(domain.size, time, colour = algorithm, linetype = sequence)) +
   geom_line() +
   scale_y_continuous(trans = log10_trans()) +
@@ -32,6 +30,9 @@ ggplot(df, aes(domain.size, time, colour = algorithm, linetype = sequence)) +
 dev.off()
 
 # ============== DEGREE FINDING (not doing this right now) ================
+
+K <- 5
+degree <- 10
 
 df1 <- df[df$algorithm == "\\textsc{FastWFOMC}" & df$sequence == "bijections",]
 df1 <- df[df$algorithm == "\\textsc{FastWFOMC}" & df$sequence == "functions",]
