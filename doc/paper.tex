@@ -36,8 +36,6 @@
 \newtheorem{definition}{Definition}
 \newtheorem{example}{Example}
 
-% TODO: 9 pages!!!
-
 \pdfinfo{
 /TemplateVersion (KR.2022.0, KR.2023.0, KR.2024.0)
 }
@@ -79,7 +77,7 @@
 \SetKwFunction{Propagate}{Propagate}
 \SetKwFunction{FindBaseCases}{FindBaseCases}
 
-\title{Towards Efficient First-Order Model Counting}
+\title{Towards Practical First-Order Model Counting}
 
 % TODO: check if this follows the formatting guidelines
 \author{%
@@ -102,21 +100,15 @@ meel@cs.toronto.edu
 \maketitle
 
 \begin{abstract}
+  TODO: 9 pages!!!
 \end{abstract}
 
 \section{Introduction}
 
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item describe which compilation rules are currently greedy or non-greedy
-    \item my agenda has a plan for proving completeness for $\mathbf{C}^{2}$
-    \item Can I prove that my domain recursion can always simulate the domain
-          recursion of \textsc{ForcLift}?
-  \end{itemize}
-}
-
 \paragraph{Papers to cite.}
 \begin{itemize}
+  \item relevant theoretical work~\cite{DBLP:conf/aaai/MalhotraS22} (there is
+        more, e.g., the LICS 2018 paper)
   \item original domain recursion~\cite{DBLP:conf/nips/Broeck11}
   \item recent overview paper~\cite{DBLP:conf/ijcai/Kuzelka23}
   \item conjecturing recurrence relations~\cite{DBLP:conf/ilp/BarvinekB0ZK21}
@@ -127,7 +119,7 @@ meel@cs.toronto.edu
     \item \textsc{FastWFOMC}~\cite{DBLP:conf/uai/BremenK21}
     \item approximate~\cite{DBLP:conf/ijcai/BremenK20}
   \end{itemize}
-  \item liftable fragments (TODO: perhaps good sources of benchmarks?)
+  \item liftable fragments
   \begin{itemize}
     \item \Ctwo~\cite{DBLP:journals/jair/Kuzelka21}
     \item tree axioms~\cite{DBLP:journals/ai/BremenK23}
@@ -142,7 +134,8 @@ meel@cs.toronto.edu
   \end{itemize}
 \end{itemize}
 
-% TODO: make sure to not call \Crane2 \textsc{Crane}
+\todo[inline]{Disambiguate between \protect\Crane, \textsc{Crane}, and
+  \Cranetwo}
 
 \paragraph{Changes to the compilation process.}
 \begin{itemize}
@@ -158,43 +151,6 @@ meel@cs.toronto.edu
         I cannot make sense of.
 \end{itemize}
 
-\paragraph{Proof of correctness (leave for later).}
-\begin{enumerate}
-  \item Define what it means for a formula to be \emph{consistent}.
-        \begin{itemize}
-          \item The formula (including the mapping of constants to their
-                domains) does not mention a domain together with its subdomain
-                (i.e., all mentioned domains are pairwise disjoint).
-                Specifically, we can't have a subdomain together with its parent
-                domain or a subdomain together with a constant that belongs to
-                its parent domain.
-          \item The target of \texttt{Ref} must also be a consistent formula.
-          \item The initial formula is consistent by definition.
-        \end{itemize}
-  \item Aim to show that \Cranetwo{} works correctly on all consistent formulas.
-  \item Prove that, whenever some compilation rule makes the formula $\phi$
-        inconsistent, greedy compilation rules will make $\phi$ consistent again
-        before $\phi$ encounters non-greedy compilation rules that depend on
-        $\phi$ being consistent.
-        \begin{itemize}
-          \item In particular, prove that shattering and unit propagation will
-                always eliminate the parent domain of the domains introduced by
-                atom counting.
-          \item Constraint removal only applies when it can eliminate the parent
-                domain entirely.
-          \item Prove this for a particular assumption about which compilation
-                rules are set to be greedy. For the greedy algorithm, although
-                all rules are applied in a greedy manner, we still assume that
-                greedy rules will be applied before non-greedy rules.
-        \end{itemize}
-  \item In particular, independent partial groundings and atom counting are the
-        two classical rules that require the formula to be shattered.
-  \end{enumerate}
-
- % TODO: Crane2 uses itself instead of Crane. Not really. By 'Crane', here I
- % mean the process of turning logical formulas into equations. Later on, I use
- % 'Crane' to refer to Crane2. Maybe rename this use of 'Crane' to something
- % else?
 \begin{figure*}[t]
   \centering
   \begin{tikzpicture}
@@ -242,13 +198,129 @@ meel@cs.toronto.edu
   \item Support for infinite precision integers using the GNU Multiple Precision
         Arithmetic Library.
   \item Some experiments vs FastWFOMC
-  \item A proof of completeness
 \end{itemize}
 
 \Cref{sec:identifying,sec:cpp} deal with algebraic constructs whereas
 \cref{sec:simplifying} deals with logic.
 
 \section{Preliminaries}
+
+\subsection{Logic}
+
+\todo[inline,caption={}]{
+  \begin{itemize}
+    \item What notation am I using for FOL? Introduce equality cardinality
+          constraints, counting quantifiers, etc.
+    \item Maybe say ``structure'' instead of interpretation?
+    \item Should I say ``sort'' instead of domain everywhere?
+  \end{itemize}
+}
+
+\begin{table*}
+  \centering
+  \begin{tabular}{llclll}
+    \toprule
+    Logic & Sorts & Constants & Variables & Quantifiers & Additional atomic constraints\\
+    \midrule
+    \FO & one or more & \cmark & unlimited & $\forall$, $\exists$ & $s = t$\\
+    \Ctwo & one & \xmark & two & $\forall$, $\exists$, $\exists^{= k}$, $\exists^{\le k}$, $\exists^{\ge k}$ & ---\\
+    \UFO & one & \xmark & two & $\forall$ & $|p| = m$\\
+    \bottomrule
+  \end{tabular}
+  \caption[]{A comparison of the three logics used in WFOMC in terms of:
+    \begin{enumerate*}[label=(\roman*)]
+      \item the number of sorts,
+      \item support for constants,
+      \item the maximum number of variables,
+      \item allowed quantifiers, and
+      \item atomic constructions in addition to those of the form $p(t_{1}, \dots, t_{n})$ for some predicate symbol $p$ and terms $t_{1}, \dots, t_{n}$.
+    \end{enumerate*}
+    Here:
+    \begin{enumerate*}[label=(\roman*)]
+      \item $k$ and $m$ are non-negative integers, the latter of which can depend on the domain size,
+      \item $p$ is a predicate symbol, and
+      \item $s$ and $t$ are terms.
+    \end{enumerate*}
+  }\label{tbl:logics}
+\end{table*}
+
+\paragraph{Three types of logics}
+\begin{itemize}
+  \item See \cref{tbl:logics} for a detailed comparison. The notation introduced
+        in the table is standard for \Ctwo{}, new for \UFO{}, and redefined to
+        be more specific for \FO{}.
+  \item All three logics are function-free.
+  \item Domains are always assumed to be finite.
+  \item
+        \begin{itemize}
+          \item \FO{} is used as the input format for
+                \textsc{ForcLift}\footnote{\url{https://github.com/UCLA-StarAI/Forclift}}~\cite{DBLP:conf/ijcai/BroeckTMDR11}
+                and its extensions
+                \textsc{Crane}\footnote{\url{https://doi.org/10.5281/zenodo.8004077}}~\cite{DBLP:conf/kr/DilkasB23}
+                and \Cranetwo{}.
+          \item \Ctwo{} is discussed in the literature on
+                \textsc{FastWFOMC}~\cite{DBLP:conf/uai/BremenK21} and related
+                methods~\cite{DBLP:journals/jair/Kuzelka21,DBLP:conf/aaai/MalhotraS22}
+          \item \UFO{} is the input format supported by a version of
+                \textsc{FastWFOMC} obtained directly from the authors. Note that
+                the publicly available
+                version\footnote{\url{https://www.comp.nus.edu.sg/~tvanbr/software/fastwfomc.tar.gz}}
+                does not support any cardinality constraints.
+        \end{itemize}
+  \item Note that, in the case of \textsc{ForcLift} and its extensions, support
+        for a formula as valid input does not imply that the algorithm will be
+        able to compile the formula into a circuit or graph suitable for lifted
+        model counting. However, it is known that \textsc{ForcLift} compilation
+        is guaranteed to succeed on any \FO{} formula without constants and with
+        at most two variables~\cite{DBLP:conf/nips/Broeck11}.
+\end{itemize}
+
+\todo[inline]{Explain arity and its notation. Define `ground'?}
+
+A \emph{formula} is a set of clauses. A \emph{clause} is of the form
+$\forall x_{1} \in \Delta_{1}\text{. }\forall x_{2} \in \Delta_{2}\dots\text{
+}\forall x_{n} \in \Delta_{n}\text{. }\phi(x_{1}, x_{2}, \dots, x_{n})$, where
+$\phi$ is a disjunction of literals that only contain variables
+$x_{1}, \dots, x_{n}$ (and any constants). A \emph{literal} is either an atom or
+its negation. An \emph{atom} is of the form $p(t_{1}, \dots, t_{m})$, where $p$
+is a predicate, and $t_{1}, \dots, t_{m}$ are terms. A \emph{term} is either a
+variable or a constant. Throughout the paper, we use set-theoretic notation,
+interpreting a formula as a set of clauses and a clause as a set of literals.
+
+For any clause or literal $l$, let $\Vars(l)$ denote the set of variables in
+$l$. For any (bound) variable $v$, let $\Dom(v)$ denote the domain over which
+$v$ is quantified. For a literal $l$,
+$\Doms(l) \coloneqq \{\, \Dom(v) \mid v \in \Vars(l) \,\}$. Similarly, for any
+clause $C$, let $\Doms(C) = \{\, \Dom(v) \mid v \in \Vars(C) \,\}$.
+
+\begin{definition}[Model]\label{def:model}
+  Let $\phi$ be a formula in \FO{}. For every predicate $p/n$ in $\phi$, let
+  ${(\Delta_{i}^{p})}_{i=1}^{n}$ be a list of the corresponding domains (not
+  necessarily distinct). Let $\sigma$ be a map from the domains of $\phi$ to
+  their interpretations as sets such that:
+  \begin{itemize}
+    \item the sets are pairwise disjoint, and
+    \item the constants in $\phi$ are included in the corresponding domains.
+  \end{itemize}
+  Then an \emph{interpretation} of $\phi$ (with respect to $\sigma$) is a set
+  $M$ of ground literals defined by adding either $p(\mathbf{t})$ or
+  $\neg p(\mathbf{t})$ for every predicate $p/n$ in $\phi$ and $n$-tuple
+  $\mathbf{t} \in \prod_{i=1}^{n} \sigma(\Delta_{i}^{p})$. An interpretation is
+  a \emph{model} if it satisfies $\phi$ (see Appendix~A of~Dilkas and
+  Belle~\shortcite{DBLP:journals/corr/abs-2306-04189} for more details).
+\end{definition}
+
+\begin{definition}[WFOMC]
+  Continuing from \cref{def:model}, for every predicate $p/n$ in $\phi$, let
+  $w^{+}(p), w^{-}(p) \in \mathbb{R}$ be its (positive and negative)
+  \emph{weights}. Unless explicitly specified otherwise, we assume weights to be
+  equal to one. The \emph{(symmetric) weighted first-order model count} (WFOMC)
+  of $\phi$ (with respect to $\sigma$, $w^{+}$, and $w^{-}$) is the quantity
+  \[
+    \sum_{M \models \phi} \prod_{p(\mathbf{t}) \in M} w^{+}(p) \prod_{\neg p(\mathbf{t}) \in M} w^{-}(p),
+  \]
+  where the sum is over all models of $\phi$.
+\end{definition}
 
 \subsection{Algebra}
 
@@ -262,17 +334,12 @@ $C[t / x]$ for the result of substituting $t$ for all occurrences of $x$ in $C$.
   \item Domains in uppercase Greek
   \item Constant and predicate symbols in lowercase
   \item Clauses written on separate lines are implicitly conjoined
-  \item For weights, for any predicate symbol $p$, we write
-        $w^{+}(p), w^{-}(p) \in \mathbb{R}$ for its positive and negative
-        weights, respectively. All weights not explicitly acknowledged are
-        assumed to be equal to one.
 \end{itemize}
 
 \todo[inline,caption={}]{
   \begin{itemize}
     \item check if I'm still using this notation in all these cases
     \item explain how this works for function calls too
-    \item introduce WFOMC as a problem
   \end{itemize}
 }
 
@@ -315,86 +382,6 @@ $C[t / x]$ for the result of substituting $t$ for all occurrences of $x$ in $C$.
   at least one constant. We denote a base case in the same way as a signature,
   e.g., $f(\mathbf{x})$.
 \end{definition}
-
-\subsection{Logic}
-
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item What notation am I using for FOL? Introduce equality cardinality
-          constraints, counting quantifiers, etc.
-    \item Need (W)FOMC semantics. What is an interpretation? What is a model?
-    \item Should table caption go above or below the table?
-    \item Define terms.
-    \item Maybe say ``structure'' instead of interpretation?
-    \item What's the right table heading capitalization for KR?
-    \item Should I say ``sort'' instead of domain everywhere?
-  \end{itemize}
-}
-
-\begin{table*}
-  \centering
-  \begin{tabular}{llclll}
-    \toprule
-    Logic & Sorts & Constants & Variables & Quantifiers & Additional atomic constraints\\
-    \midrule
-    \FO & one or more & \cmark & unlimited & $\forall$, $\exists$ & $s = t$\\
-    \Ctwo & one & \xmark & two & $\forall$, $\exists$, $\exists^{= k}$, $\exists^{\le k}$, $\exists^{\ge k}$ & ---\\
-    \UFO & one & \xmark & two & $\forall$ & $|p| = m$\\
-    \bottomrule
-  \end{tabular}
-  \caption[]{A comparison of the three logics used in WFOMC in terms of:
-    \begin{enumerate*}[label=(\roman*)]
-      \item the number of sorts,
-      \item support for constants,
-      \item the maximum number of variables,
-      \item allowed quantifiers, and
-      \item atomic constructions in addition to those of the form $p(t_{1}, \dots, t_{n})$ for some predicate symbol $p$ and terms $t_{1}, \dots, t_{n}$.
-    \end{enumerate*}
-    Here:
-    \begin{enumerate*}[label=(\roman*)]
-      \item $k$ and $m$ are non-negative integers, the latter of which can depend on the domain size,
-      \item $p$ is a predicate symbol, and
-      \item $s$ and $t$ are terms.
-    \end{enumerate*}
-  }\label{tbl:logics}
-\end{table*}
-
-\paragraph{Three types of logics}
-\begin{itemize}
-  \item All three logics are function-free.
-  \item Domains are always assumed to be finite.
-  \item See \cref{tbl:logics} for a detailed comparison. \FO{} is used as the
-        input format for \textsc{ForcLift} and its extensions \textsc{Crane} and
-        \Cranetwo{}. \Ctwo{} is used in the literature on \textsc{FastWFOMC} and
-        related methods (TODO: citations). \UFO{} is the input format supported
-        by a privately-obtained version of \textsc{FastWFOMC}. Note that the
-        publicly available version does not support any cardinality constraints.
-  \item In the case of \textsc{ForcLift} and its extensions, support for a
-        formula as valid input does not imply that the algorithm will be able to
-        compile the formula into a circuit or graph suitable for lifted model
-        counting. However, it is known that \textsc{ForcLift} compilation is
-        guaranteed to succeed on any \FO{} formula without constants and with at
-        most two variables (TODO: citation).
-\end{itemize}
-
-A \emph{formula} is a set of clauses. A \emph{clause} is of the form
-$\forall x_{1} \in \Delta_{1}\forall x_{2} \in \Delta_{2}\dots\forall x_{n} \in \Delta_{n} \phi(x_{1}, x_{2}, \dots, x_{n})$,
-where $\phi$ is a disjunction of literals that only contain variables
-$x_{1}, \dots, x_{n}$ (and any constants). A \emph{literal} is either an atom or
-its negation. An \emph{atom} is of the form $P(t_{1}, \dots, t_{m})$, where $P$
-is a predicate, and $t_{1}, \dots, t_{m}$ are terms. A \emph{term} is either a
-variable or a constant.
-
-\todo[inline]{explain set-based notation for a clause (iterating over all
-  literals)}
-
-For any clause or literal $l$, let $\Vars(l)$ denote the set of variables in
-$l$.
-
-For any (bound) variable $v$, let $\Dom(v)$ denote the domain over which $v$ is
-quantified. For a literal $l$,
-$\Doms(l) \coloneqq \{\, \Dom(v) \mid v \in \Vars(l) \,\}$. Similarly, for any
-clause $C$, let $\Doms(C) = \{\, \Dom(v) \mid v \in \Vars(C) \,\}$.
 
 \section{Completing the Definitions of Recursive Functions}\label{sec:main}
 
@@ -497,12 +484,10 @@ $\binom{x_{1}}{0} f(x_1) + \binom{x_{1}}{1} f(x_1-1)$.
   For an equation $f(m, n) = 2 \times f(m-1, n)$, \cref{alg1} returns $f(0, n)$.
 \end{example}
 
-NOTE: function calls such as $f(n-m)$ and $f(n-m-1)$ are ignored.
-
 \subsection{Propagating Domain Size Assumptions}\label{sec:simplifying}
 
 \begin{algorithm}[t]
-  \caption{\protect\Propagate{$\phi$, $\Delta$, $n$} TODO: find the source code and check: (1) what we're doing with unit clauses, (2) whether we just randomly pick any literal to negate}\label{alg2}
+  \caption{\protect\Propagate{$\phi$, $\Delta$, $n$}}\label{alg2}
   \KwIn{formula $\phi$, domain $\Delta$, domain size $n \in \{\, 0, 1 \,\}$}
   \KwOut{formula $\phi'$}
   $\phi' \gets \emptyset$\;
@@ -552,14 +537,8 @@ level' means that, e.g., if some ground atoms were eliminated from consideration
 before/after performing independent partial grounding, then the smoothing node
 should also appear before/after the independent partial grounding node.
 
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item Can I prove that the additions to smoothing outlined in the rest of
-          this section `do the right thing'?
-    \item I could include more info about the smoothing algorithm that didn't
-          make it into the previous paper.
-  \end{itemize}
-}
+\todo[inline]{Can I prove that the additions to smoothing outlined in the rest
+  of this section `do the right thing'?}
 
 \subsection{Smoothing for Base Cases}\label{sec:smoothingbase}
 
@@ -605,6 +584,39 @@ argument assigned to the empty domain. For example, we would convert
 The model count returned by this will also consider the truth value of $Q$ over
 $y \in \Gamma \setminus \Gamma'$ or $z \in \Gamma \setminus \Gamma'$.
 
+\subsection{Smoothing the FCG}
+
+\begin{algorithm}
+  \caption{Propagate atoms for smoothing across the FCG}\label{alg:smoothing}
+  \SetKwData{changed}{changed}
+  \KwIn{FCG $(V, s, N^+, \tau)$}
+  \KwIn{function $\iota$ that maps vertex types in $\mathcal{T}$ to sets of atoms}
+  \KwIn{functions $\{\,f_t\,\}_{t \in \mathcal{T}}$ that map a list of sets of atoms to a set of atoms}
+  \KwOut{function $S$ that maps vertices in $V$ to sets of atoms}
+  $S \gets \{\, v \mapsto \iota(\tau(v)) \mid v \in V \,\}$\;
+  $\changed \gets \texttt{true}$\;
+  \While{\changed}{
+    $\changed \gets \texttt{false}$\;
+    \ForEach{vertex $v \in V$}{
+      $S' \gets f_{\tau(v)}(\langle S(w) \mid w \in N^+(v) \rangle)$\;
+      \If{$S' \ne S(v)$}{
+        $\changed \gets \texttt{true}$\;
+        $S(v) \gets S'$\;
+      }
+    }
+  }
+\end{algorithm}
+
+\todo[inline]{Insert motivation for smoothing from Section 3.4.\ of the ForcLift
+  paper.}
+
+Originally, smoothing was (and still is) a two-step process. First, atoms that
+are still accounted for in the circuit are propagated upwards. Then, at vertices
+of certain types, missing atoms are detected and additional sinks are created to
+account for them. If left unchanged, the first step of this process would result
+in an infinite loop whenever a cycle is encountered. \Cref{alg:smoothing}
+outlines how the first step can be adapted to an arbitrary directed graph.
+
 \subsection{Stage 1: Propagating Unit Clauses `Upwards'}
 
 \begin{description}
@@ -634,35 +646,24 @@ $y \in \Gamma \setminus \Gamma'$ or $z \in \Gamma \setminus \Gamma'$.
 
 \subsection{Stage 2: Adding Smoothing Nodes}
 
-% TODO
-% \item Whenever the set of unit clauses received from the child node contains two
-% formulas $\phi(x)$ and $\forall X \in \Delta\text{.
-% } X \ne x \Rightarrow \phi(X)$ (i.e., the only difference between the two
-% formulas is that one has the constant $x$ whereas the other one has a variable
-% $X \ne x$), merge them into $\forall X \in \Delta\text{. }\phi(X)$.
+We never need to add smoothing nodes after \texttt{Ref} or constraint removal
+nodes. However, for domain recursion we must do the following.
 
-\begin{description}
-  \item[\texttt{Ref}:] nothing.
-  \item[Constraint removal:] nothing.
-  \item[Domain recursion:]
-        \begin{enumerate}
-          \item Whenever the set of unit clauses of the child node contains two
-                formulas $\phi(x)$ and $\forall X \in \Delta\text{.
-                } X \ne x \Rightarrow \phi(X)$ (i.e., the only difference
-                between the two formulas is that one has the constant $x$
-                whereas the other one has a variable $X \ne x$), merge them into
-                $\forall X \in \Delta\text{. }\phi(X)$.
-          \item Add smoothing nodes below the domain recursion node for the
-                difference between the unit clauses assigned to the domain
-                recursion node during Stage 1 and the unit clauses of the child
-                node post-processed by the step above. For example, if the child
-                node `covers' only $p(x)$, then Stage 1 assigns
-                $\forall X \in \Delta\text{. }p(X)$ to the domain recursion
-                node. The smoothing node below the domain recursion node then
-                has the clause $\forall X \in \Delta\text{.
-                } X \ne x \Rightarrow p(X)$.
-        \end{enumerate}
-\end{description}
+\begin{enumerate}
+  \item Whenever the set of unit clauses of the child node contains two formulas
+        $\phi(x)$ and $\forall X \in \Delta\text{.
+        } X \ne x \Rightarrow \phi(X)$ (i.e., the only difference between the
+        two formulas is that one has the constant $x$ whereas the other one has
+        a variable $X \ne x$), merge them into $\forall X \in \Delta\text{.
+        }\phi(X)$.
+  \item Add smoothing nodes below the domain recursion node for the difference
+        between the unit clauses assigned to the domain recursion node during
+        Stage 1 and the unit clauses of the child node post-processed by the
+        step above. For example, if the child node `covers' only $p(x)$, then
+        Stage 1 assigns $\forall X \in \Delta\text{. }p(X)$ to the domain
+        recursion node. The smoothing node below the domain recursion node then
+        has the clause $\forall X \in \Delta\text{. } X \ne x \Rightarrow p(X)$.
+\end{enumerate}
 
 \todo[inline]{Can I formally define what is meant by `difference'?}
 
@@ -725,7 +726,7 @@ Third, to translate the RHS, we convert $\sum_{x=a}^{b} \expr{}$ to
 \end{lstlisting}
 where $y, z, \dots$ are the free variables present in $\expr{}$.
 
-\section{Experiments}
+\section{Experimental Evaluation}
 
 Comparing \textsc{Crane} and \textsc{FastWFOMC} on a larger set of benchmarks is
 challenging because there is no automated way to translate a formula in \FO{} or
@@ -844,7 +845,6 @@ challenging because there is no automated way to translate a formula in \FO{} or
 
 % TODO: the report has some (long) examples of formulas being transformed into
 % programs perhaps suitable for supplementary material
-
 
 \end{document}
 
