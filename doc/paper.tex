@@ -71,7 +71,9 @@
 \newcommand{\FO}{$\mathsf{FO}$}
 \newcommand{\UFO}{$\mathsf{UFO}^{2} + \mathsf{EQ}$}
 
-\newcommand{\Cranetwo}{\textsc{Crane}~2}
+\newcommand{\Cranetwo}{\textsc{Crane2}}
+\newcommand{\Cranebfs}{\textsc{Crane2-BFS}}
+\newcommand{\Cranegreedy}{\textsc{Crane2-Greedy}}
 
 \SetKwFunction{Crane}{Compile}
 \SetKwFunction{Propagate}{Propagate}
@@ -79,16 +81,15 @@
 
 \title{Towards Practical First-Order Model Counting}
 
-% TODO: check if this follows the formatting guidelines
 \author{%
 Ananth K. Kidambi$^1$\and
 Guramrit Singh$^1$\and
 Paulius Dilkas$^2$\and
 Kuldeep S. Meel$^3$ \\
 \affiliations
-$^1$Indian Institute of Technology Bombay, India\\
-$^2$National University of Singapore, Singapore\\
-$^3$University of Toronto, Canada\\
+$^1$Indian Institute of Technology Bombay, Mumbai, India\\
+$^2$National University of Singapore, Singapore, Singapore\\
+$^3$University of Toronto, Toronto, Canada\\
 \emails
 \{210051002, 210050061\}@iitb.ac.in,
 paulius.dilkas@nus.edu.sg,
@@ -105,51 +106,93 @@ meel@cs.toronto.edu
 
 \section{Introduction}
 
+\todo[inline,caption={}]{
+  Add some papers mentioned in:
+  \begin{itemize}
+    \item very recent work
+    \item my previous paper, including:
+    \begin{itemize}
+      \item other liftable fragments
+      \item some more theory papers, e.g., LICS 2018
+    \end{itemize}
+  \end{itemize}
+}
+
 \paragraph{Papers to cite.}
 \begin{itemize}
-  \item relevant theoretical work~\cite{DBLP:conf/aaai/MalhotraS22} (there is
-        more, e.g., the LICS 2018 paper)
+  \item overviews
+        \begin{itemize}
+          \item lifted probabilistic inference~\cite{DBLP:conf/ecai/Kersting12}
+          \item recent overview paper~\cite{DBLP:conf/ijcai/Kuzelka23}
+        \end{itemize}
+  \item Alternative definition~\cite{DBLP:journals/cacm/GogateD16}
+  \item relevant theoretical work~\cite{DBLP:conf/aaai/MalhotraS22}
   \item original domain recursion~\cite{DBLP:conf/nips/Broeck11}
-  \item recent overview paper~\cite{DBLP:conf/ijcai/Kuzelka23}
-  \item conjecturing recurrence relations~\cite{DBLP:conf/ilp/BarvinekB0ZK21}
   \item algorithms
-  \begin{itemize}
-    \item \textsc{ForcLift}~\cite{DBLP:conf/ijcai/BroeckTMDR11}
-    \item \textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23}
-    \item \textsc{FastWFOMC}~\cite{DBLP:conf/uai/BremenK21}
-    \item approximate~\cite{DBLP:conf/ijcai/BremenK20}
-  \end{itemize}
-  \item liftable fragments
-  \begin{itemize}
-    \item \Ctwo~\cite{DBLP:journals/jair/Kuzelka21}
-    \item tree axioms~\cite{DBLP:journals/ai/BremenK23}
-    \item linear order axioms~\cite{DBLP:conf/aaai/TothK23}
-  \end{itemize}
+        \begin{itemize}
+          \item \textsc{ForcLift}~\cite{DBLP:conf/ijcai/BroeckTMDR11}
+          \item \textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23}
+          \item \textsc{FastWFOMC}~\cite{DBLP:conf/uai/BremenK21}
+          \item \textsc{L2C}~\cite{DBLP:conf/kr/KazemiP16} (similarly to us
+                compiles to C++ code, but (probably) doesn't work on as many
+                formulas)
+          \item approximate~\cite{DBLP:conf/ijcai/BremenK20}
+          \item for Markov logic networks~\cite{DBLP:journals/ml/RichardsonD06}
+                \begin{itemize}
+                  \item \textsc{Magician}~\cite{DBLP:conf/aaai/VenugopalSG15}
+                  \item \textsc{Tuffy}~\cite{DBLP:journals/pvldb/NiuRDS11}
+                  \item \textsc{Alchemy}~\cite{DBLP:journals/cacm/GogateD16}
+                        (same as the alternative definition)
+                \end{itemize}
+        \end{itemize}
+  \item complexity
+        \begin{itemize}
+          \item liftability~\cite{DBLP:conf/starai/JaegerB12}
+          \item hardness for three variables~\cite{DBLP:conf/pods/BeameBGS15}
+          \item liftable fragments
+                \begin{itemize}
+                  \item \Ctwo~\cite{DBLP:journals/jair/Kuzelka21}
+                  \item tree axioms~\cite{DBLP:journals/ai/BremenK23}
+                  \item linear order axioms~\cite{DBLP:conf/aaai/TothK23}
+                  \item some liftable fragments~\cite{DBLP:conf/nips/KazemiKBP16}
+                \end{itemize}
+        \end{itemize}
   \item applications
+        \begin{itemize}
+          \item extensions to
+                sampling~\cite{DBLP:conf/aaai/WangB0K22,DBLP:conf/lics/WangP0K23}
+          \item discovery of combinatorial
+                sequences~\cite{DBLP:conf/ijcai/SvatosJT0K23}
+          \item conjecturing recurrence
+                relations~\cite{DBLP:conf/ilp/BarvinekB0ZK21}
+          \item probabilistic logic
+                programming~\cite{DBLP:journals/ijar/RiguzziBZCL17} (WFOMC was
+                shown to be supreme)
+          \item probabilistic databases~\cite{DBLP:journals/debu/GribkoffSB14}
+        \end{itemize}
+  \item lifted inference in other domains
+        \begin{itemize}
+          \item constraint satisfaction~\cite{DBLP:journals/jair/TotisDRK23}
+          \item answer set programming~\cite{DBLP:journals/ijar/AzzoliniR23}
+        \end{itemize}
+\end{itemize}
+
+\todo[inline,caption={}]{
+  Where to put this?
+  \paragraph{Changes to the compilation process.}
   \begin{itemize}
-    \item extensions to
-          sampling~\cite{DBLP:conf/aaai/WangB0K22,DBLP:conf/lics/WangP0K23}
-    \item discovery of combinatorial
-          sequences~\cite{DBLP:conf/ijcai/SvatosJT0K23}
+    \item We make the FCGs satisfy the following property. For every domain
+          $\Delta$, for every directed path $P$ without Ref nodes, the number of
+          atom counting or (generalised) domain recursion or independent partial
+          grounding operations on $\Delta$ on $P$ is at most one.
+    \item When checking whether recursion is possible between a source and a
+          target formula, the target formula (maybe the source formula as well?)
+          must not include a domain as well as its subdomain. This might be
+          equivalent to the formula being `unshattered'. Such formulas could be
+          seen as transitory, and allowing such recursive calls leads to FCGs
+          that I cannot make sense of.
   \end{itemize}
-\end{itemize}
-
-\todo[inline]{Disambiguate between \protect\Crane, \textsc{Crane}, and
-  \Cranetwo}
-
-\paragraph{Changes to the compilation process.}
-\begin{itemize}
-  \item We make the FCGs satisfy the following property. For every domain
-        $\Delta$, for every directed path $P$ without Ref nodes, the number of
-        atom counting or (generalised) domain recursion or independent partial
-        grounding operations on $\Delta$ on $P$ is at most one.
-  \item when checking whether recursion is possible between a source and a
-        target formula, the target formula (maybe the source formula as well?)
-        must not include a domain as well as its subdomain. This might be
-        equivalent to the formula being `unshattered'. Such formulas could be
-        seen as transitory, and allowing such recursive calls leads to FCGs that
-        I cannot make sense of.
-\end{itemize}
+}
 
 \begin{figure*}[t]
   \centering
@@ -264,7 +307,7 @@ meel@cs.toronto.edu
           \item \UFO{} is the input format supported by a version of
                 \textsc{FastWFOMC} obtained directly from the authors. Note that
                 the publicly available
-                version\footnote{\url{https://www.comp.nus.edu.sg/~tvanbr/software/fastwfomc.tar.gz}}
+                version\footnote{\url{https://comp.nus.edu.sg/~tvanbr/software/fastwfomc.tar.gz}}
                 does not support any cardinality constraints.
         \end{itemize}
   \item Note that, in the case of \textsc{ForcLift} and its extensions, support
@@ -386,7 +429,8 @@ $C[t / x]$ for the result of substituting $t$ for all occurrences of $x$ in $C$.
 \section{Completing the Definitions of Recursive Functions}\label{sec:main}
 
 \begin{algorithm}[t]
-  \caption{The core part of \Cranetwo{} that compiles a formula...}\label{alg:main}% TODO: start here
+  \caption{The main part of \Cranetwo{} that compiles a formula into a set of
+    equations, including the base cases of recursive functions}\label{alg:main}
   \KwIn{formula $\phi$}
   \KwOut{set $\mathcal{E}$ of equations}
   $(\mathcal{E}, \mathcal{F}, \mathcal{D}) \gets \Crane{$\phi$}$\;
@@ -400,10 +444,9 @@ $C[t / x]$ for the result of substituting $t$ for all occurrences of $x$ in $C$.
   }
 \end{algorithm}
 
-See \cref{alg:main}.
-
-We write \Crane for a slight modification of the original \textsc{Crane} that
-compiles a formula $\phi$ into:
+We write \Crane for the first-order knowledge compilation algorithm of the
+original \textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23} that compiles a formula
+$\phi$ into:
 \begin{itemize}
   \item a set $\mathcal{E}$ of equations,
   \item a map $\mathcal{F}$ from function names to formulas, and
@@ -411,16 +454,19 @@ compiles a formula $\phi$ into:
         domains.
 \end{itemize}
 
-% TODO: update: crane or crane2
-The evaluation of base cases is done by simplifying the clauses and then using
-\textsc{Crane} to find the base cases. A particular domain is selected, and the
-clauses are simplified. Then, \textsc{Crane} is called on those clauses to
-evaluate the base cases. After that, we change the function names and variable
-to make it consistent with the previous domain to variable mapping, and append
-these base cases to the set of equations.
+\todo[inline,caption={}]{
+  \begin{itemize}
+    \item extend it to work with base cases that are themselves recursive
+    \item \textsc{Crane}, \Cranetwo{}, or \Crane (here and elsewhere)?
+  \end{itemize}
+}
 
-\todo[inline,caption={}]{extend it to work with base cases that are themselves
-  recursive}
+See \cref{alg:main}. The evaluation of base cases is done by simplifying the
+clauses and then using \textsc{Crane} to find the base cases. A particular
+domain is selected, and the clauses are simplified. Then, \textsc{Crane} is
+called on those clauses to evaluate the base cases. After that, we change the
+function names and variable to make it consistent with the previous domain to
+variable mapping, and append these base cases to the set of equations.
 
 \subsection{Identifying a Sufficient Set of Base Cases}\label{sec:identifying}
 
@@ -728,7 +774,7 @@ where $y, z, \dots$ are the free variables present in $\expr{}$.
 
 \section{Experimental Evaluation}
 
-Comparing \textsc{Crane} and \textsc{FastWFOMC} on a larger set of benchmarks is
+Comparing \Cranetwo{} and \textsc{FastWFOMC} on a larger set of benchmarks is
 challenging because there is no automated way to translate a formula in \FO{} or
 \Ctwo{} into \UFO{} (or even check if such an encoding is possible).
 
@@ -779,6 +825,10 @@ challenging because there is no automated way to translate a formula in \FO{} or
         \SI{16}{\gibi\byte} of memory and Arch Linux~6.8.2-arch2-1 operating
         system. \textsc{FastWFOMC} was run using Python~3.8.19 with
         Python-FLINT~0.5.0.
+  \item The knowledge compilation part of both \textsc{Crane} and \Cranetwo{}
+        can be executed using either greedy (similar to \textsc{ForcLift}) or
+        breadth-first search. We use both in our experiments, denoting them as
+        \Cranegreedy{} and \Cranebfs{}, respectively.
 \end{itemize}
 
 \begin{figure}
@@ -794,23 +844,23 @@ challenging because there is no automated way to translate a formula in \FO{} or
   \item As shown in \cref{fig:plot}, the runtimes of all compilation-based
         algorithms remain practically constant in contrast to the rapidly
         increasing runtimes of \textsc{FastWFOMC}.
-  \item Note that \textsc{Crane-BFS} is able to handle more instances than
+  \item Note that \Cranebfs{} is able to handle more instances than
         \textsc{ForcLift} (e.g., the permutation-counting problem in our
         experiments and other problems in my previous work).
-  \item Although the search/compilation part is slower in \textsc{Crane} than in
+  \item Although the search/compilation part is slower in \Cranetwo{} than in
         \textsc{ForcLift}, the difference is negligible.
   \item The runtimes of three out of four WFOMC algorithms appear constant
         because---for these counting problems and domain sizes---compilation
         time dominates inference time (recall that compilation time is
         independent of domain sizes). Indeed, the maximum inference time of both
-        \textsc{Crane-BFS} and \textsc{Crane-Greedy} across these experiments is
+        \Cranebfs{} and \Cranegreedy{} across these experiments is
         only \SI{4}{\milli\second}.
-  \item The runtimes of \textsc{Crane} have lower variation than those of
+  \item The runtimes of \Cranetwo{} have lower variation than those of
         \textsc{ForcLift} because with \textsc{ForcLift} we compile the formula
-        anew for each domain size whereas with \textsc{Crane} we compile it once
+        anew for each domain size whereas with \Cranetwo{} we compile it once
         and reuse the resulting C++ program for all domain sizes.
   \item As another point of comparison,---in at most
-        \SI{41}{\second}---\textsc{Crane} scales up to domains of sizes \num{e4}
+        \SI{41}{\second}---\Cranetwo{} scales up to domains of sizes \num{e4}
         and \num{3e5} in permutation- and function-counting problems,
         respectively (whereas \textsc{FastWFOMC} already takes longer with
         domains of sizes\dots)
@@ -840,8 +890,6 @@ challenging because there is no automated way to translate a formula in \FO{} or
 
 \bibliographystyle{kr}
 \bibliography{paper}
-
-% TODO: for references, maybe fix the spelling of Kuzelka's name
 
 % TODO: the report has some (long) examples of formulas being transformed into
 % programs perhaps suitable for supplementary material
