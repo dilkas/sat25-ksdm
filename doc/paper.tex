@@ -101,20 +101,22 @@ meel@cs.toronto.edu
 \maketitle
 
 \begin{abstract}
-  TODO: 9 pages!!!
 \end{abstract}
 
 \section{Introduction}
 
 \todo[inline,caption={}]{
-  Add some papers mentioned in:
   \begin{itemize}
-    \item very recent work
-    \item my previous paper, including:
-    \begin{itemize}
-      \item other liftable fragments
-      \item some more theory papers, e.g., LICS 2018
-    \end{itemize}
+    \item 9 pages!!!
+    \item Add some papers mentioned in:
+          \begin{itemize}
+            \item very recent work
+            \item my previous paper, including:
+                  \begin{itemize}
+                    \item other liftable fragments
+                    \item some more theory papers, e.g., LICS 2018
+                  \end{itemize}
+          \end{itemize}
   \end{itemize}
 }
 
@@ -170,29 +172,12 @@ meel@cs.toronto.edu
                 shown to be supreme)
           \item probabilistic databases~\cite{DBLP:journals/debu/GribkoffSB14}
         \end{itemize}
-  \item lifted inference in other domains
+  \item lifted inference elsewhere
         \begin{itemize}
           \item constraint satisfaction~\cite{DBLP:journals/jair/TotisDRK23}
           \item answer set programming~\cite{DBLP:journals/ijar/AzzoliniR23}
         \end{itemize}
 \end{itemize}
-
-\todo[inline,caption={}]{
-  Where to put this?
-  \paragraph{Changes to the compilation process.}
-  \begin{itemize}
-    \item We make the FCGs satisfy the following property. For every domain
-          $\Delta$, for every directed path $P$ without Ref nodes, the number of
-          atom counting or (generalised) domain recursion or independent partial
-          grounding operations on $\Delta$ on $P$ is at most one.
-    \item When checking whether recursion is possible between a source and a
-          target formula, the target formula (maybe the source formula as well?)
-          must not include a domain as well as its subdomain. This might be
-          equivalent to the formula being `unshattered'. Such formulas could be
-          seen as transitory, and allowing such recursive calls leads to FCGs
-          that I cannot make sense of.
-  \end{itemize}
-}
 
 \begin{figure*}[t]
   \centering
@@ -234,13 +219,21 @@ meel@cs.toronto.edu
 
 \paragraph{Contributions (outdated).}
 \begin{itemize}
-  \item \Cref{sec:identifying}
-  \item \Cref{sec:simplifying}
-  \item Converting the recursive equations into a C++ program, which can then be
-        compiled and executed to obtain numerical values (see \cref{sec:cpp}).
-  \item Support for infinite precision integers using the GNU Multiple Precision
-        Arithmetic Library.
-  \item Some experiments vs FastWFOMC
+  \item Completing the definitions of recursive functions by:
+  \begin{itemize}
+    \item identifying a sufficient set of base cases (\cref{sec:identifying})
+    \item constructing formulas that correspond to these base cases
+          (\cref{sec:simplifying})
+    \item and recursing on these subproblems
+  \end{itemize}
+  \item Compiling these function definitions into a C++ program that can be
+        executed independently for any domain size values \cref{sec:cpp}
+        \begin{itemize}
+          \item including support for infinite precision arithmetic via GNU
+                Multiple Precision Arithmetic Library
+        \end{itemize}
+  \item Experiments comparing \Cranetwo{} with the main alternative approach
+        demonstrate the ability of \Cranetwo{} to scale to domain sizes\dots
 \end{itemize}
 
 \Cref{sec:identifying,sec:cpp} deal with algebraic constructs whereas
@@ -250,24 +243,15 @@ meel@cs.toronto.edu
 
 \subsection{Logic}
 
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item What notation am I using for FOL? Introduce equality cardinality
-          constraints, counting quantifiers, etc.
-    \item Maybe say ``structure'' instead of interpretation?
-    \item Should I say ``sort'' instead of domain everywhere?
-  \end{itemize}
-}
-
 \begin{table*}
   \centering
   \begin{tabular}{llclll}
     \toprule
-    Logic & Sorts & Constants & Variables & Quantifiers & Additional atomic constraints\\
+    Logic & Sorts & Constants & Variables & Quantifiers & Additional atoms\\
     \midrule
-    \FO & one or more & \cmark & unlimited & $\forall$, $\exists$ & $s = t$\\
+    \FO & one or more & \cmark & unlimited & $\forall$, $\exists$ & $x = y$\\
     \Ctwo & one & \xmark & two & $\forall$, $\exists$, $\exists^{= k}$, $\exists^{\le k}$, $\exists^{\ge k}$ & ---\\
-    \UFO & one & \xmark & two & $\forall$ & $|p| = m$\\
+    \UFO & one & \xmark & two & $\forall$ & $|P| = m$\\
     \bottomrule
   \end{tabular}
   \caption[]{A comparison of the three logics used in WFOMC in terms of:
@@ -276,13 +260,13 @@ meel@cs.toronto.edu
       \item support for constants,
       \item the maximum number of variables,
       \item allowed quantifiers, and
-      \item atomic constructions in addition to those of the form $p(t_{1}, \dots, t_{n})$ for some predicate symbol $p$ and terms $t_{1}, \dots, t_{n}$.
+      \item supported atoms in addition to those of the form $P(\mathbf{t})$ for some predicate $P/n$ and $n$-tuple of terms $\mathbf{t}$.
     \end{enumerate*}
     Here:
     \begin{enumerate*}[label=(\roman*)]
-      \item $k$ and $m$ are non-negative integers, the latter of which can depend on the domain size,
-      \item $p$ is a predicate symbol, and
-      \item $s$ and $t$ are terms.
+      \item $k, m \in \mathbb{N}_{0}$, the latter of which can depend on the domain size,
+      \item $P$ is a predicate, and
+      \item $x$ and $y$ are terms.
     \end{enumerate*}
   }\label{tbl:logics}
 \end{table*}
@@ -294,6 +278,16 @@ meel@cs.toronto.edu
         be more specific for \FO{}.
   \item All three logics are function-free.
   \item Domains are always assumed to be finite.
+  \item In many-sorted logic, each term is assigned to a \emph{sort}, and each
+        predicate $p/n$ is assigned to a sequence of $n$ sorts. Each sort has
+        its corresponding domain. In the input formula, all domains are assumed
+        to be pairwise disjoin.t Most of these assignments are typically left
+        implicit and can be reconstructed from the quantifiers. For instance,
+        $\forall x,y \in \Delta\text{. }P(x, y)$ implies that variables $x$ and
+        $y$ have the same sort. On the other hand, $\forall x \in \Delta\text{.
+        }\forall y \in \Gamma\text{. } P(x, y)$ implies that $x$ and $y$ have
+        different sorts, and it would be improper to have $x = y$ as part of a
+        formula.
   \item
         \begin{itemize}
           \item \FO{} is used as the input format for
@@ -318,23 +312,50 @@ meel@cs.toronto.edu
         at most two variables~\cite{DBLP:conf/nips/Broeck11}.
 \end{itemize}
 
-\todo[inline]{Explain arity and its notation. Define `ground'?}
+\todo[inline,caption={}]{
+  \begin{itemize}
+    \item Add examples of cardinality constraints and counting quantifiers
+    \item Mention the role of Skolemization (with a citation)
+  \end{itemize}
+}
 
-A \emph{formula} is a set of clauses. A \emph{clause} is of the form
-$\forall x_{1} \in \Delta_{1}\text{. }\forall x_{2} \in \Delta_{2}\dots\text{
-}\forall x_{n} \in \Delta_{n}\text{. }\phi(x_{1}, x_{2}, \dots, x_{n})$, where
-$\phi$ is a disjunction of literals that only contain variables
-$x_{1}, \dots, x_{n}$ (and any constants). A \emph{literal} is either an atom or
-its negation. An \emph{atom} is of the form $p(t_{1}, \dots, t_{m})$, where $p$
-is a predicate, and $t_{1}, \dots, t_{m}$ are terms. A \emph{term} is either a
-variable or a constant. Throughout the paper, we use set-theoretic notation,
-interpreting a formula as a set of clauses and a clause as a set of literals.
+\paragraph{The \FO{} logic (after Skolemization).}
+\begin{itemize}
+  \item In the spirit of keeping sorts implicit, we always assume formulas `type
+        check' with respect to sorts. For example, if $P(x)$, $P(y)$, and
+        $x \ne c$ are all part of the formula (for some predicate $P$, variables
+        $x$ and $y$, and constant $c$), then $x$, $y$, and $c$ all have the same
+        sort.
+  \item A \emph{formula} is a conjunction of clauses.
+  \item A \emph{clause} is of the form $\forall x_{1} \in \Delta_{1}\text{.
+        }\forall x_{2} \in \Delta_{2}\dots\text{
+        }\forall x_{n} \in \Delta_{n}\text{. }\phi(x_{1}, x_{2}, \dots, x_{n})$,
+        where $\phi$ is a disjunction of literals that only contain variables
+        $x_{1}, \dots, x_{n}$ (and any constants).
+  \item A \emph{literal} is either an atom or its negation.
+  \item An \emph{atom} is either:
+  \begin{itemize}
+    \item $P(t_{1}, \dots, t_{m})$ for some predicate $P/m$ and terms
+          $t_{1}, \dots, t_{m}$ or
+    \item $x=y$ for some terms $x$ and $y$
+  \end{itemize}
+  \item An atom is \emph{ground} if it contains no variables (i.e., only
+        constants).
+  \item The \emph{arity} of a predicate is the number of arguments it takes,
+        i.e., $m$ in the case of predicate $P$.
+  \item When we want to denote a predicate together with its arity, we write
+        $P/m$.
+  \item A \emph{term} is either a variable or a constant.
+  \item Throughout the paper, we use set-theoretic notation, interpreting a
+        formula as a set of clauses and a clause as a set of literals. Moreover,
+        for readability, clauses written on separate lines are implicitly
+        conjoined.
+\end{itemize}
 
-For any clause or literal $l$, let $\Vars(l)$ denote the set of variables in
-$l$. For any (bound) variable $v$, let $\Dom(v)$ denote the domain over which
-$v$ is quantified. For a literal $l$,
-$\Doms(l) \coloneqq \{\, \Dom(v) \mid v \in \Vars(l) \,\}$. Similarly, for any
-clause $C$, let $\Doms(C) = \{\, \Dom(v) \mid v \in \Vars(C) \,\}$.
+For any variable $v$, let $\Dom(v)$ denote the domain over which $v$ is
+quantified. For any clause or literal $l$, let $\Vars(l)$ denote the set of
+variables in $l$, and, similarly, let
+$\Doms(l) \coloneqq \{\, \Dom(v) \mid v \in \Vars(l) \,\}$.
 
 \begin{definition}[Model]\label{def:model}
   Let $\phi$ be a formula in \FO{}. For every predicate $p/n$ in $\phi$, let
@@ -345,11 +366,11 @@ clause $C$, let $\Doms(C) = \{\, \Dom(v) \mid v \in \Vars(C) \,\}$.
     \item the sets are pairwise disjoint, and
     \item the constants in $\phi$ are included in the corresponding domains.
   \end{itemize}
-  Then an \emph{interpretation} of $\phi$ (with respect to $\sigma$) is a set
-  $M$ of ground literals defined by adding either $p(\mathbf{t})$ or
+  Then a \emph{structure} of $\phi$ (with respect to $\sigma$) is a set $M$ of
+  ground literals defined by adding either $p(\mathbf{t})$ or
   $\neg p(\mathbf{t})$ for every predicate $p/n$ in $\phi$ and $n$-tuple
-  $\mathbf{t} \in \prod_{i=1}^{n} \sigma(\Delta_{i}^{p})$. An interpretation is
-  a \emph{model} if it satisfies $\phi$ (see Appendix~A of~Dilkas and
+  $\mathbf{t} \in \prod_{i=1}^{n} \sigma(\Delta_{i}^{p})$. A structure is a
+  \emph{model} if it satisfies $\phi$ (see Appendix~A of~Dilkas and
   Belle~\shortcite{DBLP:journals/corr/abs-2306-04189} for more details).
 \end{definition}
 
@@ -367,40 +388,30 @@ clause $C$, let $\Doms(C) = \{\, \Dom(v) \mid v \in \Vars(C) \,\}$.
 
 \subsection{Algebra}
 
-\paragraph{Notation.}
-We write $\expr{}$ for an arbitrary algebraic expression. For any signature or
-clause $C$, argument or variable $x$, and number or constant $t$, we shall write
-$C[t / x]$ for the result of substituting $t$ for all occurrences of $x$ in $C$.
-
-\begin{itemize}
-  \item Variables in uppercase
-  \item Domains in uppercase Greek
-  \item Constant and predicate symbols in lowercase
-  \item Clauses written on separate lines are implicitly conjoined
-\end{itemize}
-
 \todo[inline,caption={}]{
   \begin{itemize}
     \item check if I'm still using this notation in all these cases
     \item explain how this works for function calls too
+    \item introduce the Iverson bracket (somewhere)
+    \item reorder the Logic subsection to cover \FO before comparing it to other
+          logics (and clarify the differences between the input format and the
+          internal format)
   \end{itemize}
 }
 
 \begin{definition}
-  A \emph{function call} is a term of the form
-  $f(x_{1} - c_{1}, \dots, x_{n} - c_{n})$ (written $f(\mathbf{x} - \mathbf{c})$
-  for short), where $f$ is an $n$-ary function, each $x_{i}$ is a variable, and
-  each $c_{i}$ is a non-negative constant.
+  A \emph{function call} is $f(x_{1} - c_{1}, \dots, x_{n} - c_{n})$ (written
+  $f(\mathbf{x} - \mathbf{c})$ for short), where $f$ is an $n$-ary function,
+  each $x_{i}$ is a variable, and each $c_{i}$ is a non-negative constant.
 \end{definition}
-\todo[inline]{do I ever use this term for the case when some of the variables
-  don't exist?}
+\todo[inline]{do I ever use this notation for the case when some of the
+  variables don't exist?}
 
 \begin{definition}
-  A \emph{signature} is a term of the form $f(x_{1}, \dots, x_{n})$ (written
-  $f(\mathbf{x})$ for short), where $f$ is an $n$-ary function, and each $x_{i}$
-  is a variable. The signature of a function call $f(\mathbf{x} - \mathbf{c})$
-  is $f(\mathbf{x})$. For example, the signature of $f(x - 1, y - 2)$ is
-  $f(x, y)$.
+  A \emph{signature} is $f(x_{1}, \dots, x_{n})$ (written $f(\mathbf{x})$ for
+  short), where $f$ is an $n$-ary function, and each $x_{i}$ is a variable. The
+  signature of a function call $f(\mathbf{x} - \mathbf{c})$ is $f(\mathbf{x})$.
+  For example, the signature of $f(x - 1, y - 2)$ is $f(x, y)$.
 \end{definition}
 
 \begin{definition}
@@ -409,13 +420,12 @@ $C[t / x]$ for the result of substituting $t$ for all occurrences of $x$ in $C$.
   Henceforth, we call $f(\mathbf{x})$ and $\expr{}$ the left-hand side (LHS) and
   the right-hand side (RHS) of the equation, respectively.
 \end{definition}
+
 \todo[inline,caption={}]{
-  give some examples of formulas that:
+  an example of a formula that:
   \begin{itemize}
-    \item introduce new variables,
-    \item call the function itself,
-    \item call some other function, and
-    \item is more nested than just a sum.
+    \item introduces a new variable,
+    \item calls itself.
   \end{itemize}
 }
 
@@ -425,6 +435,11 @@ $C[t / x]$ for the result of substituting $t$ for all occurrences of $x$ in $C$.
   at least one constant. We denote a base case in the same way as a signature,
   e.g., $f(\mathbf{x})$.
 \end{definition}
+
+\paragraph{Notation.}
+We write $\expr{}$ for an arbitrary algebraic expression. In the context of both
+algebra and logic, we write $C[x \mapsto y]$ for $C$ with all occurrences of $x$
+replaced with $y$.
 
 \section{Completing the Definitions of Recursive Functions}\label{sec:main}
 
@@ -480,7 +495,7 @@ variable mapping, and append these base cases to the set of equations.
     \ForEach{function call $f(\mathbf{x} - \mathbf{c}) \in \expr{}$}{\label{line:functioncall}
       \ForEach{$c_{i} \in \mathbf{c}$}{
         \For{$n \gets 0$ \KwTo $c_{i} - 1$}{\label{line:lim}
-          $\mathcal{B} \gets \mathcal{B} \cup \{\, f(\mathbf{x})[x_{i}/n] \,\}$\;\label{line:insert}
+          $\mathcal{B} \gets \mathcal{B} \cup \{\, f(\mathbf{x})[x_{i} \mapsto n] \,\}$\;\label{line:insert}
         }
       }
     }
@@ -507,7 +522,7 @@ $\binom{x_{1}}{0} f(x_1) + \binom{x_{1}}{1} f(x_1-1)$.
 
 \begin{itemize}
   \item \cref{line:insert} for $f(\mathbf{x}) = f(y, z)$, $x_{i} = y$, and
-        $n = 0$, add $f(y, z)[y/0] = f(0, z)$ to $\mathcal{B}$.
+        $n = 0$, add $f(y, z)[y \mapsto 0] = f(0, z)$ to $\mathcal{B}$.
 \end{itemize}
 
 \begin{theorem}
@@ -548,11 +563,11 @@ $\binom{x_{1}}{0} f(x_1) + \binom{x_{1}}{1} f(x_1-1)$.
     }
   }
   \Else{
-    $c \gets$ a new constant symbol\;
+    $c \gets$ a new constant in $\Delta$\;
     \ForEach{clause $C \in \phi$}{
       $C' \gets C$\;
       \ForEach{$v \in \Vars(C)$ with $\Dom(v) = \Delta$}{
-        $C' \gets C'[c / v]$\;
+        $C' \gets C'[v \mapsto c]$\;
       }
       $\phi' \gets \phi' \cup \{\, C' \,\}$\;
     }
@@ -589,27 +604,27 @@ should also appear before/after the independent partial grounding node.
 \subsection{Smoothing for Base Cases}\label{sec:smoothingbase}
 
 \paragraph{Key point.}
-If there is a predicate $p$ that has nothing to do with domain $\Delta$, make
-sure that $p$ remains as part of the formula even if all clauses with $p$ can be
+If there is a predicate $P$ that has nothing to do with domain $\Delta$, make
+sure that $P$ remains as part of the formula even if all clauses with $P$ can be
 removed. Which literal is picked on \cref{line:smoothing1} of \cref{alg2} is not
 important because any choice achieves the same goal: constructing a clause that
-mentions the same predicates as $C'$ and is satisfied by any interpretation.
+mentions the same predicates as $C'$ and is satisfied by any structure.
 
 \begin{fact}
   Assuming that domain $\Delta$ is empty, any clause that contains
   `$\forall x \in \Delta$' (for any variable $x$) is vacuously satisfied by all
-  interpretations.
+  structures.
 \end{fact}
 
 For example, consider the formula
-\begin{align}
-  \forall x \in \Delta \forall y, z \in \Gamma &: P(x) \lor Q(y, z)\label[formula]{eq:example1}\\
-  \forall y, z \in \Gamma' &: Q(y, z)\label[formula]{eq:example2}
-\end{align}
-and assume that $\Gamma' \subseteq \Gamma$. In this case, if we set $|\Delta|$
+\begin{gather}
+  \forall x \in \Delta\text{. }\forall y, z \in \Gamma\text{. }P(x) \lor Q(y, z)\label[formula]{eq:example1}\\
+  \forall y, z \in \Gamma'\text{. }Q(y, z)\label[formula]{eq:example2}
+\end{gather}
+and assume that $\Gamma' \subseteq \Gamma$. If we set $|\Delta|$
 to zero and remove clauses with variables quantified over $\Delta$, we get
 \begin{equation}\label[formula]{eq:simplified}
-  \forall y, z \in \Gamma' : Q(y, z),
+  \forall y, z \in \Gamma'\text{. }Q(y, z),
 \end{equation}
 but the model count of \cref{eq:simplified} is one. However, the actual model
 count should be $2^{|\Gamma|^2 - |\Gamma'|^2}$. That is, $Q$ as a relation is a
@@ -623,10 +638,10 @@ We address this issue by converting clauses with universal quantifiers over the
 empty domain to tautologies, hence retaining all the predicates that have no
 argument assigned to the empty domain. For example, we would convert
 \cref{eq:example1,eq:example2} to
-\begin{align*}
-  \forall y, z \in \Gamma &: Q(y, z) \lor \neg Q(y, z) \\
-  \forall y, z \in \Gamma' &: Q(y, z).
-\end{align*}
+\begin{gather*}
+  \forall y, z \in \Gamma\text{. }Q(y, z) \lor \neg Q(y, z)\\
+  \forall y, z \in \Gamma'\text{. }Q(y, z).
+\end{gather*}
 The model count returned by this will also consider the truth value of $Q$ over
 $y \in \Gamma \setminus \Gamma'$ or $z \in \Gamma \setminus \Gamma'$.
 
@@ -673,15 +688,15 @@ outlines how the first step can be adapted to an arbitrary directed graph.
         if the domain map include $\Delta \mapsto \Delta'$, and the unit clause
         mentions $\Delta$, then replace it by $\Delta'$.
   \item[Constraint removal.] Do reverse constraint removal. Assuming that
-        domain $\Delta$ with constraints $X \ne c$ (for some constant
+        domain $\Delta$ with constraints $x \ne c$ (for some constant
         $c \in \Delta$) were replaced with domain $\Delta'$, replace each
-        $\forall X \in \Delta'\text{. }\phi(X)$ with
-        $\forall X \in \Delta\text{. }X \ne c \Rightarrow \phi(X)$.
+        $\forall x \in \Delta'\text{. }\phi(x)$ with
+        $\forall x \in \Delta\text{. }X \ne c \Rightarrow \phi(x)$.
   \item[Domain recursion.] Suppose the domain recursion node introduces constant
-        $x \in \Delta$. For each unit clause received from the child node,
-        replace each occurrence of $\phi(x)$ or $\forall X \in \Delta\text{.
-        } X \ne x \Rightarrow \phi(X)$ with $\forall X \in \Delta\text{.
-        }\phi(X)$. This can be seen as a claim about what ground atoms the
+        $c \in \Delta$. For each unit clause received from the child node,
+        replace each occurrence of $\phi(x)$ or $\forall x \in \Delta\text{.
+        } x \ne c \Rightarrow \phi(x)$ with $\forall x \in \Delta\text{.
+        }\phi(x)$. This can be seen as a claim about what ground atoms the
         domain recursion node \emph{should} cover (or a temporary assumption).
         If the relevant subgraph indeed covers those ground atoms, Stage~2 will
         do nothing. Otherwise, smoothing nodes will be added below the domain
@@ -697,18 +712,18 @@ nodes. However, for domain recursion we must do the following.
 
 \begin{enumerate}
   \item Whenever the set of unit clauses of the child node contains two formulas
-        $\phi(x)$ and $\forall X \in \Delta\text{.
-        } X \ne x \Rightarrow \phi(X)$ (i.e., the only difference between the
-        two formulas is that one has the constant $x$ whereas the other one has
-        a variable $X \ne x$), merge them into $\forall X \in \Delta\text{.
-        }\phi(X)$.
+        $\phi(c)$ and $\forall x \in \Delta\text{.
+        } x \ne c \Rightarrow \phi(x)$ (i.e., the only difference between the
+        two formulas is that one has the constant $c$ whereas the other one has
+        a variable $x \ne c$), merge them into $\forall x \in \Delta\text{.
+        }\phi(x)$.
   \item Add smoothing nodes below the domain recursion node for the difference
         between the unit clauses assigned to the domain recursion node during
         Stage 1 and the unit clauses of the child node post-processed by the
-        step above. For example, if the child node `covers' only $p(x)$, then
-        Stage 1 assigns $\forall X \in \Delta\text{. }p(X)$ to the domain
+        step above. For example, if the child node `covers' only $P(c)$, then
+        Stage 1 assigns $\forall x \in \Delta\text{. }P(x)$ to the domain
         recursion node. The smoothing node below the domain recursion node then
-        has the clause $\forall X \in \Delta\text{. } X \ne x \Rightarrow p(X)$.
+        has the clause $\forall x \in \Delta\text{. } x \ne c \Rightarrow P(x)$.
 \end{enumerate}
 
 \todo[inline]{Can I formally define what is meant by `difference'?}
@@ -782,39 +797,39 @@ challenging because there is no automated way to translate a formula in \FO{} or
 \begin{itemize}
   \item Functions
         \begin{itemize}
-          \item In \Ctwo: $\forall X \in \Delta\text{.
-                }\exists^{=1} Y \in \Delta\text{. }p(X, Y)$
+          \item In \Ctwo: $\forall x \in \Delta\text{.
+                }\exists^{=1} y \in \Delta\text{. }P(x, y)$
           \item In \UFO:
                 \begin{gather*}
-                  \forall X, Y \in \Delta\text{. } s(X) \lor \neg p(X, Y)\\
-                  |p| = |\Delta|
+                  \forall x, y \in \Delta\text{. }S(x) \lor \neg P(x, y)\\
+                  |P| = |\Delta|
                 \end{gather*}
           \item In \FO:
                 \begin{gather*}
-                  \forall X \in \Delta\text{. }\exists Y \in \Delta\text{. } p(X, Y)\\
-                  \forall X, Y, Z \in \Delta\text{. } p(X, Y) \land p(X, Z) \Rightarrow Y = Z
+                  \forall x \in \Delta\text{. }\exists y \in \Delta\text{. }P(x, y)\\
+                  \forall x, y, z \in \Delta\text{. }P(x, y) \land P(x, z) \Rightarrow y = z
                 \end{gather*}
         \end{itemize}
   \item Permutations
         \begin{itemize}
           \item In \Ctwo:
                 \begin{gather*}
-                  \forall X \in \Delta\text{. }\exists^{=1} Y \in \Delta\text{. }p(X, Y)\\
-                  \forall Y \in \Delta\text{. }\exists^{=1} X \in \Delta\text{. }p(X, Y)
+                  \forall x \in \Delta\text{. }\exists^{=1} y \in \Delta\text{. }P(x, y)\\
+                  \forall y \in \Delta\text{. }\exists^{=1} x \in \Delta\text{. }P(x, y)
                 \end{gather*}
           \item In \UFO:
                 \begin{gather*}
-                  \forall X, Y \in \Delta\text{. } r(X) \lor \neg p(X, Y)\\
-                  \forall X, Y \in \Delta\text{. } s(X) \lor \neg p(Y, X)\\
-                  |p| = |\Delta|
+                  \forall x, y \in \Delta\text{. }R(x) \lor \neg P(x, y)\\
+                  \forall x, y \in \Delta\text{. }S(x) \lor \neg P(y, x)\\
+                  |P| = |\Delta|
                 \end{gather*}
-                with weights $w^{-}(r) = w^{-}(s) = -1$
+                with weights $w^{-}(R) = w^{-}(S) = -1$
           \item In \FO:
                 \begin{gather*}
-                  \forall X \in \Delta\text{. }\exists Y \in \Delta\text{. } p(X, Y)\\
-                  \forall Y \in \Delta\text{. }\exists X \in \Delta\text{. } p(X, Y)\\
-                  \forall X, Y, Z \in \Delta\text{. } p(X, Y) \land p(X, Z) \Rightarrow Y = Z\\
-                  \forall X, Y, Z \in \Delta\text{. } p(X, Y) \land p(Z, Y) \Rightarrow X = Z
+                  \forall x \in \Delta\text{. }\exists y \in \Delta\text{. }P(x, y)\\
+                  \forall y \in \Delta\text{. }\exists x \in \Delta\text{. }P(x, y)\\
+                  \forall x, y, z \in \Delta\text{. }P(x, y) \land P(x, z) \Rightarrow y = z\\
+                  \forall x, y, z \in \Delta\text{. }P(x, y) \land P(z, y) \Rightarrow x = z
                 \end{gather*}
         \end{itemize}
 \end{itemize}
@@ -865,6 +880,8 @@ challenging because there is no automated way to translate a formula in \FO{} or
         respectively (whereas \textsc{FastWFOMC} already takes longer with
         domains of sizes\dots)
 \end{itemize}
+
+\todo[inline]{maybe examine \textsc{ForcLift}'s scalability as well}
 
 \todo[inline,caption={}]{
   Some reproducibility requirements to keep in mind:
