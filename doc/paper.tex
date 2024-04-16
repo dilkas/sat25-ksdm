@@ -57,11 +57,14 @@
 \crefname{formula}{Clause}{Clauses}
 \creflabelformat{formula}{#2\textup{(#1)}#3}
 
+\DeclareMathOperator{\CR}{CR}
+\DeclareMathOperator{\DR}{DR}
+\DeclareMathOperator{\Reff}{Ref}
+
 \DeclareMathOperator{\Dom}{Dom}
 \DeclareMathOperator{\Doms}{Doms}
 \DeclareMathOperator{\Vars}{Vars}
 \DeclareMathOperator*{\argmin}{argmin}
-\DeclareMathOperator{\GDR}{GDR}
 
 \newcommand{\cmark}{\ding{51}}
 \newcommand{\xmark}{\ding{55}}
@@ -82,7 +85,7 @@
 \title{Towards Practical First-Order Model Counting}
 
 \author{%
-Ananth K. Kidambi$^1$\and
+  Ananth K. Kidambi$^1$\footnote{The first and second authors contributed equally and were affiliated with the National University of Singapore during the completion of this work.}\and
 Guramrit Singh$^1$\and
 Paulius Dilkas$^2$\and
 Kuldeep S. Meel$^3$ \\
@@ -101,6 +104,7 @@ meel@cs.toronto.edu
 \maketitle
 
 \begin{abstract}
+  TODO: at most 200 words
 \end{abstract}
 
 \section{Introduction}
@@ -120,7 +124,7 @@ meel@cs.toronto.edu
   \end{itemize}
 }
 
-\paragraph{Papers to cite.}
+\paragraph{Papers To Cite}
 \begin{itemize}
   \item overviews
         \begin{itemize}
@@ -217,7 +221,7 @@ meel@cs.toronto.edu
     of $\phi$ for various domain sizes.}
 \end{figure*}
 
-\paragraph{Contributions (outdated).}
+\paragraph{Contributions}
 \begin{itemize}
   \item Completing the definitions of recursive functions by:
   \begin{itemize}
@@ -241,7 +245,31 @@ meel@cs.toronto.edu
 
 \section{Preliminaries}
 
-\subsection{Logic}
+\Cref{sec:logic} introduces the fundamental ideas of first-order logic and
+WFOMC, and discusses the different logics used in the latter.\@
+\Cref{sec:algebra} introduces the terminology we use to describe the output of
+the original \textsc{Crane} algorithm~\cite{DBLP:conf/kr/DilkasB23}, i.e.,
+functions and equations that define them.
+
+\subsection{Logic}\label{sec:logic}
+
+\begin{example}\label{example:functions}
+  Functions
+  \begin{itemize}
+    \item In \Ctwo: $\forall x \in \Delta\text{.
+          }\exists^{=1} y \in \Delta\text{. }P(x, y)$
+    \item In \UFO:
+          \begin{gather*}
+            \forall x, y \in \Delta\text{. }S(x) \lor \neg P(x, y)\\
+            |P| = |\Delta|
+          \end{gather*}
+    \item In \FO:
+          \begin{gather*}
+            \forall x \in \Delta\text{. }\exists y \in \Delta\text{. }P(x, y)\\
+            \forall x, y, z \in \Delta\text{. }P(x, y) \land P(x, z) \Rightarrow y = z
+          \end{gather*}
+  \end{itemize}
+\end{example}
 
 \begin{table*}
   \centering
@@ -271,7 +299,7 @@ meel@cs.toronto.edu
   }\label{tbl:logics}
 \end{table*}
 
-\paragraph{Three types of logics}
+\paragraph{Three Types of Logics}
 \begin{itemize}
   \item See \cref{tbl:logics} for a detailed comparison. The notation introduced
         in the table is standard for \Ctwo{}, new for \UFO{}, and redefined to
@@ -312,15 +340,14 @@ meel@cs.toronto.edu
         at most two variables~\cite{DBLP:conf/nips/Broeck11}.
 \end{itemize}
 
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item Add examples of cardinality constraints and counting quantifiers
-    \item Mention the role of Skolemization (with a citation)
-  \end{itemize}
-}
-
-\paragraph{The \FO{} logic (after Skolemization).}
+\paragraph{The \FO{} Logic (After Skolemization)}
 \begin{itemize}
+  \item Although existential quantifiers are supported, here we describe the
+        format used internally. During preprocessing, all existential
+        quantifiers are eliminated using
+        Skolemization~\cite{DBLP:conf/kr/BroeckMD14}, and the formula is
+        rewritten into a conjunction of clauses, each of which is in
+        \emph{prenex normal form}~\cite{hinman2018fundamentals}.
   \item In the spirit of keeping sorts implicit, we always assume formulas `type
         check' with respect to sorts. For example, if $P(x)$, $P(y)$, and
         $x \ne c$ are all part of the formula (for some predicate $P$, variables
@@ -386,16 +413,16 @@ $\Doms(l) \coloneqq \{\, \Dom(v) \mid v \in \Vars(l) \,\}$.
   where the sum is over all models of $\phi$.
 \end{definition}
 
-\subsection{Algebra}
+\subsection{Algebra}\label{sec:algebra}
 
 \todo[inline,caption={}]{
   \begin{itemize}
-    \item check if I'm still using this notation in all these cases
     \item explain how this works for function calls too
     \item introduce the Iverson bracket (somewhere)
-    \item reorder the Logic subsection to cover \FO before comparing it to other
-          logics (and clarify the differences between the input format and the
-          internal format)
+    \item reorder the Logic subsection to cover \FO{} before comparing it to
+          other logics (and clarify the differences between the input format and
+          the internal format)
+    \item (somewhere) mention the trick about increasing the number of sorts
   \end{itemize}
 }
 
@@ -414,11 +441,23 @@ $\Doms(l) \coloneqq \{\, \Dom(v) \mid v \in \Vars(l) \,\}$.
   For example, the signature of $f(x - 1, y - 2)$ is $f(x, y)$.
 \end{definition}
 
+\paragraph{Additional notation}
+We write $\expr{}$ for an arbitrary algebraic expression. In the context of both
+algebra and logic, we write $C[x \mapsto y]$ for $C$ with all occurrences of $x$
+replaced with $y$.
+
 \begin{definition}
-  An \emph{equation} is always of the form $f(\mathbf{x}) = \expr{}$, where
-  $f(\mathbf{x})$ is a signature, and $\expr{}$ is an algebraic expression.
-  Henceforth, we call $f(\mathbf{x})$ and $\expr{}$ the left-hand side (LHS) and
-  the right-hand side (RHS) of the equation, respectively.
+  An \emph{equation} is $f(\mathbf{x}) = \expr{}$, where $f(\mathbf{x})$ is a
+  signature, and $\expr{}$ is an algebraic expression. Henceforth, we call
+  $f(\mathbf{x})$ and $\expr{}$ the left-hand side (LHS) and the right-hand side
+  (RHS) of the equation, respectively.
+\end{definition}
+
+\begin{definition}
+  A \emph{base case} is a function call where all arguments are either variables
+  or constants (i.e., there is no subtraction within any argument), and there is
+  at least one constant. We denote a base case in the same way as a signature,
+  e.g., $f(\mathbf{x})$.
 \end{definition}
 
 \todo[inline,caption={}]{
@@ -428,18 +467,6 @@ $\Doms(l) \coloneqq \{\, \Dom(v) \mid v \in \Vars(l) \,\}$.
     \item calls itself.
   \end{itemize}
 }
-
-\begin{definition}
-  A \emph{base case} is a function call where all arguments are either variables
-  or constants (i.e., there is no subtraction within any argument), and there is
-  at least one constant. We denote a base case in the same way as a signature,
-  e.g., $f(\mathbf{x})$.
-\end{definition}
-
-\paragraph{Notation.}
-We write $\expr{}$ for an arbitrary algebraic expression. In the context of both
-algebra and logic, we write $C[x \mapsto y]$ for $C$ with all occurrences of $x$
-replaced with $y$.
 
 \section{Completing the Definitions of Recursive Functions}\label{sec:main}
 
@@ -603,6 +630,8 @@ should also appear before/after the independent partial grounding node.
 
 \subsection{Smoothing for Base Cases}\label{sec:smoothingbase}
 
+\todo[inline]{Can I use an example based on permutations or something similar?}
+
 \paragraph{Key point.}
 If there is a predicate $P$ that has nothing to do with domain $\Delta$, make
 sure that $P$ remains as part of the formula even if all clauses with $P$ can be
@@ -647,6 +676,48 @@ $y \in \Gamma \setminus \Gamma'$ or $z \in \Gamma \setminus \Gamma'$.
 
 \subsection{Smoothing the FCG}
 
+\todo[inline,caption={}]{
+  \begin{itemize}
+    \item It seems like I'll need to introduce:
+          \begin{itemize}
+            \item FCGs
+            \item node types (be consistent w.r.t.\ node vs vertex)
+            \item their notation
+          \end{itemize}
+    \item Describe \cref{fig:smoothing1,fig:smoothing2}
+  \end{itemize}
+}
+
+\begin{figure}
+  \centering
+  \begin{forest}
+    for tree={sn edges}
+    [$\DR(c \in \Delta)$,name=dr,ellipse,draw,label={right:\textcolor{blue}{3. $\{\, \forall x \in \Delta\text{. }P(x) \,\}$}}
+    [$\land$,ellipse,draw,label={left:\textcolor{blue}{2. $\{\, P(c) \,\}$}},label={right:\textcolor{blue}{6. $\{\, P(c), \forall x \in \Delta\text{. }x \ne c \Rightarrow P(x) \,\}$}},
+    [$P(c)$,rectangle,draw,fill=green!20,label={272:\textcolor{blue}{1. $\{\, P(c) \,\}$}}],
+    [$\CR(\Delta' \gets \Delta \setminus \{\, c \,\})$,ellipse,draw,label={87:\textcolor{blue}{5. $\{\, \forall x \in \Delta\text{. }x \ne c \Rightarrow P(x) \,\}$}}
+    [$\Reff(\Delta \mapsto \Delta')$,name=ref,ellipse,draw,label={below:\textcolor{blue}{4. $\{\, \forall x \in \Delta'\text{. }P(x) \,\}$}}]
+    ]
+    ]
+    ]
+  \end{forest}
+  \caption{An example based on permutation counting (but simplified a lot). The
+    arc from the $\Reff$ node to the $\DR$ node is omitted.}\label{fig:smoothing1}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{forest}
+    for tree={sn edges}
+    [$\DR(c \in \Delta)$,name=dr,ellipse,draw,
+    [$P(c)$,rectangle,draw,fill=green!20],
+    [$\forall x \in \Delta\text{. }x \ne c \Rightarrow P(x) \lor \neg P(x)$,rectangle,dashed,edge=dashed,draw,fill=blue!20]
+    ]
+  \end{forest}
+  \caption{An artificial example of a situation when smoothing nodes need to be
+    added below a $\DR$ node}\label{fig:smoothing2}
+\end{figure}
+
 \begin{algorithm}
   \caption{Propagate atoms for smoothing across the FCG}\label{alg:smoothing}
   \SetKwData{changed}{changed}
@@ -668,15 +739,12 @@ $y \in \Gamma \setminus \Gamma'$ or $z \in \Gamma \setminus \Gamma'$.
   }
 \end{algorithm}
 
-\todo[inline]{Insert motivation for smoothing from Section 3.4.\ of the ForcLift
-  paper.}
-
-Originally, smoothing was (and still is) a two-step process. First, atoms that
-are still accounted for in the circuit are propagated upwards. Then, at vertices
-of certain types, missing atoms are detected and additional sinks are created to
-account for them. If left unchanged, the first step of this process would result
-in an infinite loop whenever a cycle is encountered. \Cref{alg:smoothing}
-outlines how the first step can be adapted to an arbitrary directed graph.
+Smoothing is a two-step process. First, atoms that are still accounted for in
+the circuit are propagated upwards. Then, at vertices of certain types, missing
+atoms are detected and additional sinks are created to account for them. If left
+unchanged, the first step of this process would result in an infinite loop
+whenever a cycle is encountered. \Cref{alg:smoothing} outlines how the first
+step can be adapted to an arbitrary directed graph.
 
 \subsection{Stage 1: Propagating Unit Clauses `Upwards'}
 
@@ -795,21 +863,7 @@ challenging because there is no automated way to translate a formula in \FO{} or
 
 \paragraph{Benchmarks (probably for supplementary material).}
 \begin{itemize}
-  \item Functions
-        \begin{itemize}
-          \item In \Ctwo: $\forall x \in \Delta\text{.
-                }\exists^{=1} y \in \Delta\text{. }P(x, y)$
-          \item In \UFO:
-                \begin{gather*}
-                  \forall x, y \in \Delta\text{. }S(x) \lor \neg P(x, y)\\
-                  |P| = |\Delta|
-                \end{gather*}
-          \item In \FO:
-                \begin{gather*}
-                  \forall x \in \Delta\text{. }\exists y \in \Delta\text{. }P(x, y)\\
-                  \forall x, y, z \in \Delta\text{. }P(x, y) \land P(x, z) \Rightarrow y = z
-                \end{gather*}
-        \end{itemize}
+  \item Functions (\cref{example:functions})
   \item Permutations
         \begin{itemize}
           \item In \Ctwo:
@@ -831,8 +885,15 @@ challenging because there is no automated way to translate a formula in \FO{} or
                   \forall x, y, z \in \Delta\text{. }P(x, y) \land P(x, z) \Rightarrow y = z\\
                   \forall x, y, z \in \Delta\text{. }P(x, y) \land P(z, y) \Rightarrow x = z
                 \end{gather*}
+          \item NOTE: when it's the same domain, counting bijections,
+                injections, surjections, and partial surjections all boil down
+                to the same integer sequence.
         \end{itemize}
 \end{itemize}
+
+\todo[inline]{ If it is possible to rewrite a formula to have more sorts, we do
+  that. Explain in more detail and with an example. Mention that this has been
+  observed previously by my previous work (i.e., linear vs cubic complexity). }
 
 \paragraph{Setup.}
 \begin{itemize}
@@ -905,11 +966,23 @@ challenging because there is no automated way to translate a formula in \FO{} or
 
 \section{Conclusion}
 
+\todo[inline,caption={}]{
+  \begin{itemize}
+    \item Maybe add some complete examples of C++ programs in the supplementary
+          material.
+          \item Later on:
+          \begin{itemize}
+            \item Eliminate (e.g., Emacs) warnings.
+            \item must run it by A\&G
+            \item re-check submission instructions and formatting guidelines
+            \item Full stop at the end of a single-sentence caption?
+          \end{itemize}
+  \end{itemize}
+}
+
+\clearpage % TODO: temporarary
+
 \bibliographystyle{kr}
 \bibliography{paper}
 
-% TODO: the report has some (long) examples of formulas being transformed into
-% programs perhaps suitable for supplementary material
-
 \end{document}
-
