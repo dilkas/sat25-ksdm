@@ -78,9 +78,11 @@
 \newcommand{\Cranebfs}{\textsc{Crane2-BFS}}
 \newcommand{\Cranegreedy}{\textsc{Crane2-Greedy}}
 
+\SetKwFunction{CompileWithBaseCases}{CompileWithBaseCases}
 \SetKwFunction{Crane}{Compile}
 \SetKwFunction{Propagate}{Propagate}
 \SetKwFunction{FindBaseCases}{FindBaseCases}
+\SetKwFunction{Simplify}{Simplify}
 
 \title{Towards Practical First-Order Model Counting}
 
@@ -186,40 +188,50 @@ meel@cs.toronto.edu
 \begin{figure*}[t]
   \centering
   \begin{tikzpicture}
-    \node at (0, 0) (formula) {$\phi$};
-    \node[draw,rounded rectangle] at (3, 0) (alg1) {\Cref{alg:main}};
-    \node[draw,rounded rectangle] at (6, 0) (simplification) {Simplification};
-    \node[draw,rounded rectangle] at (9, 0) (compilation) {Compilation};
+    \node at (-1, 0) (formula) {$\phi$};
+    \node[draw,rounded rectangle] at (3, 0) (alg1) {\CompileWithBaseCases};
+    \node[draw,rounded rectangle] at (9, 0) (compilation) {Compile to C++};
 
     \node[draw,rounded rectangle,dashed] at (12, 0) (cpp) {C++ code};
     \node at (12, -1) (sizes) {Domain sizes};
 
     \node at (15, 0) (count) {Model count};
 
-    \node[draw,rounded rectangle] at (3, -2) (alg2) {\Cref{alg1}};
-    \node[draw,rounded rectangle,left = 0.1cm of alg2] (crane) {\textsc{Crane}};
-    \node[draw,rounded rectangle,right = 0.1cm of alg2] (alg3) {\Cref{alg2}};
+    \node[draw,rounded rectangle] at (3, -2) (alg2) {\FindBaseCases};
+    \node[draw,rounded rectangle,left = 0.1cm of alg2] (crane) {\Crane};
+    \node[draw,rounded rectangle,right = 0.1cm of alg2] (alg3) {\Propagate};
+    \node[draw,rounded rectangle,right = 0.1cm of alg3] (simplify) {\Simplify};
 
-    \node[draw,fit={(alg1) (simplification) (compilation) (crane) (alg2) (alg3)},inner ysep=7pt,yshift=5pt] {};
-    \node at (1.1, 0.5) {\Cranetwo};
+    \node[draw,fit={(alg1) (compilation) (crane) (alg2) (alg3)},inner ysep=7pt,yshift=5pt] {};
+    \node at (0.2, 0.5) {\Cranetwo};
 
     \draw[-Latex] (formula) -- (alg1);
-    \draw[-Latex] (alg1) -- node[above] {$\mathcal{E}$} (simplification);
-    \draw[-Latex] (simplification) -- node[above] {$\mathcal{E}'$} (compilation);
+    \draw[-Latex] (alg1) -- node[above] {$\mathcal{E}$} (compilation);
     \draw[-Latex] (compilation) -- (cpp);
     \draw[-Latex] (sizes) -- (cpp);
     \draw[-Latex] (cpp) -- (count);
 
     \draw[-Latex,dashed] (alg1) -- node[midway,left] {uses} (crane);
-    \draw[-Latex,dashed] (alg1) -- node[midway] {uses} (alg2);
-    \draw[-Latex,dashed] (alg1) -- node[midway,right] {uses} (alg3);
+    \draw[-Latex,dashed] (alg1) -- node[midway,left] {uses} (alg2);
+    \draw[-Latex,dashed] (alg1) -- node[midway,left] {uses} (alg3);
+    \draw[-Latex,dashed] (alg1) -- node[midway,right] {uses} (simplify);
   \end{tikzpicture}
-  \caption{Using \Cranetwo{} to compute the model count of formula $\phi$.\ The
-    formula is compiled into a set of equations $\mathcal{E}$, which are then
-    algebraically simplified and compiled to a C++ program. This program can
-    then be run with different command line arguments to compute the model count
-    of $\phi$ for various domain sizes.}
+  \caption[]{The outline of using \Cranetwo{} to compute the model count of a
+    formula $\phi$. The formula is compiled into a set of equations
+    $\mathcal{E}$ that are then compiled to a C++ program. This program can then
+    be run with different command line arguments to compute the model count of
+    $\phi$ for various domain sizes. \CompileWithBaseCases makes use
+    of: \begin{enumerate*}[label=(\roman*)]
+      \item the knowledge compilation algorithm of \textsc{Crane} (denoted by \Crane),
+      \item a procedure for identifying a sufficient set of base cases (denoted by \FindBaseCases),
+      \item a procedure for constructing a formula that corresponds to a given base case (denoted by \Propagate), and
+      \item algebraic simplification techniques (denoted by \Simplify).
+    \end{enumerate*}
+  }\label{fig:overview}
 \end{figure*}
+
+\todo[inline]{By pointing to the outline in \cref{fig:overview}, make forward
+  references to the sections of the paper.}
 
 \paragraph{Contributions}
 \begin{itemize}
@@ -251,7 +263,15 @@ WFOMC, and discusses the different logics used in the latter.\@
 the original \textsc{Crane} algorithm~\cite{DBLP:conf/kr/DilkasB23}, i.e.,
 functions and equations that define them.
 
+We write $\mathbb{N}_{0}$ for the set of non-negative integers. In the context
+of both algebra and logic, we write $C[x \mapsto y]$ for $C$ with all
+occurrences of $x$ replaced with $y$.
+
 \subsection{Logic}\label{sec:logic}
+
+\todo[inline]{Reorder the Logic subsection to cover \FO{} before comparing it to
+  other logics (and clarify the differences between the input format and the
+  internal format)}
 
 \begin{example}\label{example:functions}
   Functions
@@ -359,7 +379,13 @@ functions and equations that define them.
         }\forall x_{n} \in \Delta_{n}\text{. }\phi(x_{1}, x_{2}, \dots, x_{n})$,
         where $\phi$ is a disjunction of literals that only contain variables
         $x_{1}, \dots, x_{n}$ (and any constants).
-  \item A \emph{literal} is either an atom or its negation.
+  \item We say that a clause is a \emph{(positive) unit clause} if:
+        \begin{itemize}
+          \item there is only one literal with a predicate, and
+          \item it is a positive literal.
+        \end{itemize}
+  \item A \emph{literal} is either an atom (i.e., a \emph{positive} literal) or
+        its negation (i.e., a \emph{negative} literal).
   \item An \emph{atom} is either:
   \begin{itemize}
     \item $P(t_{1}, \dots, t_{m})$ for some predicate $P/m$ and terms
@@ -417,74 +443,71 @@ $\Doms(l) \coloneqq \{\, \Dom(v) \mid v \in \Vars(l) \,\}$.
 
 \todo[inline,caption={}]{
   \begin{itemize}
-    \item explain how this works for function calls too
-    \item introduce the Iverson bracket (somewhere)
-    \item reorder the Logic subsection to cover \FO{} before comparing it to
-          other logics (and clarify the differences between the input format and
-          the internal format)
-    \item (somewhere) mention the trick about increasing the number of sorts
+    \item the definition of a function is a strong assumption
+    \item the notation for a function call is now outdated
   \end{itemize}
 }
 
-\begin{definition}
-  A \emph{function call} is $f(x_{1} - c_{1}, \dots, x_{n} - c_{n})$ (written
-  $f(\mathbf{x} - \mathbf{c})$ for short), where $f$ is an $n$-ary function,
-  each $x_{i}$ is a variable, and each $c_{i}$ is a non-negative constant.
-\end{definition}
-\todo[inline]{do I ever use this notation for the case when some of the
-  variables don't exist?}
+\begin{itemize}
+  \item We write $\expr{}$ for an arbitrary algebraic expression.
+  \item A few terms have different meanings in the context of algebra as
+        compared to logic:
+        \begin{itemize}
+          \item a \emph{variable} is either:
+                \begin{itemize}
+                  \item a parameter of a function or
+                  \item a variable introduced by a summation, e.g., $i$ in
+                        $\sum_{i=1}^{n} \expr$.
+                \end{itemize}
+          \item A \emph{constant} is a non-negative integer.
+        \end{itemize}
+\end{itemize}
 
 \begin{definition}
-  A \emph{signature} is $f(x_{1}, \dots, x_{n})$ (written $f(\mathbf{x})$ for
-  short), where $f$ is an $n$-ary function, and each $x_{i}$ is a variable. The
-  signature of a function call $f(\mathbf{x} - \mathbf{c})$ is $f(\mathbf{x})$.
-  For example, the signature of $f(x - 1, y - 2)$ is $f(x, y)$.
+  A (function) \emph{signature} is $f(x_{1}, \dots, x_{n})$ (written
+  $f(\mathbf{x})$ for short), where $f$ is an $n$-ary function, and each $x_{i}$
+  is a variable.
 \end{definition}
 
-\paragraph{Additional notation}
-We write $\expr{}$ for an arbitrary algebraic expression. In the context of both
-algebra and logic, we write $C[x \mapsto y]$ for $C$ with all occurrences of $x$
-replaced with $y$.
+\begin{definition}
+  Given a function $f$ with signature $f(\mathbf{x})$, a \emph{function call} of
+  $f$ is $f(\mathbf{y})$, where each $y_{i}$ is either $x_{i} - c_{i}$ or
+  $c_{i}$ for some constant $c_{i} \in \mathbb{N}_{0}$.
+\end{definition}
 
 \begin{definition}
   An \emph{equation} is $f(\mathbf{x}) = \expr{}$, where $f(\mathbf{x})$ is a
-  signature, and $\expr{}$ is an algebraic expression. Henceforth, we call
-  $f(\mathbf{x})$ and $\expr{}$ the left-hand side (LHS) and the right-hand side
-  (RHS) of the equation, respectively.
+  signature. We refer to $f(\mathbf{x})$ and $\expr{}$ as the \emph{left-hand
+    side} (LHS) and the \emph{right-hand side} (RHS) of the equation,
+  respectively.
 \end{definition}
 
-\begin{definition}
-  A \emph{base case} is a function call where all arguments are either variables
-  or constants (i.e., there is no subtraction within any argument), and there is
-  at least one constant. We denote a base case in the same way as a signature,
-  e.g., $f(\mathbf{x})$.
+\begin{definition}\label{def:basecase}
+  Let $f$ be a function with signature $f(\mathbf{x})$. Then a \emph{base case}
+  of $f$ is a function call $f(\mathbf{y})$ such that either $y_{i} = x_{i}$ or
+  $y_{i} \in \mathbb{N}_{0}$ for all $i$, and the latter case applies at least
+  once.
 \end{definition}
-
-\todo[inline,caption={}]{
-  an example of a formula that:
-  \begin{itemize}
-    \item introduces a new variable,
-    \item calls itself.
-  \end{itemize}
-}
 
 \section{Completing the Definitions of Recursive Functions}\label{sec:main}
 
 \begin{algorithm}[t]
-  \caption{The main part of \Cranetwo{} that compiles a formula into a set of
-    equations, including the base cases of recursive functions}\label{alg:main}
+  \caption{\protect\CompileWithBaseCases{$\phi$}}\label{alg:main}
   \KwIn{formula $\phi$}
   \KwOut{set $\mathcal{E}$ of equations}
   $(\mathcal{E}, \mathcal{F}, \mathcal{D}) \gets \Crane{$\phi$}$\;
+  $\mathcal{E} \gets \Simplify{$\mathcal{E}$}$\;
   \ForEach{base case $f(\mathbf{x}) \in \FindBaseCases{$\mathcal{E}$}$}{
     $\psi \gets \mathcal{F}(f)$\;
-    \ForEach{$i$ such that $x_{i}$ is a constant}{
+    \ForEach{$i$ such that $x_{i} \in \mathbb{N}_{0}$}{
       $\psi \gets \Propagate{$\psi$, $\mathcal{D}(f, i)$, $x_i$}$\;
     }
-    $(\mathcal{E}', \text{\textunderscore}, \text{\textunderscore}) \gets \Crane{$\psi$}$\;
-    $\mathcal{E} \gets \mathcal{E} \cup \mathcal{E}'$\;
+    $\mathcal{E} \gets \mathcal{E} \cup \CompileWithBaseCases{$\psi$}$\;
   }
 \end{algorithm}
+
+\todo[inline]{In \cref{alg:main}, some kind of translation also needs to take
+  place, right?}
 
 We write \Crane for the first-order knowledge compilation algorithm of the
 original \textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23} that compiles a formula
@@ -498,8 +521,7 @@ $\phi$ into:
 
 \todo[inline,caption={}]{
   \begin{itemize}
-    \item extend it to work with base cases that are themselves recursive
-    \item \textsc{Crane}, \Cranetwo{}, or \Crane (here and elsewhere)?
+    \item \textsc{Crane}, \Cranetwo{}, or \Crane in the paragraph below
   \end{itemize}
 }
 
@@ -518,16 +540,31 @@ variable mapping, and append these base cases to the set of equations.
   \KwOut{set $\mathcal{B}$ of base cases}
 
   $\mathcal{B} \gets \emptyset$\;
-  \ForEach{equation $(f(\mathbf{x}) = \expr{}) \in \mathcal{E}$}{
-    \ForEach{function call $f(\mathbf{x} - \mathbf{c}) \in \expr{}$}{\label{line:functioncall}
-      \ForEach{$c_{i} \in \mathbf{c}$}{
-        \For{$n \gets 0$ \KwTo $c_{i} - 1$}{\label{line:lim}
-          $\mathcal{B} \gets \mathcal{B} \cup \{\, f(\mathbf{x})[x_{i} \mapsto n] \,\}$\;\label{line:insert}
+  \ForEach{equation $(\ldots = \expr{}) \in \mathcal{E}$}{
+    \ForEach{function call $f(\mathbf{y}) \in \expr{}$}{\label{line:functioncall}
+      let $f(\mathbf{x})$ be the signature of $f$\;
+      \ForEach{$y_{i} \in \mathbf{y}$} {
+        \uIf{$y_{i} \in \mathbb{N}_{0}$}{
+          $\mathcal{B} \gets \mathcal{B} \cup \{\, f(\mathbf{x})[x_{i} \mapsto y_{i}] \,\}$\;
+        }
+        \ElseIf{$y_{i} = x_{i} - c_{i}$}{
+          \For{$j \gets 0$ \KwTo $c_{i} - 1$}{\label{line:lim}
+            $\mathcal{B} \gets \mathcal{B} \cup \{\, f(\mathbf{x})[x_{i} \mapsto j] \,\}$\;\label{line:insert}
+          }
         }
       }
     }
   }
 \end{algorithm}
+
+\todo[inline,caption={}]{
+  \begin{itemize}
+    \item introduce the Iverson bracket (it's only used in this subsection)
+    \item \Cref{alg1} is now fixed and supersedes the description below (and the
+          code!)
+    \item NOTE: exactly one of the if and else-if branches always applies
+  \end{itemize}
+}
 
 The algorithm is described as \cref{alg1}. We know that if, say, on the RHS of
 all equations, the domain size appears as $m - c_1, m - c_2, \dots, m - c_k$,
@@ -574,45 +611,62 @@ $\binom{x_{1}}{0} f(x_1) + \binom{x_{1}}{1} f(x_1-1)$.
 
 \subsection{Propagating Domain Size Assumptions}\label{sec:simplifying}
 
+\todo[inline,caption={}]{
+  \begin{itemize}
+    \item later check if I'm still using the syntax for $\Vars$, $\Dom$, etc.
+    \item align the last line to be a bit neater
+    \item \Cref{alg2} now supports any base case domain sizes
+    \item NOTE: if $C' = \emptyset$, then the clause becomes irrelevant and
+          doesn't need smoothing, so can be skipped
+  \end{itemize}
+}
+
 \begin{algorithm}[t]
   \caption{\protect\Propagate{$\phi$, $\Delta$, $n$}}\label{alg2}
-  \KwIn{formula $\phi$, domain $\Delta$, domain size $n \in \{\, 0, 1 \,\}$}
+  \KwIn{formula $\phi$, domain $\Delta$, $n \in \mathbb{N}_{0}$}
   \KwOut{formula $\phi'$}
   $\phi' \gets \emptyset$\;
   \uIf{$n = 0$}{
     \ForEach{clause $C \in \phi$}{
       \lIf{$\Delta \not\in \Doms(C)$}{$\phi' \gets \phi' \cup \{\, C \,\}$}
-      $C' \gets \{\, l \in C \mid \Delta \not\in \Doms(l) \,\}$\;
-      \If{$\Delta \in \Doms(C)$ {\bf and} $C' \ne \emptyset$}{
-        $l \gets \text{an arbitrary literal in } C'$\;\label{line:smoothing1}
-        $\phi' \gets \phi' \cup \{\, C' \cup \{\, \neg l \,\} \,\} $\;\label{line:smoothing2}
+      \Else{
+        $C' \gets \{\, l \in C \mid \Delta \not\in \Doms(l) \,\}$\;
+        \If{$C' \ne \emptyset$}{
+          $l \gets \text{an arbitrary literal in } C'$\;\label{line:smoothing1}
+          $\phi' \gets \phi' \cup \{\, C' \cup \{\, \neg l \,\} \,\} $\;\label{line:smoothing2}
+        }
       }
     }
   }
   \Else{
-    $c \gets$ a new constant in $\Delta$\;
+    $D \gets \text{a set of $n$ new constants in $\Delta$}$\;
     \ForEach{clause $C \in \phi$}{
-      $C' \gets C$\;
-      \ForEach{$v \in \Vars(C)$ with $\Dom(v) = \Delta$}{
-        $C' \gets C'[v \mapsto c]$\;
+      ${(x_{i})}_{i=1}^{m} \gets \text{the variables in $C$ with domain $\Delta$}$\;
+      \lIf{$m = 0$}{$\phi' \gets \phi' \cup \{\, C \,\}$}
+      \Else{
+        $\phi' \gets \phi' \cup \{\, C[x_{1} \mapsto c_{1}, \dots, x_{m} \mapsto c_{m}] \mid {(c_{i})}_{i=1}^{m} \in D^{m} \,\}$\;
       }
-      $\phi' \gets \phi' \cup \{\, C' \,\}$\;
     }
   }
 \end{algorithm}
 
-We use \cref{alg2} to find the transformed formula corresponding to each base
-case obtained using \cref{alg1} and call \textsc{Crane} on the formula to obtain
-the required base cases.
-% TODO: or crane 2?
-
-\begin{itemize}
-  \item Clauses where all literals have variables quantified over the empty
-        domain are still removed.
-  \item $C'$ is guaranteed to be non-empty.
-  \item \Cref{line:smoothing1,line:smoothing2} are explained in
-        \cref{sec:smoothingbase}.
-\end{itemize}
+\todo[inline,caption={}]{ Turn these notes into a coherent description (that
+  doesn't mention \textsc{Crane}):
+  \begin{itemize}
+    \item Each base case identified by \FindBaseCases can be interpreted as
+          assuming some domain...
+    \item \Propagate (\cref{alg2}) to find the transformed formula corresponding
+          to each base case identified by \FindBaseCases and call \textsc{Crane}
+          on the formula to obtain the required base cases.
+    \item Clauses where all literals have variables quantified over the empty
+          domain are still removed.
+    \item $C'$ is guaranteed to be non-empty.
+    \item \Cref{line:smoothing1,line:smoothing2} are explained in
+          \cref{sec:smoothingbase}.
+  \end{itemize}
+}
+\todo[inline]{Maybe prove consistency: if two base case overlap, their numerical
+  answers also overlap.}
 
 \section{Smoothing}
 
@@ -749,12 +803,12 @@ step can be adapted to an arbitrary directed graph.
 \subsection{Stage 1: Propagating Unit Clauses `Upwards'}
 
 \begin{description}
-  \item[\texttt{Ref}.] During smoothing, when unit clauses (a.k.a.\ variables)
-        are propagated in the opposite direction of the FCG arcs (i.e.,
-        `upwards'), when visiting a \texttt{Ref} node, these clauses are
-        translated using the domain map of the \texttt{Ref} node. For example,
-        if the domain map include $\Delta \mapsto \Delta'$, and the unit clause
-        mentions $\Delta$, then replace it by $\Delta'$.
+  \item[\texttt{Ref}.] During smoothing, when unit clauses are propagated in the
+        opposite direction of the FCG arcs (i.e., `upwards'), when visiting a
+        \texttt{Ref} node, these clauses are translated using the domain map of
+        the \texttt{Ref} node. For example, if the domain map include
+        $\Delta \mapsto \Delta'$, and the unit clause mentions $\Delta$, then
+        replace it by $\Delta'$.
   \item[Constraint removal.] Do reverse constraint removal. Assuming that
         domain $\Delta$ with constraints $x \ne c$ (for some constant
         $c \in \Delta$) were replaced with domain $\Delta'$, replace each
@@ -771,7 +825,6 @@ step can be adapted to an arbitrary directed graph.
         recursion node to cover the difference between what was propagated from
         the domain recursion node and what was received from the child node.
 \end{description}
-\todo[inline]{Add examples of both cases, with figures.}
 
 \subsection{Stage 2: Adding Smoothing Nodes}
 
@@ -799,15 +852,8 @@ nodes. However, for domain recursion we must do the following.
 \section{Generating C++ Code}\label{sec:cpp}
 
 The target is to generate C++ code that can evaluate numerical values of the
-model counts based on the equations generated by \textsc{Crane}. We achieve this
-by parsing the equations generated by \textsc{Crane}, simplifying them, and then
-generating C++ code. This approach can be done in linear time in the length of
-the formula using
-the
-\href{https://en.wikipedia.org/wiki/Shunting_yard_algorithm#:~:text=In%20computer%20science%2C%20the%20shunting,abstract%20syntax%20tree%20(AST).}{Shunting
-  Yard Algorithm}.
-
-The translation of a set $\mathcal{E}$ of equations into a C++ program works as
+model counts based on the equations generated by \CompileWithBaseCases. The
+translation of a set $\mathcal{E}$ of equations into a C++ program works as
 follows.
 
 First, we create a cache for each function in $\mathcal{E}$. This is implemented
@@ -976,6 +1022,8 @@ challenging because there is no automated way to translate a formula in \FO{} or
             \item must run it by A\&G
             \item re-check submission instructions and formatting guidelines
             \item Full stop at the end of a single-sentence caption?
+            \item cite the \textsc{Crane} paper (and other algorithms' papers)
+                  where necessary
           \end{itemize}
   \end{itemize}
 }
