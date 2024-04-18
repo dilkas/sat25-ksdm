@@ -54,6 +54,10 @@
 
 \crefname{line}{line}{lines}
 
+\crefalias{enumi}{type}
+\crefname{type}{Type}{Types}
+\creflabelformat{type}{#2\textup{#1}#3}
+
 \crefalias{clause}{equation}
 \crefname{clause}{Clause}{Clauses}
 \creflabelformat{clause}{#2\textup{(#1)}#3}
@@ -445,6 +449,13 @@ occurrences of $x$ replaced with $y$.
           various arithmetic operations, summations, non-negative integer
           constants, variables introduces by the function signature or
           summations)
+    \item The definition of a function call contradicts the base case finding
+          algorithm. Maybe rephrase it to only look at function calls from $f$
+          to itself and assume:
+          \begin{itemize}
+            \item no mutual recursion,
+            \item these calls in particular have this form
+          \end{itemize}
   \end{itemize}
 }
 
@@ -546,7 +557,16 @@ in more detail.
   $w^{+}(S) = 1$ and $w^{-}(S) = -1$. Hence, we get the base case
   $g(0, m) = 0^{m}$. In the case of $g(l, 0)$, \Propagate{$\psi$, $\Gamma$, $0$}
   returns an empty formula, giving us $g(l, 0) = 1$.
+
+  Note that these base cases overlap when $l = m = 0$ but are consistent with
+  each other since $0^{0} = 1$. More generally, let $\phi$ be a formula with two
+  domains $\Gamma$ and $\Delta$, and let $n, m \in \mathbb{N}_{0}$. Then the
+  model count of \Propagate{$\phi$, $\Delta$, $n$} assuming $|\Gamma| = m$ is
+  the same as the model count of \Propagate{$\phi$, $\Gamma$, $m$} assuming
+  $|\Delta| = n$.
 \end{example}
+
+\todo[inline]{This last claim sounds like something that should be proven.}
 
 \subsection{Identifying a Sufficient Set of Base Cases}\label{sec:identifying}
 
@@ -627,14 +647,6 @@ $\binom{x_{1}}{0} f(x_1) + \binom{x_{1}}{1} f(x_1-1)$.
 
 \subsection{Propagating Domain Size Assumptions}\label{sec:simplifying}
 
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item \Cref{alg2} now supports any base case domain sizes
-    \item NOTE: if $C' = \emptyset$, then the clause becomes irrelevant and
-          doesn't need smoothing, so can be skipped
-  \end{itemize}
-}
-
 \begin{algorithm}[t]
   \caption{\protect\Propagate{$\phi$, $\Delta$, $n$}}\label{alg2}
   \KwIn{formula $\phi$, domain $\Delta$, $n \in \mathbb{N}_{0}$}
@@ -664,25 +676,50 @@ $\binom{x_{1}}{0} f(x_1) + \binom{x_{1}}{1} f(x_1-1)$.
   }
 \end{algorithm}
 
-\todo[inline,caption={}]{ Turn these notes into a coherent description (that
-  doesn't mention \textsc{Crane}):
-  \begin{itemize}
-    \item Each base case identified by \FindBaseCases can be interpreted as
-          assuming some domain...
-    \item \Propagate (\cref{alg2}) to find the transformed formula corresponding
-          to each base case identified by \FindBaseCases and call \textsc{Crane}
-          on the formula to obtain the required base cases.
-    \item Clauses where all literals have variables quantified over the empty
-          domain are still removed.
-    \item $C'$ is guaranteed to be non-empty.
-    \item \Cref{line:smoothing1,line:smoothing2} are explained in
-          \cref{sec:smoothingbase}.
-    \item For a literal or a clause $C$, let $\Doms(C)$ denote the set of the
-          corresponding domains. Make sure an example illustrates this.
-  \end{itemize}
-}
-\todo[inline]{Maybe prove consistency: if two base case overlap, their numerical
-  answers also overlap.}
+\Propagate (\cref{alg2}) modifies formula $\phi$ with the assumption that domain
+$\Delta$ has size $n \in \mathbb{N}_{0}$. In the case of $n=0$, many clauses
+become vacuously satisfied and can be removed. In the case of
+$n > 0$\footnote{None of the formulas considered in this work had $n > 1$.}, we
+perform partial grounding, using constants to replace all variables quantified
+over $\Delta$. \Cref{alg2} considers these two cases separately. For a literal
+or a clause $C$, we write $\Doms(C)$ to denote the set of corresponding domains.
+
+In the case of $n = 0$, consider three types of clauses:
+\begin{enumerate*}[label=(\roman*)]
+  \item those that do not mention $\Delta$,\label{type1}
+  \item those in which every literal contains variables quantified over
+  $\Delta$, and\label{type2}
+  \item those that have some literals with variables quantified over $\Delta$
+  and some without.\label{type3}
+\end{enumerate*}
+\Cref{type1} clauses are transferred to the new formula $\phi'$ unchanged. For
+\cref{type2} clauses, $C' = \emptyset$, so these clauses are filtered out. One
+might think that the same should be done with \cref{type3} clauses, however,
+\cref{line:smoothing1,line:smoothing2} perform a new kind of smoothing, the
+explanation of which we defer to \cref{sec:smoothingbase}.
+
+In the case of $n>0$, we introduce $n$ new constants. Consider an arbitrary
+clause $C \in \phi$ and let $m \in \mathbb{N}_{0}$ be the number of variables in
+$C$ quantified over $\Delta$. If $m=0$, then, similarly to the previous case, we
+add $C$ directly to $\phi'$. Otherwise, we add a clause to $\phi'$ with every
+possible way of replacing the $m$ variables in $C$ with some combination of the
+$n$ new constants.
+
+\begin{example}
+  Let us consider the clause $C \equiv \forall x \in \Gamma\text{.
+  }\forall y, z \in \Delta\text{. } \neg P(x, y) \lor \neg P(x, z) \lor y=z$.
+  Then
+  $\Doms(C) = \Doms(\neg P(x, y)) = \Doms(\neg P(x, z)) = \{\, \Gamma, \Delta \,\}$,
+  and $\Doms(y=z) = \{\, \Delta \,\}$. A call to \Propagate{$\{\, C \,\}$,
+    $\Delta$, $3$} would produce the following formula with nine clauses:
+  \begin{align*}
+    \forall x \in \Gamma\text{. }\neg P(x, c_{1}) \lor& \neg P(x, c_{1}) \lor c_{1}=c_{1}\\
+    \forall x \in \Gamma\text{. }\neg P(x, c_{1}) \lor& \neg P(x, c_{2}) \lor c_{1}=c_{2}\\
+    \vdots&\\
+    \forall x \in \Gamma\text{. }\neg P(x, c_{3}) \lor& \neg P(x, c_{3}) \lor c_{3}=c_{3},\\
+  \end{align*}
+  where $c_{1}$, $c_{2}$, and $c_{3}$ are the new constants.
+\end{example}
 
 \section{Smoothing}
 
@@ -695,12 +732,19 @@ level' means that, e.g., if some ground atoms were eliminated from consideration
 before/after performing independent partial grounding, then the smoothing node
 should also appear before/after the independent partial grounding node.
 
-\todo[inline]{Can I prove that the additions to smoothing outlined in the rest
-  of this section `do the right thing'?}
+\todo[inline,caption={}]{
+\begin{itemize}
+  \item Cite something when introducing the idea of smoothing. Maybe both
+        propositional and first-order sources.
+  \item Can I prove that the additions to smoothing outlined in the rest of this
+        section `do the right thing'?
+\end{itemize}
+}
 
 \subsection{Smoothing for Base Cases}\label{sec:smoothingbase}
 
-\todo[inline]{Can I use an example based on permutations or something similar?}
+\todo[inline]{Must include an example of propagating the empty-domain
+  assumption (ideally based on previous examples).}
 
 \paragraph{Key point.}
 If there is a predicate $P$ that has nothing to do with domain $\Delta$, make
@@ -1042,6 +1086,9 @@ challenging because there is no automated way to translate a formula in \FO{} or
             \item Full stop at the end of a single-sentence caption?
             \item cite the \textsc{Crane} paper (and other algorithms' papers)
                   where necessary
+            \item Something to think about that could inspire some kind of
+                  theorems: how can I assume that a domain is empty if there are
+                  constants associated with it?
           \end{itemize}
   \end{itemize}
 }
