@@ -53,18 +53,21 @@
         showstringspaces=false}
 
 \crefname{line}{line}{lines}
+
+\crefalias{clause}{equation}
+\crefname{clause}{Clause}{Clauses}
+\creflabelformat{clause}{#2\textup{(#1)}#3}
+
 \crefalias{formula}{equation}
-\crefname{formula}{Clause}{Clauses}
+\crefname{formula}{Formula}{Formulas}
 \creflabelformat{formula}{#2\textup{(#1)}#3}
 
 \DeclareMathOperator{\CR}{CR}
 \DeclareMathOperator{\DR}{DR}
 \DeclareMathOperator{\Reff}{Ref}
 
-\DeclareMathOperator{\Dom}{Dom}
 \DeclareMathOperator{\Doms}{Doms}
-\DeclareMathOperator{\Vars}{Vars}
-\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator*{\argmin}{argmin} % TODO: soon to be removed
 
 \newcommand{\cmark}{\ding{51}}
 \newcommand{\xmark}{\ding{55}}
@@ -269,98 +272,11 @@ occurrences of $x$ replaced with $y$.
 
 \subsection{Logic}\label{sec:logic}
 
-\todo[inline]{Reorder the Logic subsection to cover \FO{} before comparing it to
-  other logics (and clarify the differences between the input format and the
-  internal format)}
+\todo[inline]{Clarify the differences between the input format and the internal
+  format}
 
-\begin{example}\label{example:functions}
-  Functions
-  \begin{itemize}
-    \item In \Ctwo: $\forall x \in \Delta\text{.
-          }\exists^{=1} y \in \Delta\text{. }P(x, y)$
-    \item In \UFO:
-          \begin{gather*}
-            \forall x, y \in \Delta\text{. }S(x) \lor \neg P(x, y)\\
-            |P| = |\Delta|
-          \end{gather*}
-    \item In \FO:
-          \begin{gather*}
-            \forall x \in \Delta\text{. }\exists y \in \Delta\text{. }P(x, y)\\
-            \forall x, y, z \in \Delta\text{. }P(x, y) \land P(x, z) \Rightarrow y = z
-          \end{gather*}
-  \end{itemize}
-\end{example}
-
-\begin{table*}
-  \centering
-  \begin{tabular}{llclll}
-    \toprule
-    Logic & Sorts & Constants & Variables & Quantifiers & Additional atoms\\
-    \midrule
-    \FO & one or more & \cmark & unlimited & $\forall$, $\exists$ & $x = y$\\
-    \Ctwo & one & \xmark & two & $\forall$, $\exists$, $\exists^{= k}$, $\exists^{\le k}$, $\exists^{\ge k}$ & ---\\
-    \UFO & one & \xmark & two & $\forall$ & $|P| = m$\\
-    \bottomrule
-  \end{tabular}
-  \caption[]{A comparison of the three logics used in WFOMC in terms of:
-    \begin{enumerate*}[label=(\roman*)]
-      \item the number of sorts,
-      \item support for constants,
-      \item the maximum number of variables,
-      \item allowed quantifiers, and
-      \item supported atoms in addition to those of the form $P(\mathbf{t})$ for some predicate $P/n$ and $n$-tuple of terms $\mathbf{t}$.
-    \end{enumerate*}
-    Here:
-    \begin{enumerate*}[label=(\roman*)]
-      \item $k, m \in \mathbb{N}_{0}$, the latter of which can depend on the domain size,
-      \item $P$ is a predicate, and
-      \item $x$ and $y$ are terms.
-    \end{enumerate*}
-  }\label{tbl:logics}
-\end{table*}
-
-\paragraph{Three Types of Logics}
-\begin{itemize}
-  \item See \cref{tbl:logics} for a detailed comparison. The notation introduced
-        in the table is standard for \Ctwo{}, new for \UFO{}, and redefined to
-        be more specific for \FO{}.
-  \item All three logics are function-free.
-  \item Domains are always assumed to be finite.
-  \item In many-sorted logic, each term is assigned to a \emph{sort}, and each
-        predicate $p/n$ is assigned to a sequence of $n$ sorts. Each sort has
-        its corresponding domain. In the input formula, all domains are assumed
-        to be pairwise disjoin.t Most of these assignments are typically left
-        implicit and can be reconstructed from the quantifiers. For instance,
-        $\forall x,y \in \Delta\text{. }P(x, y)$ implies that variables $x$ and
-        $y$ have the same sort. On the other hand, $\forall x \in \Delta\text{.
-        }\forall y \in \Gamma\text{. } P(x, y)$ implies that $x$ and $y$ have
-        different sorts, and it would be improper to have $x = y$ as part of a
-        formula.
-  \item
-        \begin{itemize}
-          \item \FO{} is used as the input format for
-                \textsc{ForcLift}\footnote{\url{https://github.com/UCLA-StarAI/Forclift}}~\cite{DBLP:conf/ijcai/BroeckTMDR11}
-                and its extensions
-                \textsc{Crane}\footnote{\url{https://doi.org/10.5281/zenodo.8004077}}~\cite{DBLP:conf/kr/DilkasB23}
-                and \Cranetwo{}.
-          \item \Ctwo{} is discussed in the literature on
-                \textsc{FastWFOMC}~\cite{DBLP:conf/uai/BremenK21} and related
-                methods~\cite{DBLP:journals/jair/Kuzelka21,DBLP:conf/aaai/MalhotraS22}
-          \item \UFO{} is the input format supported by a version of
-                \textsc{FastWFOMC} obtained directly from the authors. Note that
-                the publicly available
-                version\footnote{\url{https://comp.nus.edu.sg/~tvanbr/software/fastwfomc.tar.gz}}
-                does not support any cardinality constraints.
-        \end{itemize}
-  \item Note that, in the case of \textsc{ForcLift} and its extensions, support
-        for a formula as valid input does not imply that the algorithm will be
-        able to compile the formula into a circuit or graph suitable for lifted
-        model counting. However, it is known that \textsc{ForcLift} compilation
-        is guaranteed to succeed on any \FO{} formula without constants and with
-        at most two variables~\cite{DBLP:conf/nips/Broeck11}.
-\end{itemize}
-
-\paragraph{The \FO{} Logic (After Skolemization)}
+\paragraph{The \FO{} Logic (After Skolemization and in a special (prenex, CNF)
+  form)}
 \begin{itemize}
   \item Although existential quantifiers are supported, here we describe the
         format used internally. During preprocessing, all existential
@@ -405,11 +321,6 @@ occurrences of $x$ replaced with $y$.
         conjoined.
 \end{itemize}
 
-For any variable $v$, let $\Dom(v)$ denote the domain over which $v$ is
-quantified. For any clause or literal $l$, let $\Vars(l)$ denote the set of
-variables in $l$, and, similarly, let
-$\Doms(l) \coloneqq \{\, \Dom(v) \mid v \in \Vars(l) \,\}$.
-
 \begin{definition}[Model]\label{def:model}
   Let $\phi$ be a formula in \FO{}. For every predicate $p/n$ in $\phi$, let
   ${(\Delta_{i}^{p})}_{i=1}^{n}$ be a list of the corresponding domains (not
@@ -439,28 +350,110 @@ $\Doms(l) \coloneqq \{\, \Dom(v) \mid v \in \Vars(l) \,\}$.
   where the sum is over all models of $\phi$.
 \end{definition}
 
+\begin{table*}
+  \centering
+  \begin{tabular}{llclll}
+    \toprule
+    Logic & Sorts & Constants & Variables & Quantifiers & Additional atoms\\
+    \midrule
+    \FO & one or more & \cmark & unlimited & $\forall$, $\exists$ & $x = y$\\
+    \Ctwo & one & \xmark & two & $\forall$, $\exists$, $\exists^{= k}$, $\exists^{\le k}$, $\exists^{\ge k}$ & ---\\
+    \UFO & one & \xmark & two & $\forall$ & $|P| = m$\\
+    \bottomrule
+  \end{tabular}
+  \caption[]{A comparison of the three logics used in WFOMC in terms of:
+    \begin{enumerate*}[label=(\roman*)]
+      \item the number of sorts,
+      \item support for constants,
+      \item the maximum number of variables,
+      \item allowed quantifiers, and
+      \item supported atoms in addition to those of the form $P(\mathbf{t})$ for some predicate $P/n$ and $n$-tuple of terms $\mathbf{t}$.
+    \end{enumerate*}
+    Here:
+    \begin{enumerate*}[label=(\roman*)]
+      \item $k, m \in \mathbb{N}_{0}$, the latter of which can depend on the domain size,
+      \item $P$ is a predicate, and
+      \item $x$ and $y$ are terms.
+    \end{enumerate*}
+  }\label{tbl:logics}
+\end{table*}
+
+\paragraph{Three Types of Logics}
+\begin{itemize}
+  \item See \cref{tbl:logics} for a detailed comparison. The notation introduced
+        in the table is standard for \Ctwo{}, new for \UFO{}, and redefined to
+        be more specific for \FO{}.
+  \item All three logics are function-free.
+  \item Domains are always assumed to be finite.
+  \item In many-sorted logic, each term is assigned to a \emph{sort}, and each
+        predicate $p/n$ is assigned to a sequence of $n$ sorts. Each sort has
+        its corresponding domain. In the input formula, all domains are assumed
+        to be pairwise disjoint Most of these assignments are typically left
+        implicit and can be reconstructed from the quantifiers. For instance,
+        $\forall x,y \in \Delta\text{. }P(x, y)$ implies that variables $x$ and
+        $y$ have the same sort. On the other hand, $\forall x \in \Delta\text{.
+        }\forall y \in \Gamma\text{. } P(x, y)$ implies that $x$ and $y$ have
+        different sorts, and it would be improper to have $x = y$ as part of a
+        formula.
+  \item
+        \begin{itemize}
+          \item \FO{} is used as the input format for
+                \textsc{ForcLift}\footnote{\url{https://github.com/UCLA-StarAI/Forclift}}~\cite{DBLP:conf/ijcai/BroeckTMDR11}
+                and its extensions
+                \textsc{Crane}\footnote{\url{https://doi.org/10.5281/zenodo.8004077}}~\cite{DBLP:conf/kr/DilkasB23}
+                and \Cranetwo{}.
+          \item \Ctwo{} is discussed in the literature on
+                \textsc{FastWFOMC}~\cite{DBLP:conf/uai/BremenK21} and related
+                methods~\cite{DBLP:journals/jair/Kuzelka21,DBLP:conf/aaai/MalhotraS22}
+          \item \UFO{} is the input format supported by a version of
+                \textsc{FastWFOMC} obtained directly from the authors. Note that
+                the publicly available
+                version\footnote{\url{https://comp.nus.edu.sg/~tvanbr/software/fastwfomc.tar.gz}}
+                does not support any cardinality constraints.
+        \end{itemize}
+  \item Note that, in the case of \textsc{ForcLift} and its extensions, support
+        for a formula as valid input does not imply that the algorithm will be
+        able to compile the formula into a circuit or graph suitable for lifted
+        model counting. However, it is known that \textsc{ForcLift} compilation
+        is guaranteed to succeed on any \FO{} formula without constants and with
+        at most two variables~\cite{DBLP:conf/nips/Broeck11}.
+\end{itemize}
+
+\begin{example}\label{example:functions}
+  Functions
+  \begin{itemize}
+    \item In \Ctwo: $\forall x \in \Delta\text{.
+          }\exists^{=1} y \in \Delta\text{. }P(x, y)$
+    \item In \UFO:
+          \begin{gather*}
+            \forall x, y \in \Delta\text{. }S(x) \lor \neg P(x, y)\\
+            |P| = |\Delta|
+          \end{gather*}
+    \item In \FO:
+          \begin{gather*}
+            \forall x \in \Delta\text{. }\exists y \in \Delta\text{. }P(x, y)\\
+            \forall x, y, z \in \Delta\text{. }P(x, y) \land P(x, z) \Rightarrow y = z
+          \end{gather*}
+  \end{itemize}
+\end{example}
+
 \subsection{Algebra}\label{sec:algebra}
 
 \todo[inline,caption={}]{
   \begin{itemize}
-    \item the definition of a function is a strong assumption
-    \item the notation for a function call is now outdated
+    \item say something about what $\expr{}$ can contain (function calls,
+          various arithmetic operations, summations, non-negative integer
+          constants, variables introduces by the function signature or
+          summations)
   \end{itemize}
 }
 
 \begin{itemize}
   \item We write $\expr{}$ for an arbitrary algebraic expression.
-  \item A few terms have different meanings in the context of algebra as
-        compared to logic:
-        \begin{itemize}
-          \item a \emph{variable} is either:
-                \begin{itemize}
-                  \item a parameter of a function or
-                  \item a variable introduced by a summation, e.g., $i$ in
-                        $\sum_{i=1}^{n} \expr$.
-                \end{itemize}
-          \item A \emph{constant} is a non-negative integer.
-        \end{itemize}
+  \item Some terms have different meanings in the context of algebra as compared
+        to logic. Here, a \emph{constant} is a non-negative integer. Similarly,
+        a \emph{variable} is either a parameter of a function or a variable
+        introduced by a summation, e.g., $i$ in $\sum_{i=1}^{n} \expr$.
 \end{itemize}
 
 \begin{definition}
@@ -495,8 +488,8 @@ $\Doms(l) \coloneqq \{\, \Dom(v) \mid v \in \Vars(l) \,\}$.
   \caption{\protect\CompileWithBaseCases{$\phi$}}\label{alg:main}
   \KwIn{formula $\phi$}
   \KwOut{set $\mathcal{E}$ of equations}
-  $(\mathcal{E}, \mathcal{F}, \mathcal{D}) \gets \Crane{$\phi$}$\;
-  $\mathcal{E} \gets \Simplify{$\mathcal{E}$}$\;
+  $(\mathcal{E}, \mathcal{F}, \mathcal{D}) \gets \Crane{$\phi$}$\;\label{line:first}
+  $\mathcal{E} \gets \Simplify{$\mathcal{E}$}$\;\label{line:second}
   \ForEach{base case $f(\mathbf{x}) \in \FindBaseCases{$\mathcal{E}$}$}{
     $\psi \gets \mathcal{F}(f)$\;
     \ForEach{$i$ such that $x_{i} \in \mathbb{N}_{0}$}{
@@ -506,31 +499,54 @@ $\Doms(l) \coloneqq \{\, \Dom(v) \mid v \in \Vars(l) \,\}$.
   }
 \end{algorithm}
 
-\todo[inline]{In \cref{alg:main}, some kind of translation also needs to take
-  place, right?}
+\Cref{alg:main} outlines our overall approach for compiling a formula into a set
+of equation that include the required base cases. In short, we first use the
+knowledge compilation algorithm of the original
+\textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23} to compile the formula into:
+\begin{enumerate*}[label=(\roman*)]
+  \item set $\mathcal{E}$ of equations,
+  \item map $\mathcal{F}$ from function names to formulas, and
+  \item map $\mathcal{D}$ from function names and argument indices to domains.
+\end{enumerate*}
+After some algebraic simplification, $\mathcal{E}$ is passed to the
+\FindBaseCases procedure that returns a set of base cases that we need to find
+solutions for (described in \cref{sec:identifying}). For each base case
+$f(\mathbf{x})$, we identify the formula associated with $f$ and simplify it
+using the \Propagate procedure (described in \cref{sec:simplifying}). The
+algorithm then recurses on these simplified formulas and adds the resulting base
+case equations to $\mathcal{E}$. \Cref{example:overall} explains \cref{alg:main}
+in more detail.
 
-We write \Crane for the first-order knowledge compilation algorithm of the
-original \textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23} that compiles a formula
-$\phi$ into:
-\begin{itemize}
-  \item a set $\mathcal{E}$ of equations,
-  \item a map $\mathcal{F}$ from function names to formulas, and
-  \item a map $\mathcal{D}$ from function names and parameter indices to
-        domains.
-\end{itemize}
+\begin{example}\label{example:overall}
+  Let us consider the following formula (previously examined by Dilkas and
+  Belle~\shortcite{DBLP:conf/kr/DilkasB23}) that defines predicate $P$ to be a
+  bijection between two sets $\Gamma$ and $\Delta$:
+  \[
+    \begin{gathered}
+      \forall x \in \Gamma\text{. }\exists y \in \Delta\text{. }P(x, y)\\
+      \forall y \in \Delta\text{. }\exists x \in \Gamma\text{. }P(x, y)\\
+      \forall x \in \Gamma\text{. }\forall y, z \in \Delta\text{. }P(x, y) \land P(x, z) \Rightarrow y = z\\
+      \forall x, z \in \Gamma\text{. }\forall y \in \Delta\text{. }P(x, y) \land P(z, y) \Rightarrow x = z.
+    \end{gathered}
+  \]
+  In particular, we examine the first solution that \Cranebfs{} returns for this
+  formula.
 
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item \textsc{Crane}, \Cranetwo{}, or \Crane in the paragraph below
-  \end{itemize}
-}
-
-See \cref{alg:main}. The evaluation of base cases is done by simplifying the
-clauses and then using \textsc{Crane} to find the base cases. A particular
-domain is selected, and the clauses are simplified. Then, \textsc{Crane} is
-called on those clauses to evaluate the base cases. After that, we change the
-function names and variable to make it consistent with the previous domain to
-variable mapping, and append these base cases to the set of equations.
+  After \cref{line:first,line:second}, we have
+  \begin{align*}
+    \mathcal{E} &= \left\{\,\begin{aligned}f(m, n) &= \sum_{l=0}^{n} \binom{n}{l}{(-1)}^{n-l}g(l, m),\\ g(l, m) &= g(l-1, m) + mg(l-1, m-1)\end{aligned}\,\right\};\\
+    \mathcal{D} &= \{\, (f, 1) \mapsto \Gamma, (f, 2) \mapsto \Delta, (g, 1) \mapsto \Delta^{\top}, (g, 2) \mapsto \Gamma \,\},
+  \end{align*}
+  where $\Delta^{\top}$ is a new domain introduced by \Crane. Then
+  \FindBaseCases identifies two base cases: $g(0, m)$ and $g(l, 0)$. In both
+  cases, \CompileWithBaseCases recurses on the formula $\mathcal{F}(g)$
+  simplified by assuming that one of the domains is empty. In the first case, we
+  recurse on the formula $\forall x \in \Gamma\text{. }S(x) \lor \neg S(x)$,
+  where $S$ is a predicate introduced by Skolemization with weights
+  $w^{+}(S) = 1$ and $w^{-}(S) = -1$. Hence, we get the base case
+  $g(0, m) = 0^{m}$. In the case of $g(l, 0)$, \Propagate{$\psi$, $\Gamma$, $0$}
+  returns an empty formula, giving us $g(l, 0) = 1$.
+\end{example}
 
 \subsection{Identifying a Sufficient Set of Base Cases}\label{sec:identifying}
 
@@ -613,8 +629,6 @@ $\binom{x_{1}}{0} f(x_1) + \binom{x_{1}}{1} f(x_1-1)$.
 
 \todo[inline,caption={}]{
   \begin{itemize}
-    \item later check if I'm still using the syntax for $\Vars$, $\Dom$, etc.
-    \item align the last line to be a bit neater
     \item \Cref{alg2} now supports any base case domain sizes
     \item NOTE: if $C' = \emptyset$, then the clause becomes irrelevant and
           doesn't need smoothing, so can be skipped
@@ -663,6 +677,8 @@ $\binom{x_{1}}{0} f(x_1) + \binom{x_{1}}{1} f(x_1-1)$.
     \item $C'$ is guaranteed to be non-empty.
     \item \Cref{line:smoothing1,line:smoothing2} are explained in
           \cref{sec:smoothingbase}.
+    \item For a literal or a clause $C$, let $\Doms(C)$ denote the set of the
+          corresponding domains. Make sure an example illustrates this.
   \end{itemize}
 }
 \todo[inline]{Maybe prove consistency: if two base case overlap, their numerical
@@ -701,12 +717,12 @@ mentions the same predicates as $C'$ and is satisfied by any structure.
 
 For example, consider the formula
 \begin{gather}
-  \forall x \in \Delta\text{. }\forall y, z \in \Gamma\text{. }P(x) \lor Q(y, z)\label[formula]{eq:example1}\\
-  \forall y, z \in \Gamma'\text{. }Q(y, z)\label[formula]{eq:example2}
+  \forall x \in \Delta\text{. }\forall y, z \in \Gamma\text{. }P(x) \lor Q(y, z)\label[clause]{eq:example1}\\
+  \forall y, z \in \Gamma'\text{. }Q(y, z)\label[clause]{eq:example2}
 \end{gather}
 and assume that $\Gamma' \subseteq \Gamma$. If we set $|\Delta|$
 to zero and remove clauses with variables quantified over $\Delta$, we get
-\begin{equation}\label[formula]{eq:simplified}
+\begin{equation}\label[clause]{eq:simplified}
   \forall y, z \in \Gamma'\text{. }Q(y, z),
 \end{equation}
 but the model count of \cref{eq:simplified} is one. However, the actual model
@@ -953,6 +969,8 @@ challenging because there is no automated way to translate a formula in \FO{} or
         \Cranegreedy{} and \Cranebfs{}, respectively.
 \end{itemize}
 
+\todo[inline]{\Cranebfs{} must be introduced earlier (in the introduction?)}
+
 \begin{figure}
   \centering
   \input{plot}
@@ -1019,7 +1037,7 @@ challenging because there is no automated way to translate a formula in \FO{} or
           \item Later on:
           \begin{itemize}
             \item Eliminate (e.g., Emacs) warnings.
-            \item must run it by A\&G
+            \item must run it by all 3 other coauthors
             \item re-check submission instructions and formatting guidelines
             \item Full stop at the end of a single-sentence caption?
             \item cite the \textsc{Crane} paper (and other algorithms' papers)
