@@ -116,7 +116,7 @@ meel@cs.toronto.edu
   TODO: at most 200 words
 \end{abstract}
 
-\section{Introduction}
+\section{Introduction (TODO)}
 
 \todo[inline,caption={}]{
   \begin{itemize}
@@ -262,7 +262,7 @@ meel@cs.toronto.edu
 \Cref{sec:identifying,sec:cpp} deal with algebraic constructs whereas
 \cref{sec:simplifying} deals with logic.
 
-\section{Preliminaries}
+\section{Preliminaries (TODO)}
 
 \Cref{sec:logic} introduces the fundamental ideas of first-order logic and
 WFOMC, and discusses the different logics used in the latter.\@
@@ -274,7 +274,7 @@ We write $\mathbb{N}_{0}$ for the set of non-negative integers. In the context
 of both algebra and logic, we write $C[x \mapsto y]$ for $C$ with all
 occurrences of $x$ replaced with $y$.
 
-\subsection{Logic}\label{sec:logic}
+\subsection{Logic (TODO)}\label{sec:logic}
 
 \todo[inline]{Clarify the differences between the input format and the internal
   format}
@@ -441,23 +441,7 @@ occurrences of $x$ replaced with $y$.
   \end{itemize}
 \end{example}
 
-\subsection{Algebra}\label{sec:algebra}
-
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item say something about what $\expr{}$ can contain (function calls,
-          various arithmetic operations, summations, non-negative integer
-          constants, variables introduces by the function signature or
-          summations)
-    \item The definition of a function call contradicts the base case finding
-          algorithm. Maybe rephrase it to only look at function calls from $f$
-          to itself and assume:
-          \begin{itemize}
-            \item no mutual recursion,
-            \item these calls in particular have this form
-          \end{itemize}
-  \end{itemize}
-}
+\subsection{Algebra (TODO)}\label{sec:algebra}
 
 \begin{itemize}
   \item We write $\expr{}$ for an arbitrary algebraic expression.
@@ -471,12 +455,6 @@ occurrences of $x$ replaced with $y$.
   A (function) \emph{signature} is $f(x_{1}, \dots, x_{n})$ (written
   $f(\mathbf{x})$ for short), where $f$ is an $n$-ary function, and each $x_{i}$
   is a variable.
-\end{definition}
-
-\begin{definition}
-  Given a function $f$ with signature $f(\mathbf{x})$, a \emph{function call} of
-  $f$ is $f(\mathbf{y})$, where each $y_{i}$ is either $x_{i} - c_{i}$ or
-  $c_{i}$ for some constant $c_{i} \in \mathbb{N}_{0}$.
 \end{definition}
 
 \begin{definition}
@@ -520,8 +498,8 @@ knowledge compilation algorithm of the original
   \item map $\mathcal{D}$ from function names and argument indices to domains.
 \end{enumerate*}
 After some algebraic simplification, $\mathcal{E}$ is passed to the
-\FindBaseCases procedure that returns a set of base cases that we need to find
-solutions for (described in \cref{sec:identifying}). For each base case
+\FindBaseCases procedure (described in \cref{sec:identifying}) that returns a
+set of base cases that we need to find solutions for. For each base case
 $f(\mathbf{x})$, we identify the formula associated with $f$ and simplify it
 using the \Propagate procedure (described in \cref{sec:simplifying}). The
 algorithm then recurses on these simplified formulas and adds the resulting base
@@ -557,16 +535,37 @@ in more detail.
   $w^{+}(S) = 1$ and $w^{-}(S) = -1$. Hence, we get the base case
   $g(0, m) = 0^{m}$. In the case of $g(l, 0)$, \Propagate{$\psi$, $\Gamma$, $0$}
   returns an empty formula, giving us $g(l, 0) = 1$.
-
-  Note that these base cases overlap when $l = m = 0$ but are consistent with
-  each other since $0^{0} = 1$. More generally, let $\phi$ be a formula with two
-  domains $\Gamma$ and $\Delta$, and let $n, m \in \mathbb{N}_{0}$. Then the
-  model count of \Propagate{$\phi$, $\Delta$, $n$} assuming $|\Gamma| = m$ is
-  the same as the model count of \Propagate{$\phi$, $\Gamma$, $m$} assuming
-  $|\Delta| = n$.
 \end{example}
 
-\todo[inline]{This last claim sounds like something that should be proven.}
+
+Note that these base cases overlap when $l = m = 0$ but are consistent with each
+other since $0^{0} = 1$. More generally, let $\phi$ be a formula with two
+domains $\Gamma$ and $\Delta$, and let $n, m \in \mathbb{N}_{0}$. Then the model
+count of \Propagate{$\phi$, $\Delta$, $n$} assuming $|\Gamma| = m$ is the same
+as the model count of \Propagate{$\phi$, $\Gamma$, $m$} assuming $|\Delta| = n$.
+
+\todo[inline]{Can I turn the above into a theorem?}
+
+Finally, we note that the \Simplify procedure plays a crucial role in
+simplifying a common algebraic pattern $\sum_{m=0}^{n}[a \le m \le b] f(m)$.
+Here:
+\begin{enumerate*}[label=(\roman*)]
+  \item $n$ is a variable,
+  \item $a, b \in \mathbb{N}_{0}$ are constants,
+  \item $f$ is an expression that may depend on $m$, and
+  \item $[a \le m \le b] =
+  \begin{cases}
+    1 & \text{if $a \le m \le b$} \\
+    0 & \text{otherwise}
+  \end{cases}$ is the Iverson bracket.
+\end{enumerate*}
+\Simplify transforms this pattern into
+$f(a) + f(a+1) + \cdots + f(\min\{\, n, b \,\})$. For instance, in the case of
+\cref{example:overall}, \Simplify transforms
+$g(l, m) = \sum_{k=0}^{m}[0 \le k \le 1]\binom{m}{k}g(l-1, m-k)$ into the
+simpler form above.
+
+\todo[inline]{A concluding sentence that introduces the remaining subsections?}
 
 \subsection{Identifying a Sufficient Set of Base Cases}\label{sec:identifying}
 
@@ -576,14 +575,13 @@ in more detail.
   \KwOut{set $\mathcal{B}$ of base cases}
 
   $\mathcal{B} \gets \emptyset$\;
-  \ForEach{equation $(\ldots = \expr{}) \in \mathcal{E}$}{
+  \ForEach{equation $(f(\mathbf{x}) = \expr{}) \in \mathcal{E}$}{
     \ForEach{function call $f(\mathbf{y}) \in \expr{}$}{\label{line:functioncall}
-      let $f(\mathbf{x})$ be the signature of $f$\;
       \ForEach{$y_{i} \in \mathbf{y}$} {
         \uIf{$y_{i} \in \mathbb{N}_{0}$}{
           $\mathcal{B} \gets \mathcal{B} \cup \{\, f(\mathbf{x})[x_{i} \mapsto y_{i}] \,\}$\;
         }
-        \ElseIf{$y_{i} = x_{i} - c_{i}$}{
+        \ElseIf{$y_{i} = x_{i} - c_{i}$ for some $c_{i} \in \mathbb{N}_{0}$}{
           \For{$j \gets 0$ \KwTo $c_{i} - 1$}{\label{line:lim}
             $\mathcal{B} \gets \mathcal{B} \cup \{\, f(\mathbf{x})[x_{i} \mapsto j] \,\}$\;\label{line:insert}
           }
@@ -593,57 +591,53 @@ in more detail.
   }
 \end{algorithm}
 
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item introduce the Iverson bracket (it's only used in this subsection)
-    \item \Cref{alg1} is now fixed and supersedes the description below (and the
-          code!)
-    \item NOTE: exactly one of the if and else-if branches always applies
-  \end{itemize}
-}
-
-The algorithm is described as \cref{alg1}. We know that if, say, on the RHS of
-all equations, the domain size appears as $m - c_1, m - c_2, \dots, m - c_k$,
-then finding $f(0, x_1, x_2, \dots)$, $f(1, x_1, x_2, \dots)$,
-$\dots f(m_0, x_1, x_2, \dots)$ for every function $f$, where
-$m_0 = \max(c_1, c_2, \dots c_k) - 1$ forms a sufficient set of base cases.
-Hence, in order to do the same efficiently, we can take that domain for which
-$m_0$ is the minimum, i.e. $\argmin(\max(c_1, c_2, \dots c_k))$. Ideally, we
-should calculate the base cases by finding the base cases up to
-$\max(c_{1}, c_{2}, \dots) - 1$. However, currently only empty and singleton
-domains are supported.
-
-First, expand the summations in each equation. Here we expand the summations of
-the form: $\sum_{x=0}^{x_{1}} \expr{} \cdot [a \le x < b]$ or similar
-inequalities where $x$ is bounded by constants and $a$ and $b$ are constants, by
-substituting the value of $x$ from $a$ to $b-1$. For example, we replace
-$\sum_{x=0}^{x_1} \binom{x_{1}}{x} f(x_1 - x) \cdot [0 \le x < 2]$ by
-$\binom{x_{1}}{0} f(x_1) + \binom{x_{1}}{1} f(x_1-1)$.
-
-\begin{itemize}
-  \item \cref{line:insert} for $f(\mathbf{x}) = f(y, z)$, $x_{i} = y$, and
-        $n = 0$, add $f(y, z)[y \mapsto 0] = f(0, z)$ to $\mathcal{B}$.
-\end{itemize}
-
-\begin{theorem}
-  Under the following assumptions, \cref{alg1} is guaranteed to return a
-  sufficient set of base cases:
-  \begin{itemize}
-    \item there is no mutual recursion
-    \item each function $f$ has exactly one equation with $f$ on the LHS;
-    \item in the recursive definition of function $f(x_{1},\dots,x_{n})$, the
-          $i$-th argument of each call to $f$ on the RHS is of the form
-          $x_{i} - c_{i}$, where:
-          \begin{itemize}
-            \item $c_{i} \ge 0$ for all $i$, and
-            \item $c_{i} > 0$ for at least one $i$.
-          \end{itemize}
-  \end{itemize}
-\end{theorem}
+\Cref{alg1} summarises the implementation of \FindBaseCases. For each recursive
+call from a function $f$ to itself, we consider two types of arguments:
+\begin{enumerate*}[label=(\roman*)]
+  \item constants and
+  \item arguments of the form $x_{i} - c_{i}$, where $c_{i} \in \mathbb{N}_{0}$
+  is a constant, and $x_{i}$ is the $i$-th argument of the signature of $f$.
+\end{enumerate*}
+In the former case, we consider a base case specifically for that constant. In
+the latter case, we consider a base case for constants from zero up to (but not
+including) $c_{i}$. \Cref{thm:halting} below motivates this approach.
 
 \begin{example}
-  For an equation $f(m, n) = 2 \times f(m-1, n)$, \cref{alg1} returns $f(0, n)$.
+  Consider the recursive function $g$ from \cref{example:overall}.
+  \FindBaseCases{$\mathcal{E}$} iterates over two function calls: $g(l-1, m)$
+  and $g(l-1, m-1)$. The former produces the base case $g(0, m)$, while the
+  latter produces both $g(0, m)$ and $g(l, 0)$.
 \end{example}
+
+\todo[inline]{Prove (lots of notes, handwritten and elsewhere)}
+
+\begin{theorem}[Halting]\label{thm:halting}
+  Let us assume the following about the input set of equations $\mathcal{E}$:
+  \begin{enumerate}
+    \item Each function $f$ has exactly one equation with $f$ on the LHS.\@ We
+          call this equation the \emph{definition} of $f$.
+    \item There exists a topological ordering of all functions ${(f_{i})}_{i}$
+          such that the definition of $f_{i}$ does not contain function calls to
+          $f_{j}$ with $j > i$.\footnote{This condition excludes the possibility
+          of mutual recursion and similar cyclic scenarios and is akin to
+          stratified logic programs~\cite{DBLP:books/sp/Lloyd87}.}
+    \item For every equation $(f(\mathbf{x}) = \expr) \in \mathcal{E}$, every
+          recursive function call $f(\mathbf{y}) \in \expr$ satisfies the
+          following:
+          \begin{itemize}
+            \item each $y_{i}$ is either $x_{i} - c_{i}$ or $c_{i}$ for some
+                  constant $c_{i} \in \mathbb{N}_{0}$;
+            \item there exists $i$ such that $y_{i} = x_{i} - c_{i}$ for some
+                  $c_{i} > 0$.
+          \end{itemize}
+  \end{enumerate}
+  Then the set of base cases $\mathcal{B}$ returned by
+  \FindBaseCases{$\mathcal{E}$} is \emph{sufficient} for $\mathcal{E}$ in the
+  following sense. The evaluation of any function call with non-negative
+  arguments halts as long as the evaluation of base cases is prioritised over
+  the corresponding recursive definitions.\footnote{Recall that, as previously
+    discussed, the order in which base cases are considered is immaterial.}
+\end{theorem}
 
 \subsection{Propagating Domain Size Assumptions}\label{sec:simplifying}
 
@@ -721,7 +715,7 @@ $n$ new constants.
   where $c_{1}$, $c_{2}$, and $c_{3}$ are the new constants.
 \end{example}
 
-\section{Smoothing}
+\section{Smoothing (TODO)}
 
 Goal of smoothing: whenever rules such as unit propagation or
 inclusion-exclusion (maybe just these two?) eliminate the consideration of some
@@ -741,7 +735,7 @@ should also appear before/after the independent partial grounding node.
 \end{itemize}
 }
 
-\subsection{Smoothing for Base Cases}\label{sec:smoothingbase}
+\subsection{Smoothing for Base Cases (TODO)}\label{sec:smoothingbase}
 
 \todo[inline]{Must include an example of propagating the empty-domain
   assumption (ideally based on previous examples).}
@@ -788,7 +782,7 @@ argument assigned to the empty domain. For example, we would convert
 The model count returned by this will also consider the truth value of $Q$ over
 $y \in \Gamma \setminus \Gamma'$ or $z \in \Gamma \setminus \Gamma'$.
 
-\subsection{Smoothing the FCG}
+\subsection{Smoothing the FCG (TODO)}
 
 \todo[inline,caption={}]{
   \begin{itemize}
@@ -860,7 +854,7 @@ unchanged, the first step of this process would result in an infinite loop
 whenever a cycle is encountered. \Cref{alg:smoothing} outlines how the first
 step can be adapted to an arbitrary directed graph.
 
-\subsection{Stage 1: Propagating Unit Clauses `Upwards'}
+\subsection{Stage 1: Propagating Unit Clauses `Upwards' (TODO)}
 
 \begin{description}
   \item[\texttt{Ref}.] During smoothing, when unit clauses are propagated in the
@@ -886,7 +880,7 @@ step can be adapted to an arbitrary directed graph.
         the domain recursion node and what was received from the child node.
 \end{description}
 
-\subsection{Stage 2: Adding Smoothing Nodes}
+\subsection{Stage 2: Adding Smoothing Nodes (TODO)}
 
 We never need to add smoothing nodes after \texttt{Ref} or constraint removal
 nodes. However, for domain recursion we must do the following.
@@ -909,7 +903,7 @@ nodes. However, for domain recursion we must do the following.
 
 \todo[inline]{Can I formally define what is meant by `difference'?}
 
-\section{Generating C++ Code}\label{sec:cpp}
+\section{Generating C++ Code (TODO)}\label{sec:cpp}
 
 The target is to generate C++ code that can evaluate numerical values of the
 model counts based on the equations generated by \CompileWithBaseCases. The
@@ -961,7 +955,7 @@ Third, to translate the RHS, we convert $\sum_{x=a}^{b} \expr{}$ to
 \end{lstlisting}
 where $y, z, \dots$ are the free variables present in $\expr{}$.
 
-\section{Experimental Evaluation}
+\section{Experimental Evaluation (TODO)}
 
 Comparing \Cranetwo{} and \textsc{FastWFOMC} on a larger set of benchmarks is
 challenging because there is no automated way to translate a formula in \FO{} or
@@ -1072,7 +1066,7 @@ challenging because there is no automated way to translate a formula in \FO{} or
   \end{itemize}
 }
 
-\section{Conclusion}
+\section{Conclusion (TODO)}
 
 \todo[inline,caption={}]{
   \begin{itemize}
