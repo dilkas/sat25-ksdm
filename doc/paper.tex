@@ -52,6 +52,8 @@
         breaklines=true,
         showstringspaces=false}
 
+\newcommand{\crefrangeconjunction}{--}
+
 \crefname{line}{line}{lines}
 
 \crefalias{enumi}{type}
@@ -733,25 +735,29 @@ $n$ new constants.
   where $c_{1}$, $c_{2}$, and $c_{3}$ are the new constants.
 \end{example}
 
-\section{Smoothing (TODO)}
+\section{Smoothing}
 
-Goal of smoothing: whenever rules such as unit propagation or
-inclusion-exclusion (maybe just these two?) eliminate the consideration of some
-ground atoms, smoothing nodes should be inserted `at the same level' so that
-these ground atoms are still considered when counting. Note that conjunction
-nodes are irrelevant here because multiplication is associative. `At the same
-level' means that, e.g., if some ground atoms were eliminated from consideration
-before/after performing independent partial grounding, then the smoothing node
-should also appear before/after the independent partial grounding node.
+Smoothness originates in propositional knowledge compilation where it is defined
+as the property that, for every disjunction node, all disjuncts (as subtrees of
+the circuit) contain the same atoms~\cite{darwiche2001tractable}. Van den Broeck
+et al.~\shortcite{DBLP:conf/ijcai/BroeckTMDR11} generalise smoothness to
+first-order logic, adding set-disjunction and inclusion-exclusion nodes
+alongside disjunction.
 
-\todo[inline,caption={}]{
-\begin{itemize}
-  \item Cite something when introducing the idea of smoothing. Maybe both
-        propositional and first-order sources.
-  \item Can I prove that the additions to smoothing outlined in the rest of this
-        section `do the right thing'?
-\end{itemize}
-}
+The motivation for smoothing is as follows. Whenever compilation rules such as
+unit propagation and inclusion-exclusion simplify the formula, some ground atoms
+might be eliminated from consideration (see \cref{example:basecasesmoothing}
+below). To account for them during counting, smoothing nodes (i.e., tautological
+clauses such as $P(c) \lor \neg P(c)$) are added to the FCG at an appropriate
+location.
+
+In the rest of this section, we extend the smoothing algorithm of Van den Broeck
+et al.~\shortcite{DBLP:conf/ijcai/BroeckTMDR11} even further.
+\Cref{sec:smoothingbase} describes the role smoothing plays in the
+base-case-finding algorithm from \cref{sec:main}. Then,
+\cref{sec:smoothingfcg1,sec:smoothingfcg2,sec:smoothingfcg3} show how to adapt
+smoothing to the compilation rules introduced by Dilkas and
+Belle~\shortcite{DBLP:conf/kr/DilkasB23}.
 
 \subsection{Smoothing for Base Cases}\label{sec:smoothingbase}
 
@@ -798,18 +804,12 @@ Note that the choice of $l$ on \cref{line:smoothing1} of \cref{alg:propagate} is
 inconsequential because any choice achieves the same goal: constructing a
 tautological clause that retains the literals in $C'$.
 
-\subsection{Smoothing the FCG (TODO)}
+\subsection{Smoothing the FCG (TODO)}\label{sec:smoothingfcg1}
 
 \todo[inline,caption={}]{
   \begin{itemize}
-    \item It seems like I'll need to introduce:
-          \begin{itemize}
-            \item FCGs
-            \item node types (be consistent w.r.t.\ node vs vertex)
-            \item their notation
-          \end{itemize}
+    \item introduce the relevant node types and their notation
     \item Describe \cref{fig:smoothing1,fig:smoothing2}
-    \item Introduce the compilation rules
   \end{itemize}
 }
 
@@ -848,12 +848,14 @@ tautological clause that retains the literals in $C'$.
 \end{figure}
 
 Smoothing is a two-step process. First, atoms that are still accounted for in
-the circuit are propagated upwards. Then, at vertices of certain types, missing
+the circuit are propagated upwards. Then, at nodes of certain types, missing
 atoms are detected and additional sinks are created to account for them. If left
 unchanged, the first step of this process would result in an infinite loop
 whenever a cycle is encountered.
 
-\subsection{Stage 1: Propagating Unit Clauses `Upwards' (TODO)}
+\todo[inline]{Don't say `upwards'}
+
+\subsection{Stage 1: Propagating Unit Clauses (TODO)}\label{sec:smoothingfcg2}
 
 \begin{description}
   \item[\texttt{Ref}.] During smoothing, when unit clauses are propagated in the
@@ -879,7 +881,7 @@ whenever a cycle is encountered.
         the domain recursion node and what was received from the child node.
 \end{description}
 
-\subsection{Stage 2: Adding Smoothing Nodes (TODO)}
+\subsection{Stage 2: Adding Smoothing Nodes (TODO)}\label{sec:smoothingfcg3}
 
 We never need to add smoothing nodes after \texttt{Ref} or constraint removal
 nodes. However, for domain recursion we must do the following.
