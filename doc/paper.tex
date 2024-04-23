@@ -280,11 +280,11 @@ meel@cs.toronto.edu
 \Cref{sec:identifying,sec:cpp} deal with algebraic constructs whereas
 \cref{sec:simplifying} deals with logic.
 
-\section{Preliminaries (TODO)}
+\section{Preliminaries}
 
 \Cref{sec:logic} introduces the fundamental ideas of first-order logic and
-WFOMC, and discusses the different logics used in the latter.\@
-\Cref{sec:algebra} introduces the terminology we use to describe the output of
+WFOMC, and discusses the different logics used in the latter.\@ Then,
+\cref{sec:algebra} introduces the terminology we use to describe the output of
 the original \textsc{Crane} algorithm~\cite{DBLP:conf/kr/DilkasB23}, i.e.,
 functions and equations that define them.
 
@@ -525,7 +525,7 @@ case equations to $\mathcal{E}$. \Cref{example:overall} explains
 \cref{alg:compilewithbasecases} in more detail.
 
 \begin{example}\label{example:overall}
-  Let us consider the following formula (previously examined by Dilkas and
+  Consider the following formula (previously examined by Dilkas and
   Belle~\shortcite{DBLP:conf/kr/DilkasB23}) that defines predicate $P$ to be a
   bijection between two sets $\Gamma$ and $\Delta$:
   \[
@@ -754,9 +754,8 @@ location.
 In the rest of this section, we extend the smoothing algorithm of Van den Broeck
 et al.~\shortcite{DBLP:conf/ijcai/BroeckTMDR11} even further.
 \Cref{sec:smoothingbase} describes the role smoothing plays in the
-base-case-finding algorithm from \cref{sec:main}. Then,
-\cref{sec:smoothingfcg1,sec:smoothingfcg2,sec:smoothingfcg3} show how to adapt
-smoothing to the compilation rules introduced by Dilkas and
+base-case-finding algorithm from \cref{sec:main}. Then, \cref{sec:smoothingfcg1}
+shows how to adapt smoothing to the compilation rules introduced by Dilkas and
 Belle~\shortcite{DBLP:conf/kr/DilkasB23}.
 
 \subsection{Smoothing for Base Cases}\label{sec:smoothingbase}
@@ -804,14 +803,97 @@ Note that the choice of $l$ on \cref{line:smoothing1} of \cref{alg:propagate} is
 inconsequential because any choice achieves the same goal: constructing a
 tautological clause that retains the literals in $C'$.
 
-\subsection{Smoothing the FCG (TODO)}\label{sec:smoothingfcg1}
+\subsection{Smoothing the FCG}\label{sec:smoothingfcg1}
 
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item introduce the relevant node types and their notation
-    \item Describe \cref{fig:smoothing1,fig:smoothing2}
-  \end{itemize}
-}
+Smoothing is a two-step process. First, positive unit clauses (denoting sets of
+ground atoms that are accounted for in the FCG) are propagated `upwards', i.e.,
+in the opposite direction of FCG arcs. Then, at nodes of certain types, missing
+atoms are detected and additional nodes are added to account for them. In this
+section, we:
+\begin{enumerate*}[label=(\roman*)]
+  \item describe the relevant node types from previous work,
+  \item show how smoothing ought to work for these node types, and
+  \item illustrate how the new smoothing techniques work on two example FCGs.
+\end{enumerate*}
+
+Before describing the proposed changes to smoothing, we briefly review the
+compilation rules (and their corresponding node types) introduced by Dilkas and
+Belle~\shortcite{DBLP:conf/kr/DilkasB23} while referring to the aforementioned
+paper for precise definitions. \emph{Domain recursion} selects a domain
+$\Delta$, introduces a new constant $c \in \Delta$, and, for each variable $x$
+quantified over $\Delta$, considers two possibilities: $x = c$ or $x \ne c$,
+modifying the formula accordingly. We denote the resulting node as
+$\DR(c \in \Delta)$. \emph{Constraint removal} applies to formulas such that,
+for some domain $\Delta$, each variable $x$ quantified over $\Delta$ is followed
+by the inequality constraint $x \ne c$. In other words, the relevant clauses can
+be rewritten to begin with $\forall x \in \Delta\text{.
+}x \ne c \Rightarrow \ldots$ For such formulas, constraint removal replaces
+$\Delta$ with a new domain $\Delta'$ and removes the $x \ne c$ constraints. We
+denote the resulting node as $\CR(\Delta' \gets \Delta \setminus \{\,c\,\})$.
+Finally, \emph{caching} detects when the input formula $\phi$ is equal to a
+previously-encountered formula $\psi$ except for having different domains. We
+denote the resulting node as $\Reff(\sigma)$, where $\sigma$ is the substitution
+mapping the domains of $\psi$ to their corresponding domains in $\phi$.
+
+\paragraph{Stage~1 for domain recursion.}
+When visiting a $\DR(c \in \Delta)$ node, for each unit clause received from the
+child node, we replace each occurrence of $\phi(c)$ or
+$\forall x \in \Delta\text{. } x \ne c \Rightarrow \phi(x)$ with
+$\forall x \in \Delta\text{. }\phi(x)$. In other words, if the subgraph below
+the domain recursion node covers some of the ground atoms that are affected by
+domain recursion, then it should cover all of them. If the relevant subgraph
+indeed covers those ground atoms, Stage~2 will do nothing. Otherwise, smoothing
+nodes will be added below the domain recursion node to cover the difference
+between the sets of ground atoms assigned to the domain recursion node and its
+child node.
+
+\paragraph{Stage~1 for constraint removal and caching.}
+When visiting a $\CR(\Delta' \gets \Delta \setminus \{\,c\,\})$ node, we reverse
+constraint removal. In other words, we replace each
+$\forall x \in \Delta'\text{. }\phi(x)$ with $\forall x \in \Delta\text{.
+}x \ne c \Rightarrow \phi(x)$. When visiting a $\Reff(\sigma)$ node, we apply
+substitution $\sigma$ to the unit clauses coming from the child node.
+
+\paragraph{Stage~2 for domain recursion.}
+We need not add smoothing nodes immediately below constraint removal or caching
+nodes. However, for domain recursion we do the following.
+\begin{enumerate}
+  \item Suppose the set of unit clauses assigned to the child node during
+        Stage~1 contains both $\phi(c)$ and $\forall x \in \Delta\text{.
+        } x \ne c \Rightarrow \phi(x)$. In other words, the only difference
+        between the two clauses is that one has the constant $c$ whereas the
+        other one has a variable $x \ne c$. In such a case, we merge the two
+        clauses into $\forall x \in \Delta\text{. }\phi(x)$.
+  \item If necessary, we add smoothing nodes below the domain recursion node to
+        cover the difference between the unit clauses assigned to the domain
+        recursion node during Stage~1 and the unit clauses of the child node
+        post-processed by the step above.
+\end{enumerate}
+
+\begin{figure}
+  \centering
+  \begin{forest}
+    for tree={sn edges}
+    [$\DR(c \in \Delta)$,name=dr,ellipse,draw
+    [$\land$,ellipse,draw,dashed,edge=dashed
+    [$P(c)$,rectangle,draw,fill=green!20]
+    [$\forall x \in \Delta\text{. }x \ne c \Rightarrow P(x) \lor \neg P(x)$,rectangle,dashed,edge=dashed,draw,fill=blue!20]
+    ]
+    ]
+  \end{forest}
+  \caption{An artificial example of an FCG where a smoothing node must be added
+    below a domain recursion node. The dashed nodes and arcs are added during
+    Stage~2 of smoothing.}\label{fig:smoothing2}
+\end{figure}
+
+\begin{example}[An FCG that needs smoothing]
+  \Cref{fig:smoothing2} shows an FCG with a domain recursion node
+  $\DR(c \in \Delta)$ immediately followed by a single $P(c)$ node. In this
+  case, Stage~1 of smoothing assigns $\{\, \forall x \in \Delta\text{.
+  }P(x) \,\}$ to the former node and $\{\, P(c) \,\}$ to the latter. Since these
+  two sets of unit clauses cover different ground atoms, Stage~2 adds a
+  smoothing node to cover $P(x)$ for all $x \in \Delta \setminus \{\, c \,\}$.
+\end{example}
 
 \begin{figure}
   \centering
@@ -826,83 +908,34 @@ tautological clause that retains the literals in $C'$.
     ]
     ]
   \end{forest}
-  \caption{An example based on bijection counting (but simplified a lot). The
-    arc from the $\Reff$ node to the $\DR$ node is
-    omitted.}\label{fig:smoothing1}
+  \caption{A smooth FCG loosely based on \cref{example:overall}. The arc from
+    the caching node to the domain recursion node is omitted for compactness.
+    The labels next to nodes show the sets of unit clauses assigned to each node
+    during Stage~1 and the order of these assignments, omitting empty
+    assignments that replace a set $S$ with $S$ itself.}\label{fig:smoothing1}
 \end{figure}
 
-\begin{figure}
-  \centering
-  \begin{forest}
-    for tree={sn edges}
-    [$\DR(c \in \Delta)$,name=dr,ellipse,draw
-    [$\land$,ellipse,draw,dashed,edge=dashed
-    [$P(c)$,rectangle,draw,fill=green!20]
-    [$\forall x \in \Delta\text{. }x \ne c \Rightarrow P(x) \lor \neg P(x)$,rectangle,dashed,edge=dashed,draw,fill=blue!20]
-    ]
-    ]
-  \end{forest}
-  \caption{An artificial example of a situation when smoothing nodes need to be
-    added below a $\DR$ node. The dashed part is added during
-    smoothing}\label{fig:smoothing2}
-\end{figure}
+\begin{example}[A smooth FCG]\label{example:smooth}
+  Stage~1 of smoothing is more involved in the case of the FCG in
+  \cref{fig:smoothing1}. The unit clause $P(c)$ propagates to the conjunction
+  node and is then generalised to $\forall x \in \Delta\text{. }P(x)$ by the
+  domain recursion node. It then propagates to the caching node, changing form
+  to $(\forall x \in \Delta\text{.
+  }P(x))[\Delta \mapsto \Delta'] \equiv \forall x \in \Delta'\text{. }P(x)$. The
+  constraint removal node re-introduces the constraints, transforming the clause
+  to $\forall x \in \Delta\text{. }x \ne c \Rightarrow P(x)$, which is then
+  propagated to the conjunction node, joining $P(c)$.
 
-Smoothing is a two-step process. First, atoms that are still accounted for in
-the circuit are propagated upwards. Then, at nodes of certain types, missing
-atoms are detected and additional sinks are created to account for them. If left
-unchanged, the first step of this process would result in an infinite loop
-whenever a cycle is encountered.
+  In Stage~2, $P(c)$ and $\forall x \in \Delta\text{. }x \ne c \Rightarrow P(x)$
+  are merged into $\forall x \in \Delta\text{. }P(x)$. Since the resulting
+  clause matches the clause assigned to the domain recursion node, the FCG is
+  already smooth.
+\end{example}
 
-\todo[inline]{Don't say `upwards'}
-
-\subsection{Stage 1: Propagating Unit Clauses (TODO)}\label{sec:smoothingfcg2}
-
-\begin{description}
-  \item[\texttt{Ref}.] During smoothing, when unit clauses are propagated in the
-        opposite direction of the FCG arcs (i.e., `upwards'), when visiting a
-        \texttt{Ref} node, these clauses are translated using the domain map of
-        the \texttt{Ref} node. For example, if the domain map include
-        $\Delta \mapsto \Delta'$, and the unit clause mentions $\Delta$, then
-        replace it by $\Delta'$.
-  \item[Constraint removal.] Do reverse constraint removal. Assuming that
-        domain $\Delta$ with constraints $x \ne c$ (for some constant
-        $c \in \Delta$) were replaced with domain $\Delta'$, replace each
-        $\forall x \in \Delta'\text{. }\phi(x)$ with
-        $\forall x \in \Delta\text{. }X \ne c \Rightarrow \phi(x)$.
-  \item[Domain recursion.] Suppose the domain recursion node introduces constant
-        $c \in \Delta$. For each unit clause received from the child node,
-        replace each occurrence of $\phi(c)$ or $\forall x \in \Delta\text{.
-        } x \ne c \Rightarrow \phi(x)$ with $\forall x \in \Delta\text{.
-        }\phi(x)$. This can be seen as a claim about what ground atoms the
-        domain recursion node \emph{should} cover (or a temporary assumption).
-        If the relevant subgraph indeed covers those ground atoms, Stage~2 will
-        do nothing. Otherwise, smoothing nodes will be added below the domain
-        recursion node to cover the difference between what was propagated from
-        the domain recursion node and what was received from the child node.
-\end{description}
-
-\subsection{Stage 2: Adding Smoothing Nodes (TODO)}\label{sec:smoothingfcg3}
-
-We never need to add smoothing nodes after \texttt{Ref} or constraint removal
-nodes. However, for domain recursion we must do the following.
-
-\begin{enumerate}
-  \item Whenever the set of unit clauses of the child node contains two formulas
-        $\phi(c)$ and $\forall x \in \Delta\text{.
-        } x \ne c \Rightarrow \phi(x)$ (i.e., the only difference between the
-        two formulas is that one has the constant $c$ whereas the other one has
-        a variable $x \ne c$), merge them into $\forall x \in \Delta\text{.
-        }\phi(x)$.
-  \item Add smoothing nodes below the domain recursion node for the difference
-        between the unit clauses assigned to the domain recursion node during
-        Stage 1 and the unit clauses of the child node post-processed by the
-        step above. For example, if the child node `covers' only $P(c)$, then
-        Stage 1 assigns $\forall x \in \Delta\text{. }P(x)$ to the domain
-        recursion node. The smoothing node below the domain recursion node then
-        has the clause $\forall x \in \Delta\text{. } x \ne c \Rightarrow P(x)$.
-\end{enumerate}
-
-\todo[inline]{Can I formally define what is meant by `difference'?}
+The algebraic interpretation of \cref{fig:smoothing1} is an equation $e$ that
+defines a recursive function. The right-hand side of $e$ already covers $P(c)$,
+and the smoothing algorithm correctly recognises that the recursive call also
+covers $P(x)$ for all $x \in \Delta \setminus \{\, c \,\}$.
 
 \section{Generating C++ Code}\label{sec:cpp}
 
