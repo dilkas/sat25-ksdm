@@ -973,7 +973,7 @@ function that corresponds to the definition of base case $f(\mathbf{y})$.
 Finally, if the above cases fail, we evaluate $\mathbf{c}$ according to
 $\expr{}$, store the result in the cache, and return it.
 
-\section{Experimental Evaluation (TODO)}
+\section{Experimental Evaluation}
 
 We compare \Cranetwo{} (in both BFS and greedy modes) with \textsc{FastWFOMC}
 and \textsc{ForcLift} on two problems previously considered by Dilkas and
@@ -982,7 +982,9 @@ Belle~\shortcite{DBLP:conf/kr/DilkasB23}: the function-counting problem from
 Note that comparing \Cranetwo{} and \textsc{FastWFOMC} on a larger set of
 benchmarks is challenging because there is no automated way to translate a
 formula in \FO{} or \Ctwo{} into \UFO{} (or even check if such an encoding is
-possible).
+possible). The experiments were run on an AMD~Ryzen~7~5800H processor with
+\SI{16}{\gibi\byte} of memory and Arch Linux~6.8.2-arch2-1 operating system.
+\textsc{FastWFOMC} was executed using Python~3.8.19 with Python-FLINT~0.5.0.
 
 The \FO{} formula for bijections is described in \cref{example:overall}. The
 equivalent formula in \Ctwo{} is
@@ -998,12 +1000,6 @@ Similarly, in \UFO{} the same formula can be written as
 \end{gather*}
 where $w^{-}(R) = w^{-}(S) = -1$.
 
-We run each of the four algorithms once on each combination of formula and
-domain size, the latter ranging from one up to and including 35. The experiments
-were run on an AMD~Ryzen~7~5800H processor with \SI{16}{\gibi\byte} of memory
-and Arch Linux~6.8.2-arch2-1 operating system. \textsc{FastWFOMC} was executed
-using Python~3.8.19 with Python-FLINT~0.5.0.
-
 \begin{figure}
   \centering
   \input{plot}
@@ -1011,16 +1007,18 @@ using Python~3.8.19 with Python-FLINT~0.5.0.
     logarithmic scale.}\label{fig:plot}
 \end{figure}
 
-\Cref{fig:plot} shows total runtime values as a measure of the overall
-performance of each algorithm. For the three knowledge compilation algorithms,
-we also separately track compilation and inference times and comment on them
-where relevant. Note that \Cranebfs{} is able to handle more instances than
-either \textsc{ForcLift} or \Cranegreedy{}, i.e., the bijection-counting problem
-in our experiments as well as similar formulas examined
+In the first experiment, we run each of the four algorithms once on each
+combination of benchmark and domain size, the latter ranging from one up to and
+including 35. \Cref{fig:plot} shows total runtime values as a measure of the
+overall performance of each algorithm. For the three knowledge compilation
+algorithms, we also separately track compilation and inference times and comment
+on them where relevant. Note that \Cranebfs{} is able to handle more instances
+than either \textsc{ForcLift} or \Cranegreedy{}, i.e., the bijection-counting
+problem in our experiments as well as similar formulas examined
 previously~\cite{DBLP:conf/kr/DilkasB23}.
 
-As shown in the figure, the runtimes of all compilation-based algorithms remain
-practically constant in contrast to the rapidly increasing runtimes of
+As shown in \cref{fig:plot}, the runtimes of all compilation-based algorithms
+remain practically constant in contrast to the rapidly increasing runtimes of
 \textsc{FastWFOMC}. Although the search/compilation part is slower in
 \Cranetwo{} than in \textsc{ForcLift}, the difference is negligible. The
 runtimes of the knowledge compilation algorithms appear constant because---for
@@ -1032,22 +1030,32 @@ lower variation than those of \textsc{ForcLift} because with \textsc{ForcLift}
 we compile the formula anew for each domain size whereas with \Cranetwo{} we
 compile it once and reuse the resulting C++ program for all domain sizes.
 
-As another point of comparison, we examine the maximum domain size that the
-algorithms can handle in at most \SI{45}{\second} of total runtime. For
-bijection-counting, \textsc{FastWFOMC} scales up to domains of size 28, whereas
-\Cranebfs{} can handle domains of size \num{e4}. In the case of
-function-counting, \textsc{FastWFOMC} can handle domains of size 32, whereas
-\Cranebfs{} can handle \num{3e5}. On function-counting, \textsc{ForcLift} can
-handle domains sizes up to about 100, but then the finite-precision arithmetic
-declares higher model as infinite.
+\begin{table}
+  \centering
+  \begin{tabular}{lrr}
+    \toprule
+    Algorithm & Bijections & Functions \\
+    \midrule
+    \Cranebfs{} & \num{e4} & \num{3e5} \\
+    \Cranegreedy{} & --- & \num{3e5} \\
+    \textsc{FastWFOMC} & 28 & 32 \\
+    \textsc{ForcLift} & --- & 143 \\
+    \bottomrule
+  \end{tabular}
+  \caption{The maximum domain sizes that can be handled by each algorithm in at
+    most \SI{45}{\second}. `---' indicates that the algorithm is unable to find
+    a solution. The domain sizes for \Cranetwo{} are accurate up to the first
+    digit while other domain sizes are exact.}\label{table:results}
+\end{table}
 
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item Add info about \textsc{ForcLift} (taking care of infinities)
-    \item Turn the above paragraph into a table.
-    \item Mention two types of experiments earlier in the section.
-  \end{itemize}
-}
+For the second experiment, we examine the maximum domain size that the
+algorithms can handle in at most \SI{45}{\second} of total runtime. As shown in
+\cref{table:results}, \Cranebfs{} is able to scale to domain sizes \num{357} and
+\num{9375} times larger than \textsc{FastWFOMC} for bijection-counting and
+function-counting problems, respectively. Note that, while \textsc{ForcLift} may
+have runtime performance comparable to \Cranetwo{}, its finite-precision
+arithmetic cannot represent model counts for domain sizes higher than 143 and
+returns $\infty$ instead.
 
 \section{Conclusion (TODO)}
 
@@ -1058,18 +1066,8 @@ declares higher model as infinite.
             \item Eliminate (e.g., Emacs) warnings.
             \item must run it by all 3 other coauthors
             \item re-check submission instructions and formatting guidelines
-            \item Full stop at the end of a single-sentence caption?
             \item cite the \textsc{Crane} paper (and other algorithms' papers)
                   where necessary
-            \item Something to think about that could inspire some kind of
-                  theorems: how can I assume that a domain is empty if there are
-                  constants associated with it?
-            \item consider turning small sections (e.g., Section 5) into
-                  subsections of even paragraphs.
-            \item Authors may submit a separate PDF with additional information
-                  supporting their claims (such as proof details, additional
-                  experimental results, further details on experimental design,
-                  etc).
           \end{itemize}
   \end{itemize}
 }
