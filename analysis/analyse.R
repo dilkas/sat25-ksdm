@@ -2,7 +2,7 @@ library(tidyverse)
 library(scales)
 library(tikzDevice)
 
-df <- read.csv("../results/processed/results.csv")
+df <- read.csv("../results/processed/results1.csv")
 df$compilation.time <- df$compilation.time / 1000
 df$inference.time <- df$inference.time / 1000
 df$time <- df$compilation.time + df$inference.time
@@ -10,7 +10,6 @@ df$algorithm[df$algorithm == "bfs"] <- "\\textsc{Crane2-BFS}"
 df$algorithm[df$algorithm == "greedy"] <- "\\textsc{Crane2-Greedy}"
 df$algorithm[df$algorithm == "forclift"] <- "\\textsc{ForcLift}"
 df$algorithm[df$algorithm == "fastwfomc"] <- "\\textsc{FastWFOMC}"
-df$sequence[df$sequence == "bijections"] <- "permutations"
 
 # Sanity check: differences between max and min counts as a percentage of the
 # min count

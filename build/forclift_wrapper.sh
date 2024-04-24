@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-cd Forclift
+cd ../lib/Forclift
 for ((i=1; i<=$1; i++)); do
     echo "Domain size: $i"
     sed -i "s/\.\.\.,[[:digit:]]\+/\.\.\.,$i/g" $2

@@ -16,7 +16,7 @@
 \usepackage{booktabs}
 \urlstyle{same}
 
-\usepackage[backgroundcolor=lightgray]{todonotes}
+\usepackage[backgroundcolor=lightgray]{todonotes} % TODO: remove
 \usepackage{listings}
 \usepackage[linesnumbered,ruled,vlined]{algorithm2e}
 \usepackage[capitalize,noabbrev]{cleveref}
@@ -73,7 +73,6 @@
 \DeclareMathOperator{\Reff}{Ref}
 
 \DeclareMathOperator{\Doms}{Doms}
-\DeclareMathOperator*{\argmin}{argmin} % TODO: soon to be removed
 
 \newcommand{\cmark}{\ding{51}}
 \newcommand{\xmark}{\ding{55}}
@@ -115,7 +114,22 @@ meel@cs.toronto.edu
 \maketitle
 
 \begin{abstract}
-  TODO: at most 200 words
+  First-order model counting (FOMC) is the problem of counting the number of
+  models of a sentence in first-order logic. Recently, a new algorithm for FOMC
+  was proposed that, instead of simply providing the final count, generates
+  definitions of (possibly recursive) functions, which can be evaluated with
+  different arguments to compute the model count for any domain size. However,
+  the algorithm did not include base cases in the recursive definitions. This
+  work makes three contributions. Firstly, we demonstrate how to construct
+  function definitions that include base cases by modifying the logical formulas
+  used in the FOMC algorithm. Secondly, we extend the well-known circuit
+  modification technique in knowledge compilation, known as smoothing, to work
+  with the formulas corresponding to base cases and the recently proposed node
+  types, such as domain recursion and constraint removal. Thirdly, we introduce
+  a compilation algorithm that transforms the function definitions into C++
+  code, equipped with arbitrary-precision arithmetic. These additions allow the
+  new FOMC algorithm to scale to domain sizes over \num{9000} times larger than
+  the current state of the art, as demonstrated through experimental results.
 \end{abstract}
 
 \section{Introduction (TODO)}
@@ -968,85 +982,70 @@ Belle~\shortcite{DBLP:conf/kr/DilkasB23}: the function-counting problem from
 Note that comparing \Cranetwo{} and \textsc{FastWFOMC} on a larger set of
 benchmarks is challenging because there is no automated way to translate a
 formula in \FO{} or \Ctwo{} into \UFO{} (or even check if such an encoding is
-possible). The experiments were run on an AMD~Ryzen~7~5800H processor with
-\SI{16}{\gibi\byte} of memory and Arch Linux~6.8.2-arch2-1 operating system.
-\textsc{FastWFOMC} was executed using Python~3.8.19 with Python-FLINT~0.5.0.
+possible).
 
-\paragraph{Benchmarks (probably for supplementary material).}
-\begin{itemize}
-  \item Bijections
-        \begin{itemize}
-          \item In \Ctwo:
-                \begin{gather*}
-                  \forall x \in \Delta\text{. }\exists^{=1} y \in \Delta\text{. }P(x, y)\\
-                  \forall y \in \Delta\text{. }\exists^{=1} x \in \Delta\text{. }P(x, y)
-                \end{gather*}
-          \item In \UFO:
-                \begin{gather*}
-                  \forall x, y \in \Delta\text{. }R(x) \lor \neg P(x, y)\\
-                  \forall x, y \in \Delta\text{. }S(x) \lor \neg P(y, x)\\
-                  |P| = |\Delta|
-                \end{gather*}
-                with weights $w^{-}(R) = w^{-}(S) = -1$
-          \item In \FO: see \cref{example:overall}
-        \end{itemize}
-\end{itemize}
+The \FO{} formula for bijections is described in \cref{example:overall}. The
+equivalent formula in \Ctwo{} is
+\begin{gather*}
+  \forall x \in \Delta\text{. }\exists^{=1} y \in \Delta\text{. }P(x, y)\\
+  \forall y \in \Delta\text{. }\exists^{=1} x \in \Delta\text{. }P(x, y).
+\end{gather*}
+Similarly, in \UFO{} the same formula can be written as
+\begin{gather*}
+  \forall x, y \in \Delta\text{. }R(x) \lor \neg P(x, y)\\
+  \forall x, y \in \Delta\text{. }S(x) \lor \neg P(y, x)\\
+  |P| = |\Delta|,
+\end{gather*}
+where $w^{-}(R) = w^{-}(S) = -1$.
+
+We run each of the four algorithms once on each combination of formula and
+domain size, the latter ranging from one up to and including 35. The experiments
+were run on an AMD~Ryzen~7~5800H processor with \SI{16}{\gibi\byte} of memory
+and Arch Linux~6.8.2-arch2-1 operating system. \textsc{FastWFOMC} was executed
+using Python~3.8.19 with Python-FLINT~0.5.0.
 
 \begin{figure}
   \centering
   \input{plot}
-  \caption{The runtime data of WFOMC algorithms on domains of sizes
-    $1, 2, \dots, 35$. Note that the $y$ axis is on a logarithmic
-    scale.}\label{fig:plot}
+  \caption{The runtime of WFOMC algorithms. Note that the $y$ axis is on a
+    logarithmic scale.}\label{fig:plot}
 \end{figure}
-% TODO: rename permutations to bijections in the plot
 
-\paragraph{Results.}
-\begin{itemize}
-  \item As shown in \cref{fig:plot}, the runtimes of all compilation-based
-        algorithms remain practically constant in contrast to the rapidly
-        increasing runtimes of \textsc{FastWFOMC}.
-  \item Note that \Cranebfs{} is able to handle more instances than
-        \textsc{ForcLift} (e.g., the bijection-counting problem in our
-        experiments and other problems in my previous work).
-  \item Although the search/compilation part is slower in \Cranetwo{} than in
-        \textsc{ForcLift}, the difference is negligible.
-  \item The runtimes of three out of four WFOMC algorithms appear constant
-        because---for these counting problems and domain sizes---compilation
-        time dominates inference time (recall that compilation time is
-        independent of domain sizes). Indeed, the maximum inference time of both
-        \Cranebfs{} and \Cranegreedy{} across these experiments is
-        only \SI{4}{\milli\second}.
-  \item The runtimes of \Cranetwo{} have lower variation than those of
-        \textsc{ForcLift} because with \textsc{ForcLift} we compile the formula
-        anew for each domain size whereas with \Cranetwo{} we compile it once
-        and reuse the resulting C++ program for all domain sizes.
-  \item As another point of comparison,---in at most
-        \SI{41}{\second}---\Cranetwo{} scales up to domains of sizes \num{e4}
-        and \num{3e5} in bijection- and function-counting problems, respectively
-        (whereas \textsc{FastWFOMC} already takes longer with domains of
-        sizes\dots)
-\end{itemize}
+\Cref{fig:plot} shows total runtime values as a measure of the overall
+performance of each algorithm. For the three knowledge compilation algorithms,
+we also separately track compilation and inference times and comment on them
+where relevant. Note that \Cranebfs{} is able to handle more instances than
+either \textsc{ForcLift} or \Cranegreedy{}, i.e., the bijection-counting problem
+in our experiments as well as similar formulas examined
+previously~\cite{DBLP:conf/kr/DilkasB23}.
 
-\todo[inline]{maybe examine \textsc{ForcLift}'s scalability as well}
+As shown in the figure, the runtimes of all compilation-based algorithms remain
+practically constant in contrast to the rapidly increasing runtimes of
+\textsc{FastWFOMC}. Although the search/compilation part is slower in
+\Cranetwo{} than in \textsc{ForcLift}, the difference is negligible. The
+runtimes of the knowledge compilation algorithms appear constant because---for
+these counting problems and domain sizes---compilation time dominates inference
+time (recall that compilation time is independent of domain sizes). Indeed, the
+maximum inference time of both \Cranebfs{} and \Cranegreedy{} across these
+experiments is only \SI{4}{\milli\second}. The runtimes of \Cranetwo{} have
+lower variation than those of \textsc{ForcLift} because with \textsc{ForcLift}
+we compile the formula anew for each domain size whereas with \Cranetwo{} we
+compile it once and reuse the resulting C++ program for all domain sizes.
+
+As another point of comparison, we examine the maximum domain size that the
+algorithms can handle in at most \SI{45}{\second} of total runtime. For
+bijection-counting, \textsc{FastWFOMC} scales up to domains of size 28, whereas
+\Cranebfs{} can handle domains of size \num{e4}. In the case of
+function-counting, \textsc{FastWFOMC} can handle domains of size 32, whereas
+\Cranebfs{} can handle \num{3e5}. On function-counting, \textsc{ForcLift} can
+handle domains sizes up to about 100, but then the finite-precision arithmetic
+declares higher model as infinite.
 
 \todo[inline,caption={}]{
-  Some reproducibility requirements to keep in mind:
   \begin{itemize}
-    \item A motivation is given for why the experiments are conducted on the
-          selected datasets.
-    \item All novel datasets introduced in this paper are included in a data
-          appendix.
-    \item All datasets drawn from the existing literature (potentially including
-          authors’ own previously published work) are accompanied by appropriate
-          citations. (mention the counting quantifier paper and my KR paper)
-    \item All source code implementing new methods have comments detailing the
-          implementation, with references to the paper where each step comes
-          from.
-    \item This paper formally describes evaluation metrics used and explains the
-          motivation for choosing these metrics.
-    \item This paper states the number of algorithm runs used to compute each
-          reported result.
+    \item Add info about \textsc{ForcLift} (taking care of infinities)
+    \item Turn the above paragraph into a table.
+    \item Mention two types of experiments earlier in the section.
   \end{itemize}
 }
 
@@ -1054,8 +1053,6 @@ possible). The experiments were run on an AMD~Ryzen~7~5800H processor with
 
 \todo[inline,caption={}]{
   \begin{itemize}
-    \item Maybe add some complete examples of C++ programs in the supplementary
-          material.
     \item Later on:
           \begin{itemize}
             \item Eliminate (e.g., Emacs) warnings.
