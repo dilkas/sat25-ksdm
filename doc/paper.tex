@@ -300,11 +300,12 @@ meel@cs.toronto.edu
 
 \section{Preliminaries}
 
-\Cref{sec:logic} introduces the fundamental ideas of first-order logic and
-WFOMC, and discusses the different logics used in the latter.\@ Then,
-\cref{sec:algebra} introduces the terminology we use to describe the output of
-the original \textsc{Crane} algorithm~\cite{DBLP:conf/kr/DilkasB23}, i.e.,
-functions and equations that define them.
+In \cref{sec:logic}, we summarise the fundamentals of first-order logic. Then,
+in \cref{sec:threelogics}, we formally define WFOMC and discuss the differences
+among three variants of first-order logic used for WFOMC.\@ Finally, in
+\cref{sec:algebra}, we introduce the terminology used to describe the output of
+the original \textsc{Crane} algorithm, i.e., functions and equations that define
+them.
 
 We write $\mathbb{N}_{0}$ for the set of non-negative integers. In the context
 of both algebra and logic, we write $S\sigma$ for a \emph{substitution} $\sigma$
@@ -313,87 +314,41 @@ $\sigma = [x_{1} \mapsto y_{1}, x_{2} \mapsto y_{2}, \dots, x_{n} \mapsto y_{n}]
 denotes the replacement of all occurrences of $x_{i}$ with $y_{i}$ for all
 $i = 1, \dots, n$.
 
-\todo[inline]{There are three subsections now, not two.}
+\subsection{First-Order Logic}\label{sec:logic}
 
-\subsection{First-Order Logic and WFOMC (TODO)}\label{sec:logic}
+In this section, we review the basic concepts of first-order logic as they are
+used in first-order knowledge compilation algorithms. There are two key
+differences between the logic used within such algorithms and the logic
+supported as input. First, Skolemization~\cite{DBLP:conf/kr/BroeckMD14} is used
+to eliminate existential quantifiers by introducing additional predicates (some
+of which have negative weights). Second, the input formula is rewritten as a
+conjunction of clauses, each of which is in \emph{prenex normal
+  form}~\cite{hinman2018fundamentals}.
 
-\todo[inline]{Clarify the differences between the input format and the internal
-  format}
-
-\paragraph{The \FO{} Logic (After Skolemization and in a special (prenex, CNF)
-  form)}
-\begin{itemize}
-  \item Although existential quantifiers are supported, here we describe the
-        format used internally. During preprocessing, all existential
-        quantifiers are eliminated using
-        Skolemization~\cite{DBLP:conf/kr/BroeckMD14}, and the formula is
-        rewritten into a conjunction of clauses, each of which is in
-        \emph{prenex normal form}~\cite{hinman2018fundamentals}.
-  \item In the spirit of keeping sorts implicit, we always assume formulas `type
-        check' with respect to sorts. For example, if $P(x)$, $P(y)$, and
-        $x \ne c$ are all part of the formula (for some predicate $P$, variables
-        $x$ and $y$, and constant $c$), then $x$, $y$, and $c$ all have the same
-        sort.
-  \item A \emph{formula} is a conjunction of clauses.
-  \item A \emph{clause} is of the form $\forall x_{1} \in \Delta_{1}\text{.
-        }\forall x_{2} \in \Delta_{2}\dots\text{
-        }\forall x_{n} \in \Delta_{n}\text{. }\phi(x_{1}, x_{2}, \dots, x_{n})$,
-        where $\phi$ is a disjunction of literals that only contain variables
-        $x_{1}, \dots, x_{n}$ (and any constants).
-  \item We say that a clause is a \emph{(positive) unit clause} if:
-        \begin{itemize}
-          \item there is only one literal with a predicate, and
-          \item it is a positive literal.
-        \end{itemize}
-  \item A \emph{literal} is either an atom (i.e., a \emph{positive} literal) or
-        its negation (i.e., a \emph{negative} literal).
-  \item An \emph{atom} is either:
-  \begin{itemize}
-    \item $P(t_{1}, \dots, t_{m})$ for some predicate $P/m$ and terms
-          $t_{1}, \dots, t_{m}$ or
-    \item $x=y$ for some terms $x$ and $y$
-  \end{itemize}
-  \item An atom is \emph{ground} if it contains no variables (i.e., only
-        constants).
-  \item The \emph{arity} of a predicate is the number of arguments it takes,
-        i.e., $m$ in the case of predicate $P$.
-  \item When we want to denote a predicate together with its arity, we write
-        $P/m$.
-  \item A \emph{term} is either a variable or a constant.
-  \item Throughout the paper, we use set-theoretic notation, interpreting a
-        formula as a set of clauses and a clause as a set of literals. Moreover,
-        for readability, clauses written on separate lines are implicitly
-        conjoined.
-\end{itemize}
-
-\begin{definition}[Model]\label{def:model}
-  Let $\phi$ be a formula in \FO{}. For every predicate $P/n$ in $\phi$, let
-  ${(\Delta_{i}^{P})}_{i=1}^{n}$ be a list of the corresponding domains (not
-  necessarily distinct). Let $\sigma$ be a map from the domains of $\phi$ to
-  their interpretations as sets such that:
-  \begin{enumerate*}[label=(\roman*)]
-    \item the sets are pairwise disjoint, and
-    \item the constants in $\phi$ are included in the corresponding domains.
-  \end{enumerate*}
-  Then a \emph{structure} of $\phi$ (with respect to $\sigma$) is a set $M$ of
-  ground literals defined by adding either $P(\mathbf{t})$ or
-  $\neg P(\mathbf{t})$ for every predicate $P/n$ in $\phi$ and $n$-tuple
-  $\mathbf{t} \in \prod_{i=1}^{n} \sigma(\Delta_{i}^{P})$. A structure is a
-  \emph{model} if it satisfies $\phi$ (see Appendix~A of~Dilkas and
-  Belle~\shortcite{DBLP:journals/corr/abs-2306-04189} for more details).
-\end{definition}
-
-\begin{definition}[WFOMC]
-  Continuing from \cref{def:model}, for every predicate $P/n$ in $\phi$, let
-  $w^{+}(P), w^{-}(P) \in \mathbb{R}$ be its (positive and negative)
-  \emph{weights}. Unless specified otherwise, we assume weights to be equal to
-  one. The \emph{(symmetric) weighted first-order model count} (WFOMC) of $\phi$
-  (with respect to $\sigma$, $w^{+}$, and $w^{-}$) is the quantity
-  \[
-    \sum_{M \models \phi} \prod_{P(\mathbf{t}) \in M} w^{+}(P) \prod_{\neg P(\mathbf{t}) \in M} w^{-}(P),
-  \]
-  where the sum is over all models of $\phi$.
-\end{definition}
+A \emph{formula} is a conjunction of clauses. A \emph{clause} is of the form
+$\forall x_{1} \in \Delta_{1}\text{.}\forall x_{2} \in \Delta_{2}\dots\text{
+}\forall x_{n} \in \Delta_{n}\text{.}\phi(x_{1}, x_{2}, \dots, x_{n})$, where
+$\phi$ is a disjunction of literals that only contain variables
+$x_{1}, \dots, x_{n}$ (and any constants). We say that a clause is a
+\emph{(positive) unit clause} if
+\begin{enumerate*}[label=(\roman*)]
+  \item there is only one literal with a predicate, and
+  \item it is a positive literal.
+\end{enumerate*}
+A \emph{literal} is either an atom (i.e., a \emph{positive} literal) or its
+negation (i.e., a \emph{negative} literal). An \emph{atom} is either
+\begin{enumerate*}[label=(\roman*)]
+  \item $P(t_{1}, \dots, t_{m})$ for some predicate $P$ and terms
+  $t_{1}, \dots, t_{m}$ (written $P(\mathbf{t})$ for short) or
+  \item $x=y$ for some terms $x$ and $y$.
+\end{enumerate*}
+An atom is \emph{ground} if it contains no variables, i.e., only constants. The
+\emph{arity} of a predicate is the number of arguments it takes, i.e., $m$ in
+the case of predicate $P$ above. When we want to denote a predicate together
+with its arity, we write $P/m$. A \emph{term} is either a variable or a
+constant. Throughout the paper, we use set-theoretic notation, interpreting a
+formula as a set of clauses and a clause as a set of literals. Moreover, for
+readability, clauses written on separate lines are implicitly conjoined.
 
 \subsection{WFOMC Algorithms and Their Logics}\label{sec:threelogics}
 
@@ -413,7 +368,7 @@ $i = 1, \dots, n$.
       \item the number of sorts,
       \item support for constants,
       \item the maximum number of variables,
-      \item allowed quantifiers, and
+      \item supported quantifiers, and
       \item supported atoms in addition to those of the form $P(\mathbf{t})$ for some predicate $P/n$ and $n$-tuple of terms $\mathbf{t}$.
     \end{enumerate*}
     Here:
@@ -455,14 +410,14 @@ hand, $\forall x \in \Delta\text{. }\forall y \in \Gamma\text{. } P(x, y)$
 implies that $x$ and $y$ have different sorts, and it would be improper to
 write, e.g., $\forall x \in \Delta\text{. }\forall y \in \Gamma\text{.
 } P(x, y) \lor x = y$. \FO{} is also the only logic to support constants,
-clauses with more than two variables, and the equality predicate.
+formulas with more than two variables, and the equality predicate.
 
 \begin{remark}
   In the case of \textsc{ForcLift} and its extensions, support for a formula as
-  valid input does not imply that the algorithm will be able to compile the
-  formula into a circuit or graph suitable for lifted model counting. However,
-  it is known that \textsc{ForcLift} compilation is guaranteed to succeed on any
-  \FO{} formula without constants and with at most two
+  valid input does not imply that the algorithm can compile the formula into a
+  circuit or graph suitable for lifted model counting. However, it is known that
+  \textsc{ForcLift} compilation is guaranteed to succeed on any \FO{} formula
+  without constants and with at most two
   variables~\cite{DBLP:conf/nips/Broeck11}.
 \end{remark}
 
@@ -474,26 +429,53 @@ that there exists \emph{exactly one} $x$ such that $\phi(x)$, and
 $\exists^{\le 2} x\text{. }\phi(x)$ means that there exist \emph{at most two}
 such $x$. The advantage \UFO{} brings over \Ctwo{} is the support for
 \emph{(equality) cardinality constraints}. For example, $|P| = 3$ constrains all
-models to have \emph{exactly three positive literals with predicate $P$}. We
-further illustrate the differences among the three logics with the example
-below.
+models to have \emph{exactly three positive literals with predicate $P$}.
 
-\begin{example}[Functions]\label{example:functions}
-  To define predicate $P$ to be an endofunction on $\Delta$, in \Ctwo{} one
-  could write $\forall x \in \Delta\text{. }\exists^{=1} y \in \Delta\text{.
+\begin{definition}[Model]\label{def:model}
+  Let $\phi$ be a formula in \FO{}. For every predicate $P/n$ in $\phi$, let
+  ${(\Delta_{i}^{P})}_{i=1}^{n}$ be a list of the corresponding domains (not
+  necessarily distinct). Let $\sigma$ be a map from the domains of $\phi$ to
+  their interpretations as sets such that:
+  \begin{enumerate*}[label=(\roman*)]
+    \item the sets are pairwise disjoint, and
+    \item the constants in $\phi$ are included in the corresponding domains.
+  \end{enumerate*}
+  Then a \emph{structure} of $\phi$ (with respect to $\sigma$) is a set $M$ of
+  ground literals defined by adding either $P(\mathbf{t})$ or
+  $\neg P(\mathbf{t})$ for every predicate $P/n$ in $\phi$ and $n$-tuple
+  $\mathbf{t} \in \prod_{i=1}^{n} \sigma(\Delta_{i}^{P})$. A structure is a
+  \emph{model} if it satisfies $\phi$ (see Appendix~A of~Dilkas and
+  Belle~\shortcite{DBLP:journals/corr/abs-2306-04189} for more details).
+\end{definition}
+
+\begin{definition}[WFOMC~\cite{DBLP:conf/ijcai/BroeckTMDR11}]
+  Continuing from \cref{def:model}, for every predicate $P$ in $\phi$, let
+  $w^{+}(P), w^{-}(P) \in \mathbb{Q}$ be its \emph{weights}. Unless specified
+  otherwise, we assume weights to be equal to one. The \emph{(symmetric)
+    weighted first-order model count} (WFOMC) of $\phi$ (with respect to
+  $\sigma$, $w^{+}$, and $w^{-}$) is
+  \[
+    \sum_{M \models \phi} \prod_{P(\mathbf{t}) \in M} w^{+}(P) \prod_{\neg P(\mathbf{t}) \in M} w^{-}(P),
+  \]
+  where the sum is over all models of $\phi$.
+\end{definition}
+
+\begin{example}[Counting functions]\label{example:functions}
+  To define predicate $P$ as an endofunction on $\Delta$, in \Ctwo{} one would
+  write $\forall x \in \Delta\text{. }\exists^{=1} y \in \Delta\text{.
   }P(x, y)$. In \UFO{}, the same could be written as
   \begin{equation}\label[formula]{eq:functions1}
     \begin{gathered}
       \forall x, y \in \Delta\text{. }S(x) \lor \neg P(x, y)\\
-      |P| = |\Delta|.
+      |P| = |\Delta|,
     \end{gathered}
   \end{equation}
-  Although \cref{eq:functions1} has some additional models, the negative weight
-  $w^{-}(S) = -1$ makes some of the counts cancel out so that the WFOMC of
-  \cref{eq:functions1} is still equal to the number of endofunctions on
-  $\Delta$.
+  where $w^{-}(S) = -1$. Although \cref{eq:functions1} has more models compared
+  to its counterpart in \Ctwo{}, the weight function makes it so the
+  \emph{weighted} model count of \cref{eq:functions1} is still equal to the
+  number of endofunctions on $\Delta$.
 
-  In \FO{}, we would write
+  Equivalently, in \FO{} we would write
   \begin{equation}\label[formula]{eq:fo}
     \begin{gathered}
       \forall x \in \Gamma\text{. }\exists y \in \Delta\text{. }P(x, y)\\
@@ -511,8 +493,8 @@ below.
 
 \subsection{Algebra}\label{sec:algebra}
 
-We write $\expr{}$ for an arbitrary algebraic expression. Note that some terms
-have different meanings in the context of algebra as compared to logic. Here, a
+We write $\expr{}$ for an arbitrary algebraic expression. Some terms have
+different meanings in the context of algebra compared to logic. Here, a
 \emph{constant} is a non-negative integer. Similarly, a \emph{variable} is
 either a parameter of a function or a variable introduced by a summation, e.g.,
 $i$ in $\sum_{i=1}^{n} \expr$. A (function) \emph{signature} is
