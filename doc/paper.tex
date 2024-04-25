@@ -35,6 +35,8 @@
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}
 \newtheorem{example}{Example}
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
 
 \pdfinfo{
 /TemplateVersion (KR.2022.0, KR.2023.0, KR.2024.0)
@@ -120,16 +122,16 @@ meel@cs.toronto.edu
   definitions of (possibly recursive) functions, which can be evaluated with
   different arguments to compute the model count for any domain size. However,
   the algorithm did not include base cases in the recursive definitions. This
-  work makes three contributions. Firstly, we demonstrate how to construct
+  work makes three contributions. First, we demonstrate how to construct
   function definitions that include base cases by modifying the logical formulas
-  used in the FOMC algorithm. Secondly, we extend the well-known circuit
+  used in the FOMC algorithm. Second, we extend the well-known circuit
   modification technique in knowledge compilation, known as smoothing, to work
   with the formulas corresponding to base cases and the recently proposed node
-  types, such as domain recursion and constraint removal. Thirdly, we introduce
-  a compilation algorithm that transforms the function definitions into C++
-  code, equipped with arbitrary-precision arithmetic. These additions allow the
-  new FOMC algorithm to scale to domain sizes over \num{9000} times larger than
-  the current state of the art, as demonstrated through experimental results.
+  types, such as domain recursion and constraint removal. Third, we introduce a
+  compilation algorithm that transforms the function definitions into C++ code,
+  equipped with arbitrary-precision arithmetic. These additions allow the new
+  FOMC algorithm to scale to domain sizes over \num{9000} times larger than the
+  current state of the art, as demonstrated through experimental results.
 \end{abstract}
 
 \section{Introduction (TODO)}
@@ -146,6 +148,8 @@ meel@cs.toronto.edu
                     \item some more theory papers, e.g., LICS 2018
                   \end{itemize}
           \end{itemize}
+    \item introduce \Cranetwo{}
+    \item (maybe) introduce lifted/liftable
   \end{itemize}
 }
 
@@ -309,7 +313,9 @@ $\sigma = [x_{1} \mapsto y_{1}, x_{2} \mapsto y_{2}, \dots, x_{n} \mapsto y_{n}]
 denotes the replacement of all occurrences of $x_{i}$ with $y_{i}$ for all
 $i = 1, \dots, n$.
 
-\subsection{Logic (TODO)}\label{sec:logic}
+\todo[inline]{There are three subsections now, not two.}
+
+\subsection{First-Order Logic and WFOMC (TODO)}\label{sec:logic}
 
 \todo[inline]{Clarify the differences between the input format and the internal
   format}
@@ -361,33 +367,35 @@ $i = 1, \dots, n$.
 \end{itemize}
 
 \begin{definition}[Model]\label{def:model}
-  Let $\phi$ be a formula in \FO{}. For every predicate $p/n$ in $\phi$, let
-  ${(\Delta_{i}^{p})}_{i=1}^{n}$ be a list of the corresponding domains (not
+  Let $\phi$ be a formula in \FO{}. For every predicate $P/n$ in $\phi$, let
+  ${(\Delta_{i}^{P})}_{i=1}^{n}$ be a list of the corresponding domains (not
   necessarily distinct). Let $\sigma$ be a map from the domains of $\phi$ to
   their interpretations as sets such that:
-  \begin{itemize}
+  \begin{enumerate*}[label=(\roman*)]
     \item the sets are pairwise disjoint, and
     \item the constants in $\phi$ are included in the corresponding domains.
-  \end{itemize}
+  \end{enumerate*}
   Then a \emph{structure} of $\phi$ (with respect to $\sigma$) is a set $M$ of
-  ground literals defined by adding either $p(\mathbf{t})$ or
-  $\neg p(\mathbf{t})$ for every predicate $p/n$ in $\phi$ and $n$-tuple
-  $\mathbf{t} \in \prod_{i=1}^{n} \sigma(\Delta_{i}^{p})$. A structure is a
+  ground literals defined by adding either $P(\mathbf{t})$ or
+  $\neg P(\mathbf{t})$ for every predicate $P/n$ in $\phi$ and $n$-tuple
+  $\mathbf{t} \in \prod_{i=1}^{n} \sigma(\Delta_{i}^{P})$. A structure is a
   \emph{model} if it satisfies $\phi$ (see Appendix~A of~Dilkas and
   Belle~\shortcite{DBLP:journals/corr/abs-2306-04189} for more details).
 \end{definition}
 
 \begin{definition}[WFOMC]
-  Continuing from \cref{def:model}, for every predicate $p/n$ in $\phi$, let
-  $w^{+}(p), w^{-}(p) \in \mathbb{R}$ be its (positive and negative)
-  \emph{weights}. Unless explicitly specified otherwise, we assume weights to be
-  equal to one. The \emph{(symmetric) weighted first-order model count} (WFOMC)
-  of $\phi$ (with respect to $\sigma$, $w^{+}$, and $w^{-}$) is the quantity
+  Continuing from \cref{def:model}, for every predicate $P/n$ in $\phi$, let
+  $w^{+}(P), w^{-}(P) \in \mathbb{R}$ be its (positive and negative)
+  \emph{weights}. Unless specified otherwise, we assume weights to be equal to
+  one. The \emph{(symmetric) weighted first-order model count} (WFOMC) of $\phi$
+  (with respect to $\sigma$, $w^{+}$, and $w^{-}$) is the quantity
   \[
-    \sum_{M \models \phi} \prod_{p(\mathbf{t}) \in M} w^{+}(p) \prod_{\neg p(\mathbf{t}) \in M} w^{-}(p),
+    \sum_{M \models \phi} \prod_{P(\mathbf{t}) \in M} w^{+}(P) \prod_{\neg P(\mathbf{t}) \in M} w^{-}(P),
   \]
   where the sum is over all models of $\phi$.
 \end{definition}
+
+\subsection{WFOMC Algorithms and Their Logics}\label{sec:threelogics}
 
 \begin{table*}
   \centering
@@ -417,71 +425,88 @@ $i = 1, \dots, n$.
   }\label{tbl:logics}
 \end{table*}
 
-\paragraph{Three Types of Logics}
-\begin{itemize}
-  \item See \cref{tbl:logics} for a detailed comparison. The notation introduced
-        in the table is standard for \Ctwo{}, new for \UFO{}, and redefined to
-        be more specific for \FO{}.
-  \item All three logics are function-free.
-  \item Domains are always assumed to be finite.
-  \item In many-sorted logic, each term is assigned to a \emph{sort}, and each
-        predicate $p/n$ is assigned to a sequence of $n$ sorts. Each sort has
-        its corresponding domain. In the input formula, all domains are assumed
-        to be pairwise disjoint Most of these assignments are typically left
-        implicit and can be reconstructed from the quantifiers. For instance,
-        $\forall x,y \in \Delta\text{. }P(x, y)$ implies that variables $x$ and
-        $y$ have the same sort. On the other hand, $\forall x \in \Delta\text{.
-        }\forall y \in \Gamma\text{. } P(x, y)$ implies that $x$ and $y$ have
-        different sorts, and it would be improper to have $x = y$ as part of a
-        formula.
-  \item
-        \begin{itemize}
-          \item \FO{} is used as the input format for
-                \textsc{ForcLift}\footnote{\url{https://github.com/UCLA-StarAI/Forclift}}~\cite{DBLP:conf/ijcai/BroeckTMDR11}
-                and its extensions
-                \textsc{Crane}\footnote{\url{https://doi.org/10.5281/zenodo.8004077}}~\cite{DBLP:conf/kr/DilkasB23}
-                and \Cranetwo{}.
-          \item \Ctwo{} is discussed in the literature on
-                \textsc{FastWFOMC}~\cite{DBLP:conf/uai/BremenK21} and related
-                methods~\cite{DBLP:journals/jair/Kuzelka21,DBLP:conf/aaai/MalhotraS22}
-          \item \UFO{} is the input format supported by a version of
-                \textsc{FastWFOMC} obtained directly from the authors. Note that
-                the publicly available
-                version\footnote{\url{https://comp.nus.edu.sg/~tvanbr/software/fastwfomc.tar.gz}}
-                does not support any cardinality constraints.
-        \end{itemize}
-  \item Note that, in the case of \textsc{ForcLift} and its extensions, support
-        for a formula as valid input does not imply that the algorithm will be
-        able to compile the formula into a circuit or graph suitable for lifted
-        model counting. However, it is known that \textsc{ForcLift} compilation
-        is guaranteed to succeed on any \FO{} formula without constants and with
-        at most two variables~\cite{DBLP:conf/nips/Broeck11}.
-\end{itemize}
+In \cref{tbl:logics}, we outline the differences among three first-order logics
+commonly used in WFOMC:
+\begin{enumerate*}[label=(\roman*)]
+  \item \FO{} is the input format for
+  \textsc{ForcLift}\footnote{\url{https://github.com/UCLA-StarAI/Forclift}} and
+  its extensions
+  \textsc{Crane}\footnote{\url{https://doi.org/10.5281/zenodo.8004077}} and
+  \Cranetwo{},
+  \item \Ctwo{} is often used in the literature on \textsc{FastWFOMC} and
+  related
+  methods~\cite{DBLP:journals/jair/Kuzelka21,DBLP:conf/aaai/MalhotraS22}, and
+  \item \UFO{} is the input format supported by a private version of
+  \textsc{FastWFOMC} obtained directly from the authors.
+\end{enumerate*}
+Note that the publicly available
+version\footnote{\url{https://comp.nus.edu.sg/~tvanbr/software/fastwfomc.tar.gz}}
+does not support any cardinality constraints. The notation we use to refer to
+each logic is standard in the case of \Ctwo{}, new in the case of \UFO{}, and
+redefined to be more specific in the case of \FO{}. All three logics are
+function-free, and domains are always assumed to be finite.
 
-\begin{example}\label{example:functions}
-  Functions
-  \begin{itemize}
-    \item In \Ctwo: $\forall x \in \Delta\text{.
-          }\exists^{=1} y \in \Delta\text{. }P(x, y)$
-    \item In \UFO:
-          \begin{gather*}
-            \forall x, y \in \Delta\text{. }S(x) \lor \neg P(x, y)\\
-            |P| = |\Delta|
-          \end{gather*}
-    \item In \FO:
-    \begin{equation}\label[formula]{eq:fo}
-      \begin{gathered}
-        \forall x \in \Gamma\text{. }\exists y \in \Delta\text{. }P(x, y)\\
-        \forall x \in \Gamma\text{. }\forall y, z \in \Delta\text{. }P(x, y) \land P(x, z) \Rightarrow y = z
-      \end{gathered}
-    \end{equation}
-  \end{itemize}
+In \FO{}, each term is assigned to a \emph{sort}, and each predicate $P/n$ is
+assigned to a sequence of $n$ sorts. Each sort has its corresponding domain.
+Most of these assignments to sorts are typically left implicit and can be
+reconstructed from the quantifiers. For example, $\forall x,y \in \Delta\text{.
+}P(x, y)$ implies that variables $x$ and $y$ have the same sort. On the other
+hand, $\forall x \in \Delta\text{. }\forall y \in \Gamma\text{. } P(x, y)$
+implies that $x$ and $y$ have different sorts, and it would be improper to
+write, e.g., $\forall x \in \Delta\text{. }\forall y \in \Gamma\text{.
+} P(x, y) \lor x = y$. \FO{} is also the only logic to support constants,
+clauses with more than two variables, and the equality predicate.
 
-  Note that \cref{eq:fo} is written with two domains instead of one. Clearly,
-  the model count does not change whenever $|\Gamma| = |\Delta|$. As was
-  previously observed by Dilkas and Belle~\shortcite{DBLP:conf/kr/DilkasB23},
-  such a reformulation can help first-order knowledge compilation algorithms
-  find efficient solutions.
+\begin{remark}
+  In the case of \textsc{ForcLift} and its extensions, support for a formula as
+  valid input does not imply that the algorithm will be able to compile the
+  formula into a circuit or graph suitable for lifted model counting. However,
+  it is known that \textsc{ForcLift} compilation is guaranteed to succeed on any
+  \FO{} formula without constants and with at most two
+  variables~\cite{DBLP:conf/nips/Broeck11}.
+\end{remark}
+
+Both \Ctwo{} and \UFO{} are single-sorted (i.e., variables are always quantified
+over the same domain) and only include formulas with at most two variables and
+no constants. Unlike \UFO{}, \Ctwo{} supports existential quantifiers, including
+\emph{counting quantifiers}. For example, $\exists^{=1} x\text{. }\phi(x)$ means
+that there exists \emph{exactly one} $x$ such that $\phi(x)$, and
+$\exists^{\le 2} x\text{. }\phi(x)$ means that there exist \emph{at most two}
+such $x$. The advantage \UFO{} brings over \Ctwo{} is the support for
+\emph{(equality) cardinality constraints}. For example, $|P| = 3$ constrains all
+models to have \emph{exactly three positive literals with predicate $P$}. We
+further illustrate the differences among the three logics with the example
+below.
+
+\begin{example}[Functions]\label{example:functions}
+  To define predicate $P$ to be an endofunction on $\Delta$, in \Ctwo{} one
+  could write $\forall x \in \Delta\text{. }\exists^{=1} y \in \Delta\text{.
+  }P(x, y)$. In \UFO{}, the same could be written as
+  \begin{equation}\label[formula]{eq:functions1}
+    \begin{gathered}
+      \forall x, y \in \Delta\text{. }S(x) \lor \neg P(x, y)\\
+      |P| = |\Delta|.
+    \end{gathered}
+  \end{equation}
+  Although \cref{eq:functions1} has some additional models, the negative weight
+  $w^{-}(S) = -1$ makes some of the counts cancel out so that the WFOMC of
+  \cref{eq:functions1} is still equal to the number of endofunctions on
+  $\Delta$.
+
+  In \FO{}, we would write
+  \begin{equation}\label[formula]{eq:fo}
+    \begin{gathered}
+      \forall x \in \Gamma\text{. }\exists y \in \Delta\text{. }P(x, y)\\
+      \forall x \in \Gamma\text{. }\forall y, z \in \Delta\text{. }P(x, y) \land P(x, z) \Rightarrow y = z,
+    \end{gathered}
+  \end{equation}
+  first stating that each $x$ must be mapped to at least one $y$ and then adding
+  that if $x$ is mapped to both $y$ and $z$, then $y=z$. Note that \cref{eq:fo}
+  is written with two domains instead of one. Clearly, one can still count the
+  number of endofunctions by setting $|\Gamma| = |\Delta|$. As was previously
+  observed by Dilkas and Belle~\shortcite{DBLP:conf/kr/DilkasB23}, such a
+  reformulation can help first-order knowledge compilation algorithms find
+  efficient solutions.
 \end{example}
 
 \subsection{Algebra}\label{sec:algebra}
@@ -1071,8 +1096,6 @@ returns $\infty$ instead.
           \end{itemize}
   \end{itemize}
 }
-
-\clearpage % TODO: temporarary
 
 \bibliographystyle{kr}
 \bibliography{paper}
