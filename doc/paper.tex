@@ -62,6 +62,10 @@
 \crefname{type}{Type}{Types}
 \creflabelformat{type}{#2\textup{#1}#3}
 
+\crefalias{enumi}{step}
+\crefname{step}{Step}{Steps}
+\creflabelformat{step}{#2\textup{#1}#3}
+
 \crefalias{clause}{equation}
 \crefname{clause}{Clause}{Clauses}
 \creflabelformat{clause}{#2\textup{(#1)}#3}
@@ -136,81 +140,85 @@ meel@cs.toronto.edu
 
 \section{Introduction (TODO)}
 
+% 1. What is the problem?
+
+\emph{First-order model counting} is the problem of counting the number of
+models of a sentence in first-order logic over some given domain(s). The
+(symmetric) weighted variant of the problem (WFOMC) asks for the sum of model
+weights instead, where the weight of a model is a product over predicate
+weights~\cite{DBLP:conf/ijcai/BroeckTMDR11}. WFOMC is a prominent approach to
+the broader problem known as \emph{lifted (probabilistic) inference} that aims
+to compute probabilities more efficiently by utlilising symmetries inherent in
+the description of the problem~\cite{DBLP:conf/ecai/Kersting12}.
+
+% 2. Why is it interesting and important?
+
+Lifted inference is an active area of research with recent work in domains such
+as constraint satisfaction problems~\cite{DBLP:journals/jair/TotisDRK23} and
+probabilistic answer set programming~\cite{DBLP:journals/ijar/AzzoliniR23}.
+WFOMC itself has been used to perform inference on probabilistic
+databases~\cite{DBLP:journals/debu/GribkoffSB14} and probabilistic logic
+programs~\cite{DBLP:journals/ijar/RiguzziBZCL17}. By iteratively considering
+domains of increasing sizes, the model count of a formula can be interpreted as
+an (integer) sequence. WFOMC algorithms have been used to discover new
+sequences~\cite{DBLP:conf/ijcai/SvatosJT0K23} and
+conjecture~\cite{DBLP:conf/ilp/BarvinekB0ZK21} and
+construct~\cite{DBLP:conf/kr/DilkasB23} recurrence relations and other recursive
+constructs that describe these sequences. Recently, WFOMC algorithms have also
+been extended and applied to perform
+\emph{sampling}~\cite{DBLP:conf/aaai/WangB0K22,DBLP:conf/lics/WangP0K23}.
+
+% 3. Why is it hard? (E.g., why do naive approaches fail?)
+
+The complexity of WFOMC is typically characterised in terms of \emph{data
+  complexity}, i.e., fixing the formula and asking whether there exists an
+algorithm that can compute the WFOMC in time polynomial in the domain size(s).
+If such an algorithm exists, the formula is called
+\emph{liftable}~\cite{DBLP:conf/starai/JaegerB12}. Beame et
+al.~\shortcite{DBLP:conf/pods/BeameBGS15} showed that there exists an unliftable
+formula with three variables. It is also known that all formulas with up to two
+variables are liftable~\cite{DBLP:conf/nips/Broeck11,DBLP:conf/kr/BroeckMD14}.
+This liftable fragment of formulas with two variables has been extended with
+various axioms~\cite{DBLP:conf/aaai/TothK23,DBLP:journals/ai/BremenK23},
+counting quantifiers~\cite{DBLP:journals/jair/Kuzelka21}, and in other
+ways~\cite{DBLP:conf/nips/KazemiKBP16}.
+
+% 4. Why hasn't it been solved before? (Or, what's wrong with previous proposed
+% solutions? How does mine differ?)
+
+There is a variety of WFOMC algorithms with different underlying principles.
+Perhaps the most prominent class of WFOMC algorithms is based on
+\emph{first-order knowledge compilation}. Here, by iteratively applying
+\emph{compilation rules}, the formula is compiled to a representation (such as a
+circuit of graph), which can then be used to compute the WFOMC for any
+combination of domain sizes (or weights). Algorithms in this class include
+\textsc{ForcLift}~\cite{DBLP:conf/ijcai/BroeckTMDR11} and its recent extension
+\textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23}. The former compiles formulas into
+circuits whereas the latter compiles them first to \emph{first-order
+  computational graphs} (FCGs) and then to (algebraic) equations. Another major
+WFOMC algorithm \textsc{FastWFOMC}~\cite{DBLP:conf/uai/BremenK21} is based on
+cell enumeration. Other algorithms employ local
+search~\cite{DBLP:journals/pvldb/NiuRDS11}, junction
+trees~\cite{DBLP:conf/aaai/VenugopalSG15}, Monte Carlo
+sampling~\cite{DBLP:journals/cacm/GogateD16}, and anytime approximation via
+upper/lower bound construction~\cite{DBLP:conf/ijcai/BremenK20}.
+
+% 5. What are the key components of my approach and results? Also include any
+% specific limitations.
+
+The recently-proposed \textsc{Crane} algorithm, while able to handle formulas
+beyond the reach of \textsc{ForcLift}, was somewhat incomplete in that it could
+only construct functions definitions, which would then need to be evaluated to
+compute the WFOMC.\@ Moreover, recursive functions were presented without base
+cases. In this work, we present \Cranetwo{}---an extension of \textsc{Crane}
+that fixes these two weaknesses.
+
 \todo[inline,caption={}]{
   \begin{itemize}
-    \item 9 pages including appendices but not acknowledgements
-    \item Add some papers mentioned in:
-          \begin{itemize}
-            \item very recent work
-            \item my previous paper, including:
-                  \begin{itemize}
-                    \item other liftable fragments
-                    \item some more theory papers, e.g., LICS 2018
-                  \end{itemize}
-          \end{itemize}
-    \item introduce \Cranetwo{}
-    \item (maybe) introduce lifted/liftable
+  \item Finish the paragraph above.
+  \item mention that \textsc{L2C}~\cite{DBLP:conf/kr/KazemiP16} compiles to C++
   \end{itemize}
 }
-
-\paragraph{Papers To Cite}
-\begin{itemize}
-  \item overviews
-        \begin{itemize}
-          \item lifted probabilistic inference~\cite{DBLP:conf/ecai/Kersting12}
-          \item recent overview paper~\cite{DBLP:conf/ijcai/Kuzelka23}
-        \end{itemize}
-  \item Alternative definition~\cite{DBLP:journals/cacm/GogateD16}
-  \item relevant theoretical work~\cite{DBLP:conf/aaai/MalhotraS22}
-  \item original domain recursion~\cite{DBLP:conf/nips/Broeck11}
-  \item algorithms
-        \begin{itemize}
-          \item \textsc{ForcLift}~\cite{DBLP:conf/ijcai/BroeckTMDR11}
-          \item \textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23}
-          \item \textsc{FastWFOMC}~\cite{DBLP:conf/uai/BremenK21}
-          \item \textsc{L2C}~\cite{DBLP:conf/kr/KazemiP16} (similarly to us
-                compiles to C++ code, but (probably) doesn't work on as many
-                formulas)
-          \item approximate~\cite{DBLP:conf/ijcai/BremenK20}
-          \item for Markov logic networks~\cite{DBLP:journals/ml/RichardsonD06}
-                \begin{itemize}
-                  \item \textsc{Magician}~\cite{DBLP:conf/aaai/VenugopalSG15}
-                  \item \textsc{Tuffy}~\cite{DBLP:journals/pvldb/NiuRDS11}
-                  \item \textsc{Alchemy}~\cite{DBLP:journals/cacm/GogateD16}
-                        (same as the alternative definition)
-                \end{itemize}
-        \end{itemize}
-  \item complexity
-        \begin{itemize}
-          \item liftability~\cite{DBLP:conf/starai/JaegerB12}
-          \item hardness for three variables~\cite{DBLP:conf/pods/BeameBGS15}
-          \item liftable fragments
-                \begin{itemize}
-                  \item \Ctwo~\cite{DBLP:journals/jair/Kuzelka21}
-                  \item tree axioms~\cite{DBLP:journals/ai/BremenK23}
-                  \item linear order axioms~\cite{DBLP:conf/aaai/TothK23}
-                  \item some liftable fragments~\cite{DBLP:conf/nips/KazemiKBP16}
-                \end{itemize}
-        \end{itemize}
-  \item applications
-        \begin{itemize}
-          \item extensions to
-                sampling~\cite{DBLP:conf/aaai/WangB0K22,DBLP:conf/lics/WangP0K23}
-          \item discovery of combinatorial
-                sequences~\cite{DBLP:conf/ijcai/SvatosJT0K23}
-          \item conjecturing recurrence
-                relations~\cite{DBLP:conf/ilp/BarvinekB0ZK21}
-          \item probabilistic logic
-                programming~\cite{DBLP:journals/ijar/RiguzziBZCL17} (WFOMC was
-                shown to be supreme)
-          \item probabilistic databases~\cite{DBLP:journals/debu/GribkoffSB14}
-        \end{itemize}
-  \item lifted inference elsewhere
-        \begin{itemize}
-          \item constraint satisfaction~\cite{DBLP:journals/jair/TotisDRK23}
-          \item answer set programming~\cite{DBLP:journals/ijar/AzzoliniR23}
-        \end{itemize}
-\end{itemize}
 
 \begin{figure*}[t]
   \centering
@@ -257,46 +265,21 @@ meel@cs.toronto.edu
   }\label{fig:overview}
 \end{figure*}
 
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item By pointing to the outline in \cref{fig:overview}, make forward
-          references to the sections of the paper.
-    \item Somewhere: mention that we're primarily concerned with computing
-          unweighted model counts, but everything trivially extends to the
-          weighted setting as well.
-    \item Introduce greedy search and breadth-first search (BFS), together with
-          \Cranegreedy{} and \Cranebfs{}. The knowledge compilation part of both
-          \textsc{Crane} and \Cranetwo{} can be executed using either greedy
-          (similar to \textsc{ForcLift}) or breadth-first search. We use both in
-          our experiments, denoting them as \Cranegreedy{} and \Cranebfs{},
-          respectively.
-    \item Introduce the WFOMC acronym.
-    \item Introduce first-order knowledge compilation as a class of WFOMC
-          algorithms, defining/mentioning compilation rules, FCG, etc.
-  \end{itemize}
-}
-
-\paragraph{Contributions}
-\begin{itemize}
-  \item Completing the definitions of recursive functions by:
-  \begin{itemize}
-    \item identifying a sufficient set of base cases (\cref{sec:identifying})
-    \item constructing formulas that correspond to these base cases
-          (\cref{sec:simplifying})
-    \item and recursing on these subproblems
-  \end{itemize}
-  \item Compiling these function definitions into a C++ program that can be
-        executed independently for any domain size values \cref{sec:cpp}
-        \begin{itemize}
-          \item including support for infinite precision arithmetic via GNU
-                Multiple Precision Arithmetic Library
-        \end{itemize}
-  \item Experiments comparing \Cranetwo{} with the main alternative approach
-        demonstrate the ability of \Cranetwo{} to scale to domain sizes\dots
-\end{itemize}
-
-\Cref{sec:identifying,sec:cpp} deal with algebraic constructs whereas
-\cref{sec:simplifying} deals with logic.
+\Cref{fig:overview} outlines the workflow of the new algorithm \Cranetwo{}. In
+\cref{sec:main}, we describe how \CompileWithBaseCases finds the base cases for
+recursive functions by:
+\begin{enumerate*}[label=(\roman*)]
+  \item identifying a sufficient set of base cases for each function,
+  \item constructing formulas that correspond to these base cases,
+  and\label[step]{step2}
+  \item recursing on these new formulas.
+\end{enumerate*}
+Then, \cref{sec:smoothing} describes post-processing techniques for FCGs and the
+formulas from \cref{step2} above necessary to preserve the correct model count.
+Next, \cref{sec:cpp} explains how function definitions that encode a solution to
+a WFOMC problem are then compiled to a C++ program. Finally,
+\cref{sec:experiments} reports on two experiments that compare \Cranetwo{} with
+other state-of-the-art WFOMC algorithms.
 
 \section{Preliminaries}
 
@@ -418,7 +401,7 @@ formulas with more than two variables, and the equality predicate.
   circuit or graph suitable for lifted model counting. However, it is known that
   \textsc{ForcLift} compilation is guaranteed to succeed on any \FO{} formula
   without constants and with at most two
-  variables~\cite{DBLP:conf/nips/Broeck11}.
+  variables~\cite{DBLP:conf/nips/Broeck11,DBLP:conf/kr/BroeckMD14}.
 \end{remark}
 
 Both \Ctwo{} and \UFO{} are single-sorted (i.e., variables are always quantified
@@ -529,8 +512,8 @@ $f(\mathbf{x}) = \expr{}$, where $f(\mathbf{x})$ is a signature.
 
 \Cref{alg:compilewithbasecases} outlines our overall approach for compiling a
 formula into a set of equation that include the required base cases. In short,
-we first use the knowledge compilation algorithm of the original
-\textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23} to compile the formula into:
+we first use the knowledge compilation algorithm of the original \textsc{Crane}
+to compile the formula into:
 \begin{enumerate*}[label=(\roman*)]
   \item set $\mathcal{E}$ of equations,
   \item map $\mathcal{F}$ from function names to formulas, and
@@ -557,7 +540,7 @@ case equations to $\mathcal{E}$. \Cref{example:overall} explains
       \forall x, z \in \Gamma\text{. }\forall y \in \Delta\text{. }P(x, y) \land P(z, y) \Rightarrow x = z.
     \end{gathered}
   \]
-  In particular, we examine the first solution that \Cranebfs{} returns for this
+  In particular, we examine the first solution that \Cranetwo{} returns for this
   formula.
 
   After \cref{line:first,line:second}, we have
@@ -582,8 +565,6 @@ domains $\Gamma$ and $\Delta$, and let $n, m \in \mathbb{N}_{0}$. Then the model
 count of \Propagate{$\phi$, $\Delta$, $n$} assuming $|\Gamma| = m$ is the same
 as the model count of \Propagate{$\phi$, $\Gamma$, $m$} assuming $|\Delta| = n$.
 
-\todo[inline]{Can I turn the above into a theorem?}
-
 Finally, we note that the \Simplify procedure plays a crucial role in
 simplifying a common algebraic pattern $\sum_{m=0}^{n}[a \le m \le b] f(m)$.
 Here:
@@ -602,8 +583,6 @@ $f(a) + f(a+1) + \cdots + f(\min\{\, n, b \,\})$. For instance, in the case of
 \cref{example:overall}, \Simplify transforms
 $g(l, m) = \sum_{k=0}^{m}[0 \le k \le 1]\binom{m}{k}g(l-1, m-k)$ into the
 simpler form above.
-
-\todo[inline]{A concluding sentence that introduces the remaining subsections?}
 
 \subsection{Identifying a Sufficient Set of Base Cases}\label{sec:identifying}
 
@@ -756,14 +735,14 @@ $n$ new constants.
   where $c_{1}$, $c_{2}$, and $c_{3}$ are the new constants.
 \end{example}
 
-\section{Smoothing}
+\section{Smoothing}\label{sec:smoothing}
 
-Smoothness originates in propositional knowledge compilation where it is defined
-as the property that, for every disjunction node, all disjuncts (as subtrees of
-the circuit) contain the same atoms~\cite{darwiche2001tractable}. Van den Broeck
-et al.~\shortcite{DBLP:conf/ijcai/BroeckTMDR11} generalise smoothness to
-first-order logic, adding set-disjunction and inclusion-exclusion nodes
-alongside disjunction.
+\emph{Smoothness} originates in propositional knowledge compilation where it is
+defined as the property that, for every disjunction node, all disjuncts (as
+subtrees of the circuit) contain the same atoms~\cite{darwiche2001tractable}.
+Van den Broeck et al.~\shortcite{DBLP:conf/ijcai/BroeckTMDR11} generalise
+smoothness to first-order logic, adding set-disjunction and inclusion-exclusion
+nodes alongside disjunction.
 
 The motivation for smoothing is as follows. Whenever compilation rules such as
 unit propagation and inclusion-exclusion simplify the formula, some ground atoms
@@ -772,8 +751,8 @@ below). To account for them during counting, smoothing nodes (i.e., tautological
 clauses such as $P(c) \lor \neg P(c)$) are added to the FCG at an appropriate
 location.
 
-In the rest of this section, we extend the smoothing algorithm of Van den Broeck
-et al.~\shortcite{DBLP:conf/ijcai/BroeckTMDR11} even further.
+The rest of this section presents an extension to the smoothing algorithm of Van
+den Broeck et al.~\shortcite{DBLP:conf/ijcai/BroeckTMDR11}.
 \Cref{sec:smoothingbase} describes the role smoothing plays in the
 base-case-finding algorithm from \cref{sec:main}. Then, \cref{sec:smoothingfcg1}
 shows how to adapt smoothing to the compilation rules introduced by Dilkas and
@@ -980,7 +959,13 @@ function that corresponds to the definition of base case $f(\mathbf{y})$.
 Finally, if the above cases fail, we evaluate $\mathbf{c}$ according to
 $\expr{}$, store the result in the cache, and return it.
 
-\section{Experimental Evaluation}
+\section{Experimental Evaluation}\label{sec:experiments}
+
+\todo[inline]{Introduce greedy search and breadth-first search (BFS), together
+  with \Cranegreedy{} and \Cranebfs{}. The knowledge compilation part of both
+  \textsc{Crane} and \Cranetwo{} can be executed using either greedy (similar to
+  \textsc{ForcLift}) or breadth-first search. We use both in our experiments,
+  denoting them as \Cranegreedy{} and \Cranebfs{}, respectively.}
 
 We compare \Cranetwo{} (in both BFS and greedy modes) with \textsc{FastWFOMC}
 and \textsc{ForcLift} on two problems previously considered by Dilkas and
@@ -1073,8 +1058,6 @@ returns $\infty$ instead.
             \item Eliminate (e.g., Emacs) warnings.
             \item must run it by all 3 other coauthors
             \item re-check submission instructions and formatting guidelines
-            \item cite the \textsc{Crane} paper (and other algorithms' papers)
-                  where necessary
           \end{itemize}
   \end{itemize}
 }
