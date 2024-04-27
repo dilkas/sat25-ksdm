@@ -16,8 +16,6 @@
 \usepackage{booktabs}
 \urlstyle{same}
 
-\usepackage[backgroundcolor=lightgray]{todonotes} % TODO: remove
-\usepackage{listings}
 \usepackage[linesnumbered,ruled,vlined]{algorithm2e}
 \usepackage[capitalize,noabbrev]{cleveref}
 \usepackage{microtype}
@@ -29,10 +27,9 @@
 \usepackage[inline]{enumitem}
 
 \usetikzlibrary{arrows.meta}
+\usetikzlibrary{positioning}
 
 \newtheorem{theorem}{Theorem}
-\newtheorem{fact}{Fact}
-\theoremstyle{definition}
 \newtheorem{definition}{Definition}
 \newtheorem{example}{Example}
 \theoremstyle{remark}
@@ -45,14 +42,6 @@
 \forestset{
   sn edges/.style={for tree={edge={-Latex}}}
 }
-
-\lstset{breaklines=true}
-\lstset{language=C++,
-        basicstyle=\ttfamily,
-        stringstyle=\color{red},
-        commentstyle=\color{green},
-        breaklines=true,
-        showstringspaces=false}
 
 \newcommand{\crefrangeconjunction}{--}
 
@@ -93,7 +82,7 @@
 \newcommand{\Cranegreedy}{\textsc{Crane2-Greedy}}
 
 \SetKwFunction{CompileWithBaseCases}{CompileWithBaseCases}
-\SetKwFunction{Crane}{Compile}
+\SetKwFunction{Compile}{Compile}
 \SetKwFunction{Propagate}{Propagate}
 \SetKwFunction{FindBaseCases}{FindBaseCases}
 \SetKwFunction{Simplify}{Simplify}
@@ -138,7 +127,7 @@ meel@cs.toronto.edu
   current state of the art, as demonstrated through experimental results.
 \end{abstract}
 
-\section{Introduction (TODO)}
+\section{Introduction}
 
 % 1. What is the problem?
 
@@ -164,7 +153,7 @@ an (integer) sequence. WFOMC algorithms have been used to discover new
 sequences~\cite{DBLP:conf/ijcai/SvatosJT0K23} and
 conjecture~\cite{DBLP:conf/ilp/BarvinekB0ZK21} and
 construct~\cite{DBLP:conf/kr/DilkasB23} recurrence relations and other recursive
-constructs that describe these sequences. Recently, WFOMC algorithms have also
+structures that describe these sequences. Recently, WFOMC algorithms have also
 been extended and applied to perform
 \emph{sampling}~\cite{DBLP:conf/aaai/WangB0K22,DBLP:conf/lics/WangP0K23}.
 
@@ -207,18 +196,11 @@ upper/lower bound construction~\cite{DBLP:conf/ijcai/BremenK20}.
 % specific limitations.
 
 The recently-proposed \textsc{Crane} algorithm, while able to handle formulas
-beyond the reach of \textsc{ForcLift}, was somewhat incomplete in that it could
-only construct functions definitions, which would then need to be evaluated to
+beyond the reach of \textsc{ForcLift}, was incomplete in that it could only
+construct functions definitions, which would then need to be evaluated to
 compute the WFOMC.\@ Moreover, recursive functions were presented without base
 cases. In this work, we present \Cranetwo{}---an extension of \textsc{Crane}
 that fixes these two weaknesses.
-
-\todo[inline,caption={}]{
-  \begin{itemize}
-  \item Finish the paragraph above.
-  \item mention that \textsc{L2C}~\cite{DBLP:conf/kr/KazemiP16} compiles to C++
-  \end{itemize}
-}
 
 \begin{figure*}[t]
   \centering
@@ -233,7 +215,7 @@ that fixes these two weaknesses.
     \node at (15, 0) (count) {Model count};
 
     \node[draw,rounded rectangle] at (3, -2) (findbasecases) {\FindBaseCases};
-    \node[draw,rounded rectangle,left = 0.1cm of findbasecases] (crane) {\Crane};
+    \node[draw,rounded rectangle,left = 0.1cm of findbasecases] (crane) {\Compile};
     \node[draw,rounded rectangle,right = 0.1cm of findbasecases] (propagate) {\Propagate};
     \node[draw,rounded rectangle,right = 0.1cm of propagate] (simplify) {\Simplify};
 
@@ -251,21 +233,17 @@ that fixes these two weaknesses.
     \draw[-Latex,dashed] (compilewithbasecases) -- node[midway,left] {uses} (propagate);
     \draw[-Latex,dashed] (compilewithbasecases) -- node[midway,right] {uses} (simplify);
   \end{tikzpicture}
-  \caption[]{The outline of using \Cranetwo{} to compute the model count of a
-    formula $\phi$. The formula is compiled into a set of equations
-    $\mathcal{E}$ that are then compiled to a C++ program. This program can then
-    be run with different command line arguments to compute the model count of
-    $\phi$ for various domain sizes. \CompileWithBaseCases makes use
-    of: \begin{enumerate*}[label=(\roman*)]
-      \item the knowledge compilation algorithm of \textsc{Crane} (denoted by \Crane),
-      \item a procedure for identifying a sufficient set of base cases (denoted by \FindBaseCases),
-      \item a procedure for constructing a formula that corresponds to a given base case (denoted by \Propagate), and
-      \item algebraic simplification techniques (denoted by \Simplify).
+  \caption[]{The outline of using \Cranetwo{} to compute the model count of a formula $\phi$. First, the formula is compiled into a set of equations, which are then used to create a C++ program. This program can be executed with different command line arguments to calculate the model count of $\phi$ for different domain sizes. To accomplish this, the \CompileWithBaseCases function employs several components:
+    \begin{enumerate*}[label=(\roman*)]
+      \item the knowledge compilation algorithm of \textsc{Crane}, referred to as \Compile,
+      \item a procedure called \FindBaseCases, which identifies a sufficient set of base cases,
+      \item a procedure called \Propagate, which constructs a formula corresponding to a given base case, and
+      \item algebraic simplification techniques (denoted as \Simplify).
     \end{enumerate*}
   }\label{fig:overview}
 \end{figure*}
 
-\Cref{fig:overview} outlines the workflow of the new algorithm \Cranetwo{}. In
+\Cref{fig:overview} outlines the workflow of the new algorithm. In
 \cref{sec:main}, we describe how \CompileWithBaseCases finds the base cases for
 recursive functions by:
 \begin{enumerate*}[label=(\roman*)]
@@ -277,36 +255,37 @@ recursive functions by:
 Then, \cref{sec:smoothing} describes post-processing techniques for FCGs and the
 formulas from \cref{step2} above necessary to preserve the correct model count.
 Next, \cref{sec:cpp} explains how function definitions that encode a solution to
-a WFOMC problem are then compiled to a C++ program. Finally,
-\cref{sec:experiments} reports on two experiments that compare \Cranetwo{} with
-other state-of-the-art WFOMC algorithms.
+a WFOMC problem are then compiled to C++ programs.\footnote{Compilation to C++
+  has been explored before~\cite{DBLP:conf/kr/KazemiP16}, although with limited
+  capabilities in terms of what formulas can be handled in a lifted manner.}
+Finally, \cref{sec:experiments} reports on two experiments that compare
+\Cranetwo{} with other state-of-the-art WFOMC algorithms.
 
 \section{Preliminaries}
 
-In \cref{sec:logic}, we summarise the fundamentals of first-order logic. Then,
-in \cref{sec:threelogics}, we formally define WFOMC and discuss the differences
-among three variants of first-order logic used for WFOMC.\@ Finally, in
-\cref{sec:algebra}, we introduce the terminology used to describe the output of
-the original \textsc{Crane} algorithm, i.e., functions and equations that define
-them.
+In \cref{sec:logic}, we provide a summary of the basic principles of first-order
+logic. Then, in \cref{sec:threelogics}, we formally define WFOMC and discuss the
+distinctions between three variations of first-order logic that are utilised for
+WFOMC.\@ Finally, in \cref{sec:algebra}, we introduce the terminology used to
+describe the output of the original \textsc{Crane} algorithm, i.e., functions
+and equations that define them.
 
-We write $\mathbb{N}_{0}$ for the set of non-negative integers. In the context
-of both algebra and logic, we write $S\sigma$ for a \emph{substitution} $\sigma$
-applied to an expression $S$, where
+We use $\mathbb{N}_{0}$ to represent the set of non-negative integers. In both
+algebra and logic, we write $S\sigma$ to denote the application of a
+\emph{substitution} $\sigma$ to an expression $S$, where
 $\sigma = [x_{1} \mapsto y_{1}, x_{2} \mapsto y_{2}, \dots, x_{n} \mapsto y_{n}]$
-denotes the replacement of all occurrences of $x_{i}$ with $y_{i}$ for all
+signifies the replacement of all instances of $x_{i}$ with $y_{i}$ for all
 $i = 1, \dots, n$.
 
 \subsection{First-Order Logic}\label{sec:logic}
 
-In this section, we review the basic concepts of first-order logic as they are
-used in first-order knowledge compilation algorithms. There are two key
+In this section, we will review the basic concepts of first-order logic as they
+are used in first-order knowledge compilation algorithms. There are two key
 differences between the logic used within such algorithms and the logic
-supported as input. First, Skolemization~\cite{DBLP:conf/kr/BroeckMD14} is used
-to eliminate existential quantifiers by introducing additional predicates (some
-of which have negative weights). Second, the input formula is rewritten as a
-conjunction of clauses, each of which is in \emph{prenex normal
-  form}~\cite{hinman2018fundamentals}.
+supported as input. First, Skolemization~\cite{DBLP:conf/kr/BroeckMD14} is
+employed to eliminate existential quantifiers by introducing additional
+predicates. Second, the input formula is rewritten as a conjunction of clauses,
+each of which is in \emph{prenex normal form}~\cite{hinman2018fundamentals}.
 
 A \emph{formula} is a conjunction of clauses. A \emph{clause} is of the form
 $\forall x_{1} \in \Delta_{1}\text{.}\forall x_{2} \in \Delta_{2}\dots\text{
@@ -322,20 +301,20 @@ A \emph{literal} is either an atom (i.e., a \emph{positive} literal) or its
 negation (i.e., a \emph{negative} literal). An \emph{atom} is either
 \begin{enumerate*}[label=(\roman*)]
   \item $P(t_{1}, \dots, t_{m})$ for some predicate $P$ and terms
-  $t_{1}, \dots, t_{m}$ (written $P(\mathbf{t})$ for short) or
+  $t_{1}, \dots, t_{m}$ (written as $P(\mathbf{t})$ for short) or
   \item $x=y$ for some terms $x$ and $y$.
 \end{enumerate*}
 An atom is \emph{ground} if it contains no variables, i.e., only constants. The
 \emph{arity} of a predicate is the number of arguments it takes, i.e., $m$ in
-the case of predicate $P$ above. When we want to denote a predicate together
-with its arity, we write $P/m$. A \emph{term} is either a variable or a
-constant. Throughout the paper, we use set-theoretic notation, interpreting a
-formula as a set of clauses and a clause as a set of literals. Moreover, for
+the case of predicate $P$ mentioned above. When we want to denote a predicate
+together with its arity, we write $P/m$. A \emph{term} is either a variable or a
+constant. Throughout the paper, we will use set-theoretic notation, interpreting
+a formula as a set of clauses and a clause as a set of literals. Moreover, for
 readability, clauses written on separate lines are implicitly conjoined.
 
 \subsection{WFOMC Algorithms and Their Logics}\label{sec:threelogics}
 
-\begin{table*}
+\begin{table*}[t]
   \centering
   \begin{tabular}{llclll}
     \toprule
@@ -346,18 +325,18 @@ readability, clauses written on separate lines are implicitly conjoined.
     \UFO & one & \xmark & two & $\forall$ & $|P| = m$\\
     \bottomrule
   \end{tabular}
-  \caption[]{A comparison of the three logics used in WFOMC in terms of:
+  \caption[]{Comparison of three logics used in WFOMC based on the following aspects:
     \begin{enumerate*}[label=(\roman*)]
-      \item the number of sorts,
+      \item number of sorts,
       \item support for constants,
-      \item the maximum number of variables,
+      \item maximum number of variables,
       \item supported quantifiers, and
-      \item supported atoms in addition to those of the form $P(\mathbf{t})$ for some predicate $P/n$ and $n$-tuple of terms $\mathbf{t}$.
+      \item supported atoms in addition to those of the form $P(\mathbf{t})$ for a predicate $P/n$ and $n$-tuple of terms $\mathbf{t}$.
     \end{enumerate*}
-    Here:
+    In this context:
     \begin{enumerate*}[label=(\roman*)]
-      \item $k, m \in \mathbb{N}_{0}$, the latter of which can depend on the domain size,
-      \item $P$ is a predicate, and
+      \item $k$ and $m$ are non-negative integers, with the latter depending on the domain size,
+      \item $P$ represents a predicate, and
       \item $x$ and $y$ are terms.
     \end{enumerate*}
   }\label{tbl:logics}
@@ -370,19 +349,19 @@ commonly used in WFOMC:
   \textsc{ForcLift}\footnote{\url{https://github.com/UCLA-StarAI/Forclift}} and
   its extensions
   \textsc{Crane}\footnote{\url{https://doi.org/10.5281/zenodo.8004077}} and
-  \Cranetwo{},
+  \Cranetwo{};
   \item \Ctwo{} is often used in the literature on \textsc{FastWFOMC} and
   related
-  methods~\cite{DBLP:journals/jair/Kuzelka21,DBLP:conf/aaai/MalhotraS22}, and
+  methods~\cite{DBLP:journals/jair/Kuzelka21,DBLP:conf/aaai/MalhotraS22};
   \item \UFO{} is the input format supported by a private version of
   \textsc{FastWFOMC} obtained directly from the authors.
 \end{enumerate*}
 Note that the publicly available
 version\footnote{\url{https://comp.nus.edu.sg/~tvanbr/software/fastwfomc.tar.gz}}
-does not support any cardinality constraints. The notation we use to refer to
-each logic is standard in the case of \Ctwo{}, new in the case of \UFO{}, and
-redefined to be more specific in the case of \FO{}. All three logics are
-function-free, and domains are always assumed to be finite.
+of \textsc{FastWFOMC} does not support any cardinality constraints. The notation
+we use to refer to each logic is standard in the case of \Ctwo{}, new in the
+case of \UFO{}, and redefined to be more specific in the case of \FO{}. All
+three logics are function-free, and domains are always assumed to be finite.
 
 In \FO{}, each term is assigned to a \emph{sort}, and each predicate $P/n$ is
 assigned to a sequence of $n$ sorts. Each sort has its corresponding domain.
@@ -391,7 +370,7 @@ reconstructed from the quantifiers. For example, $\forall x,y \in \Delta\text{.
 }P(x, y)$ implies that variables $x$ and $y$ have the same sort. On the other
 hand, $\forall x \in \Delta\text{. }\forall y \in \Gamma\text{. } P(x, y)$
 implies that $x$ and $y$ have different sorts, and it would be improper to
-write, e.g., $\forall x \in \Delta\text{. }\forall y \in \Gamma\text{.
+write, for example, $\forall x \in \Delta\text{. }\forall y \in \Gamma\text{.
 } P(x, y) \lor x = y$. \FO{} is also the only logic to support constants,
 formulas with more than two variables, and the equality predicate.
 
@@ -415,10 +394,10 @@ such $x$. The advantage \UFO{} brings over \Ctwo{} is the support for
 models to have \emph{exactly three positive literals with predicate $P$}.
 
 \begin{definition}[Model]\label{def:model}
-  Let $\phi$ be a formula in \FO{}. For every predicate $P/n$ in $\phi$, let
-  ${(\Delta_{i}^{P})}_{i=1}^{n}$ be a list of the corresponding domains (not
-  necessarily distinct). Let $\sigma$ be a map from the domains of $\phi$ to
-  their interpretations as sets such that:
+  Let $\phi$ be a formula in \FO{}. For each predicate $P/n$ in $\phi$, let
+  ${(\Delta_{i}^{P})}_{i=1}^{n}$ be a list of the corresponding domains (which
+  may not be distinct). Let $\sigma$ be a map from the domains of $\phi$ to
+  their interpretations as sets that, satisfying the following conditions:
   \begin{enumerate*}[label=(\roman*)]
     \item the sets are pairwise disjoint, and
     \item the constants in $\phi$ are included in the corresponding domains.
@@ -426,21 +405,20 @@ models to have \emph{exactly three positive literals with predicate $P$}.
   Then a \emph{structure} of $\phi$ (with respect to $\sigma$) is a set $M$ of
   ground literals defined by adding either $P(\mathbf{t})$ or
   $\neg P(\mathbf{t})$ for every predicate $P/n$ in $\phi$ and $n$-tuple
-  $\mathbf{t} \in \prod_{i=1}^{n} \sigma(\Delta_{i}^{P})$. A structure is a
-  \emph{model} if it satisfies $\phi$ (see Appendix~A of~Dilkas and
-  Belle~\shortcite{DBLP:journals/corr/abs-2306-04189} for more details).
+  $\mathbf{t} \in \prod_{i=1}^{n} \sigma(\Delta_{i}^{P})$. A structure is
+  considered a \emph{model} if it satisfies $\phi$.
 \end{definition}
 
 \begin{definition}[WFOMC~\cite{DBLP:conf/ijcai/BroeckTMDR11}]
-  Continuing from \cref{def:model}, for every predicate $P$ in $\phi$, let
-  $w^{+}(P), w^{-}(P) \in \mathbb{Q}$ be its \emph{weights}. Unless specified
-  otherwise, we assume weights to be equal to one. The \emph{(symmetric)
-    weighted first-order model count} (WFOMC) of $\phi$ (with respect to
-  $\sigma$, $w^{+}$, and $w^{-}$) is
+  Continuing from \cref{def:model}, for each predicate $P$ in $\phi$, let
+  $w^{+}(P)$ and $w^{-}(P)$ be its \emph{weights} in $\mathbb{Q}$. Unless
+  specified otherwise, we assume weights to be equal to one. The
+  \emph{(symmetric) weighted first-order model count} (WFOMC) of $\phi$ (with
+  respect to $\sigma$, $w^{+}$, and $w^{-}$) is calculated as follows:
   \[
     \sum_{M \models \phi} \prod_{P(\mathbf{t}) \in M} w^{+}(P) \prod_{\neg P(\mathbf{t}) \in M} w^{-}(P),
   \]
-  where the sum is over all models of $\phi$.
+  where the sum is taken over all models of $\phi$.
 \end{definition}
 
 \begin{example}[Counting functions]\label{example:functions}
@@ -454,43 +432,46 @@ models to have \emph{exactly three positive literals with predicate $P$}.
     \end{gathered}
   \end{equation}
   where $w^{-}(S) = -1$. Although \cref{eq:functions1} has more models compared
-  to its counterpart in \Ctwo{}, the weight function makes it so the
-  \emph{weighted} model count of \cref{eq:functions1} is still equal to the
-  number of endofunctions on $\Delta$.
+  to its counterpart in \Ctwo{}, the weight function makes the \emph{weighted}
+  model count of \cref{eq:functions1} equal to the number of endofunctions on
+  $\Delta$.
 
   Equivalently, in \FO{} we would write
   \begin{equation}\label[formula]{eq:fo}
     \begin{gathered}
       \forall x \in \Gamma\text{. }\exists y \in \Delta\text{. }P(x, y)\\
-      \forall x \in \Gamma\text{. }\forall y, z \in \Delta\text{. }P(x, y) \land P(x, z) \Rightarrow y = z,
+      \forall x \in \Gamma\text{. }\forall y, z \in \Delta\text{. }P(x, y) \land P(x, z) \Rightarrow y = z.
     \end{gathered}
   \end{equation}
-  first stating that each $x$ must be mapped to at least one $y$ and then adding
-  that if $x$ is mapped to both $y$ and $z$, then $y=z$. Note that \cref{eq:fo}
-  is written with two domains instead of one. Clearly, one can still count the
-  number of endofunctions by setting $|\Gamma| = |\Delta|$. As was previously
-  observed by Dilkas and Belle~\shortcite{DBLP:conf/kr/DilkasB23}, such a
-  reformulation can help first-order knowledge compilation algorithms find
-  efficient solutions.
+  The first clause asserts that each $x$ must have at least one corresponding
+  $y$, while the second statement adds the condition that if $x$ is mapped to
+  both $y$ and $z$, then $y$ must equal $z$. It is important to note that
+  \cref{eq:fo} is written with two domains instead of just one. However, we can
+  still determine the number of endofunctions by assuming that the sizes of
+  $\Gamma$ and $\Delta$ are equal. This formulation, as observed by Dilkas and
+  Belle~\shortcite{DBLP:conf/kr/DilkasB23}, can prove beneficial in enabling
+  first-order knowledge compilation algorithms to find efficient solutions.
 \end{example}
 
 \subsection{Algebra}\label{sec:algebra}
 
-We write $\expr{}$ for an arbitrary algebraic expression. Some terms have
-different meanings in the context of algebra compared to logic. Here, a
-\emph{constant} is a non-negative integer. Similarly, a \emph{variable} is
-either a parameter of a function or a variable introduced by a summation, e.g.,
-$i$ in $\sum_{i=1}^{n} \expr$. A (function) \emph{signature} is
-$f(x_{1}, \dots, x_{n})$ (written $f(\mathbf{x})$ for short), where $f$ is an
-$n$-ary function, and each $x_{i}$ is a variable. An \emph{equation} is
-$f(\mathbf{x}) = \expr{}$, where $f(\mathbf{x})$ is a signature.
+We write $\expr{}$ to represent an arbitrary algebraic expression. It is
+important to note that certain terms have different meanings in the context of
+algebra compared to logic. In algebra, a \emph{constant} refers to a
+non-negative integer. Likewise, a \emph{variable} can either be a parameter of a
+function or a variable introduced through summation, such as $i$ in the
+expression $\sum_{i=1}^{n} \expr$. A (function) \emph{signature} is denoted as
+$f(x_{1}, \dots, x_{n})$ (or $f(\mathbf{x})$ for short), where $f$ represents an
+$n$-ary function, and each $x_{i}$ represents a variable. An \emph{equation} is
+written as $f(\mathbf{x}) = \expr{}$, with $f(\mathbf{x})$ representing a
+signature.
 
-\begin{definition}\label{def:basecase}
+\begin{definition}[Base case]\label{def:basecase}
   Let $f(\mathbf{x})$ be a function call where each $x_{i}$ is either a constant
   or a variable (note that signatures are included in this definition). Then a
-  function call $f(\mathbf{y})$ is a \emph{base case} of $f(\mathbf{x})$ if
-  $f(\mathbf{y}) = f(\mathbf{x})\sigma$, where $\sigma$ is a substitution that
-  replaces one or more $x_{i}$ with a constant.
+  function call $f(\mathbf{y})$ is considered a \emph{base case} of
+  $f(\mathbf{x})$ if $f(\mathbf{y}) = f(\mathbf{x})\sigma$, where $\sigma$ is a
+  substitution that replaces one or more $x_{i}$ with a constant.
 \end{definition}
 
 \section{Completing the Definitions of Recursive Functions}\label{sec:main}
@@ -499,7 +480,7 @@ $f(\mathbf{x}) = \expr{}$, where $f(\mathbf{x})$ is a signature.
   \caption{\protect\CompileWithBaseCases{$\phi$}}\label{alg:compilewithbasecases}
   \KwIn{formula $\phi$}
   \KwOut{set $\mathcal{E}$ of equations}
-  $(\mathcal{E}, \mathcal{F}, \mathcal{D}) \gets \Crane{$\phi$}$\;\label{line:first}
+  $(\mathcal{E}, \mathcal{F}, \mathcal{D}) \gets \Compile{$\phi$}$\;\label{line:first}
   $\mathcal{E} \gets \Simplify{$\mathcal{E}$}$\;\label{line:second}
   \ForEach{base case $f(\mathbf{x}) \in \FindBaseCases{$\mathcal{E}$}$}{
     $\psi \gets \mathcal{F}(f)$\;
@@ -528,7 +509,7 @@ algorithm then recurses on these simplified formulas and adds the resulting base
 case equations to $\mathcal{E}$. \Cref{example:overall} explains
 \cref{alg:compilewithbasecases} in more detail.
 
-\begin{example}\label{example:overall}
+\begin{example}[Counting bijections]\label{example:overall}
   Consider the following formula (previously examined by Dilkas and
   Belle~\shortcite{DBLP:conf/kr/DilkasB23}) that defines predicate $P$ to be a
   bijection between two sets $\Gamma$ and $\Delta$:
@@ -548,7 +529,7 @@ case equations to $\mathcal{E}$. \Cref{example:overall} explains
     \mathcal{E} &= \left\{\,\begin{aligned}f(m, n) &= \sum_{l=0}^{n} \binom{n}{l}{(-1)}^{n-l}g(l, m),\\ g(l, m) &= g(l-1, m) + mg(l-1, m-1)\end{aligned}\,\right\};\\
     \mathcal{D} &= \{\, (f, 1) \mapsto \Gamma, (f, 2) \mapsto \Delta, (g, 1) \mapsto \Delta^{\top}, (g, 2) \mapsto \Gamma \,\},
   \end{align*}
-  where $\Delta^{\top}$ is a new domain introduced by \Crane. Then
+  where $\Delta^{\top}$ is a new domain introduced by \Compile. Then
   \FindBaseCases identifies two base cases: $g(0, m)$ and $g(l, 0)$. In both
   cases, \CompileWithBaseCases recurses on the formula $\mathcal{F}(g)$
   simplified by assuming that one of the domains is empty. In the first case, we
@@ -627,7 +608,7 @@ including) $c_{i}$. \Cref{thm:halting} below motivates this approach.
   latter produces both $g(0, m)$ and $g(l, 0)$.
 \end{example}
 
-\todo[inline]{Prove (lots of notes, handwritten and elsewhere)}
+TODO: Prove (lots of notes, handwritten and elsewhere)
 
 \begin{theorem}[Termination]\label{thm:halting}
   Let us assume the following about the input set of equations $\mathcal{E}$:
@@ -720,7 +701,7 @@ possible way of replacing the $m$ variables in $C$ with some combination of the
 $n$ new constants.
 
 \begin{example}
-  Let us consider the clause $C \equiv \forall x \in \Gamma\text{.
+  Consider the clause $C \equiv \forall x \in \Gamma\text{.
   }\forall y, z \in \Delta\text{. } \neg P(x, y) \lor \neg P(x, z) \lor y=z$.
   Then
   $\Doms(C) = \Doms(\neg P(x, y)) = \Doms(\neg P(x, z)) = \{\, \Gamma, \Delta \,\}$,
@@ -835,7 +816,7 @@ previously-encountered formula $\psi$ except for having different domains. We
 denote the resulting node as $\Reff(\sigma)$, where $\sigma$ is the substitution
 mapping the domains of $\psi$ to their corresponding domains in $\phi$.
 
-\paragraph{Stage~1 for domain recursion.}
+\paragraph{Stage~1 for Domain Recursion}
 When visiting a $\DR(c \in \Delta)$ node, for each unit clause received from the
 child node, we replace each occurrence of $\phi(c)$ or
 $\forall x \in \Delta\text{. } x \ne c \Rightarrow \phi(x)$ with
@@ -847,14 +828,14 @@ nodes will be added below the domain recursion node to cover the difference
 between the sets of ground atoms assigned to the domain recursion node and its
 child node.
 
-\paragraph{Stage~1 for constraint removal and caching.}
+\paragraph{Stage~1 for Constraint Removal and Caching}
 When visiting a $\CR(\Delta' \gets \Delta \setminus \{\,c\,\})$ node, we reverse
 constraint removal. In other words, we replace each
 $\forall x \in \Delta'\text{. }\phi(x)$ with $\forall x \in \Delta\text{.
 }x \ne c \Rightarrow \phi(x)$. When visiting a $\Reff(\sigma)$ node, we apply
 substitution $\sigma$ to the unit clauses coming from the child node.
 
-\paragraph{Stage~2 for domain recursion.}
+\paragraph{Stage~2 for Domain Recursion}
 We need not add smoothing nodes immediately below constraint removal or caching
 nodes. However, for domain recursion we do the following.
 \begin{enumerate}
@@ -870,7 +851,7 @@ nodes. However, for domain recursion we do the following.
         post-processed by the step above.
 \end{enumerate}
 
-\begin{figure}
+\begin{figure}[t]
   \centering
   \begin{forest}
     for tree={sn edges}
@@ -895,7 +876,7 @@ nodes. However, for domain recursion we do the following.
   smoothing node to cover $P(x)$ for all $x \in \Delta \setminus \{\, c \,\}$.
 \end{example}
 
-\begin{figure}
+\begin{figure}[t]
   \centering
   \begin{forest}
     for tree={sn edges}
@@ -908,9 +889,9 @@ nodes. However, for domain recursion we do the following.
     ]
     ]
   \end{forest}
-  \caption{A smooth FCG loosely based on \cref{example:overall}. The arc from
-    the caching node to the domain recursion node is omitted for compactness.
-    The labels next to nodes show the sets of unit clauses assigned to each node
+  \caption{A smooth FCG based on \cref{example:overall}. The arc from the
+    caching node to the domain recursion node is omitted for compactness. The
+    labels next to nodes show the sets of unit clauses assigned to each node
     during Stage~1 and the order of these assignments, omitting empty
     assignments that replace a set $S$ with $S$ itself.}\label{fig:smoothing1}
 \end{figure}
@@ -961,11 +942,11 @@ $\expr{}$, store the result in the cache, and return it.
 
 \section{Experimental Evaluation}\label{sec:experiments}
 
-\todo[inline]{Introduce greedy search and breadth-first search (BFS), together
-  with \Cranegreedy{} and \Cranebfs{}. The knowledge compilation part of both
-  \textsc{Crane} and \Cranetwo{} can be executed using either greedy (similar to
-  \textsc{ForcLift}) or breadth-first search. We use both in our experiments,
-  denoting them as \Cranegreedy{} and \Cranebfs{}, respectively.}
+TODO: Introduce greedy search and breadth-first search (BFS), together with
+\Cranegreedy{} and \Cranebfs{}. The knowledge compilation part of both
+\textsc{Crane} and \Cranetwo{} can be executed using either greedy (similar to
+\textsc{ForcLift}) or breadth-first search. We use both in our experiments,
+denoting them as \Cranegreedy{} and \Cranebfs{}, respectively.
 
 We compare \Cranetwo{} (in both BFS and greedy modes) with \textsc{FastWFOMC}
 and \textsc{ForcLift} on two problems previously considered by Dilkas and
@@ -992,7 +973,7 @@ Similarly, in \UFO{} the same formula can be written as
 \end{gather*}
 where $w^{-}(R) = w^{-}(S) = -1$.
 
-\begin{figure}
+\begin{figure}[t]
   \centering
   \input{plot}
   \caption{The runtime of WFOMC algorithms. Note that the $y$ axis is on a
@@ -1022,7 +1003,7 @@ lower variation than those of \textsc{ForcLift} because with \textsc{ForcLift}
 we compile the formula anew for each domain size whereas with \Cranetwo{} we
 compile it once and reuse the resulting C++ program for all domain sizes.
 
-\begin{table}
+\begin{table}[t]
   \centering
   \begin{tabular}{lrr}
     \toprule
@@ -1049,18 +1030,9 @@ have runtime performance comparable to \Cranetwo{}, its finite-precision
 arithmetic cannot represent model counts for domain sizes higher than 143 and
 returns $\infty$ instead.
 
-\section{Conclusion (TODO)}
+\section{Conclusion}
 
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item Later on:
-          \begin{itemize}
-            \item Eliminate (e.g., Emacs) warnings.
-            \item must run it by all 3 other coauthors
-            \item re-check submission instructions and formatting guidelines
-          \end{itemize}
-  \end{itemize}
-}
+TODO
 
 \bibliographystyle{kr}
 \bibliography{paper}
