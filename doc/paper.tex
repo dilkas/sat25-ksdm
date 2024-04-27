@@ -608,8 +608,6 @@ including) $c_{i}$. \Cref{thm:halting} below motivates this approach.
   latter produces both $g(0, m)$ and $g(l, 0)$.
 \end{example}
 
-TODO: Prove (lots of notes, handwritten and elsewhere)
-
 \begin{theorem}[Termination]\label{thm:halting}
   Let us assume the following about the input set of equations $\mathcal{E}$:
   \begin{enumerate}
@@ -942,22 +940,20 @@ $\expr{}$, store the result in the cache, and return it.
 
 \section{Experimental Evaluation}\label{sec:experiments}
 
-TODO: Introduce greedy search and breadth-first search (BFS), together with
-\Cranegreedy{} and \Cranebfs{}. The knowledge compilation part of both
-\textsc{Crane} and \Cranetwo{} can be executed using either greedy (similar to
-\textsc{ForcLift}) or breadth-first search. We use both in our experiments,
-denoting them as \Cranegreedy{} and \Cranebfs{}, respectively.
-
-We compare \Cranetwo{} (in both BFS and greedy modes) with \textsc{FastWFOMC}
-and \textsc{ForcLift} on two problems previously considered by Dilkas and
-Belle~\shortcite{DBLP:conf/kr/DilkasB23}: the function-counting problem from
-\cref{example:functions} and the bijection-counting problem described below.
-Note that comparing \Cranetwo{} and \textsc{FastWFOMC} on a larger set of
-benchmarks is challenging because there is no automated way to translate a
-formula in \FO{} or \Ctwo{} into \UFO{} (or even check if such an encoding is
-possible). The experiments were run on an AMD~Ryzen~7~5800H processor with
-\SI{16}{\gibi\byte} of memory and Arch Linux~6.8.2-arch2-1 operating system.
-\textsc{FastWFOMC} was executed using Python~3.8.19 with Python-FLINT~0.5.0.
+We compare \Cranetwo{}\footnote{\textsc{Crane} has two modes that decide how
+  compilation rules are applied to formulas: one based on greedy search and one
+  that combines greedy and breadth-first search. We include both modes in our
+  experiments, referring to them as \Cranegreedy{} and \Cranebfs{},
+  respectively.} with \textsc{FastWFOMC} and \textsc{ForcLift} on two problems
+previously considered by Dilkas and Belle~\shortcite{DBLP:conf/kr/DilkasB23}:
+the function-counting problem from \cref{example:functions} and the
+bijection-counting problem described below. Note that comparing \Cranetwo{} and
+\textsc{FastWFOMC} on a larger set of benchmarks is challenging because there is
+no automated way to translate a formula in \FO{} or \Ctwo{} into \UFO{} (or even
+check if such an encoding is possible). The experiments were run on an
+AMD~Ryzen~7~5800H processor with \SI{16}{\gibi\byte} of memory and Arch
+Linux~6.8.2-arch2-1 operating system. \textsc{FastWFOMC} was executed using
+Python~3.8.19 with Python-FLINT~0.5.0.
 
 The \FO{} formula for bijections is described in \cref{example:overall}. The
 equivalent formula in \Ctwo{} is
@@ -1030,9 +1026,38 @@ have runtime performance comparable to \Cranetwo{}, its finite-precision
 arithmetic cannot represent model counts for domain sizes higher than 143 and
 returns $\infty$ instead.
 
-\section{Conclusion}
+\section{Conclusion and Future Work}
 
-TODO
+In this work, we presented:
+\begin{enumerate*}[label=(\roman*)]
+  \item algorithmic techniques for finding the base cases of recursive functions
+  produced by the original \textsc{Crane} algorithm,
+  \item an extension to the smoothing procedure of \textsc{ForcLift} and
+  \textsc{Crane} that supports base case formulas and the compilation rules
+  introduced by Dilkas and Belle~\shortcite{DBLP:conf/kr/DilkasB23}.
+  \item an approach for compiling function definitions to C++ programs with
+  support for arbitrary-precision arithmetic, and
+  \item experimental evidence showing that \Cranetwo{} can scale to domain sizes
+  orders of magnitude higher than \textsc{FastWFOMC} while being able to handle
+  more formulas than \textsc{ForcLift}.
+\end{enumerate*}
+
+Many avenues for future work remain. In particular, a more extensive
+experimental study is warranted to better understand how WFOMC algorithms
+compare in terms of
+\begin{enumerate*}[label=(\roman*)]
+  \item what formulas they can handle and
+  \item their scalability with respect to domain size.
+\end{enumerate*}
+The capabilities of \Cranetwo{} could be further characterised in other ways.
+For instance, one could prove \emph{completeness} for a fragment of first-order
+logic such as \Ctwo{} (via a suitable encoding of counting quantifiers).
+Moreover, the efficiency with which a WFOMC algorithm is able to handle a
+particular formula can be assessed using \emph{fine-grained complexity}. In the
+case of \textsc{Crane} and \Cranetwo{}, one can do so simply by analysing the
+equations~\cite{DBLP:conf/kr/DilkasB23}. This way, one can reason about
+efficiency in a more implementation-independent manner by making claims about
+the maximum degree of the polynomial that characterises any particular solution.
 
 \bibliographystyle{kr}
 \bibliography{paper}
