@@ -110,7 +110,7 @@ $^3$University of Toronto, Toronto, Canada\\
 guramrit@iitb.ac.in,
 paulius.dilkas@nus.edu.sg,
 meel@cs.toronto.edu
-}
+}% TODO: update affiliation and email
 
 \begin{document}
 
@@ -135,7 +135,28 @@ meel@cs.toronto.edu
   current state of the art, as demonstrated through experimental results.
 \end{abstract}
 
+% TODO: No proper runtime consideration (other than the termination). (address
+% this criticism in some way)
+
+% TODO: Having an algorithm that can efficiently handle large domain sizes is
+% crucial in the weighted setting. For example, consider the well-known "friends
+% and smokers" Markov logic network [1]. The utility of such a model would be
+% significantly limited if exact probabilities could only be efficiently
+% computed for social networks of at most 30 people.
+% [1] Richardson, M., & Domingos, P. (2006). Markov logic networks. Machine learning, 62, 107-136.
+
+% TODO: somehow indicate that source code will be available (a redacted link?)
+
+% TODO: Updates to the algorithm
+% 1) replace x_i-c_i on Line 7 of Algorithm 2 with a generalisation of x_i that can be an arbitrary summation/subtraction of domain sizes
+% 2) a function call with a constant should always mean that that function should have a base case, not just when it's in the same function
+
 \section{Introduction}
+% TODO: improvements to the introduction (must):
+% * make it extra clear what the gap is that this work is trying to fill
+% * mention Crane earlier and describe its importance
+% * the last two paragraphs should make more of a BOOM (e.g., include the over 9k claim)
+% * (here and elsewhere) clarify the distinction between the weighted and unweighted variants of the problem in the final version of the paper. We focus on the unweighted variant in our implementation and experiments, however, Crane2 can handle WFOMC instances as well simply by switching the main data type from integers to rational numbers. Maybe add some weighted experiments as well.
 
 % 1. What is the problem?
 
@@ -200,16 +221,23 @@ Other algorithms utilise local search~\cite{DBLP:journals/pvldb/NiuRDS11},
 junction trees~\cite{DBLP:conf/aaai/VenugopalSG15}, Monte Carlo
 sampling~\cite{DBLP:journals/cacm/GogateD16}, and anytime approximation via
 upper/lower bound construction~\cite{DBLP:conf/ijcai/BremenK20}.
+% TODO: FCGs were never defined. Maybe avoid referring to them altogether?
+% Smoothing nodes are also undefined.
 
 % 5. What are the key components of my approach and results? Also include any
 % specific limitations.
 
+% TODO: first sentence: elaborate a bit more for a general audience
 The recently proposed \textsc{Crane} algorithm, while capable of handling
 formulas beyond the reach of \textsc{ForcLift}, was incomplete as it could only
 construct function definitions, which would then need to be evaluated to compute
 the WFOMC.\@ Additionally, recursive functions were presented without base
 cases. In this work, we introduce \Cranetwo{}, an extension of \textsc{Crane}
 that addresses these two weaknesses.
+% TODO: We called the previous version of Crane "incomplete" because it cannot
+% be used as a black box that takes Markov logic networks (or weighted formulas
+% in some other format) and outputs numbers (i.e., model counts or
+% probabilities).
 
 \begin{figure*}[t]
   \centering
@@ -295,7 +323,11 @@ supported as input. First, Skolemization~\cite{DBLP:conf/kr/BroeckMD14} is
 employed to eliminate existential quantifiers by introducing additional
 predicates. Second, the input formula is rewritten as a conjunction of clauses,
 each of which is in \emph{prenex normal form}~\cite{hinman2018fundamentals}.
+% TODO: explain that "Skolemization" here is NOT standard Skolemization of
+% first-order logic, which would replace existential quantifiers by function
+% terms.
 
+% TODO: reorder the definitions in the opposite direction
 A \emph{formula} is a conjunction of clauses. A \emph{clause} is of the form
 $\forall x_{1} \in \Delta_{1}\text{.}\forall x_{2} \in \Delta_{2}\dots\text{
 }\forall x_{n} \in \Delta_{n}\text{.}\phi(x_{1}, x_{2}, \dots, x_{n})$, where
@@ -322,6 +354,9 @@ a formula as a set of clauses and a clause as a set of literals. Moreover, for
 readability, clauses written on separate lines are implicitly conjoined.
 
 \subsection{WFOMC Algorithms and Their Logics}\label{sec:threelogics}
+
+% TODO: mention the Unique Name Assumption and that, hence, s = t holds iff s
+% and t are the same constant.
 
 \begin{table*}[t]
   \centering
@@ -351,6 +386,10 @@ readability, clauses written on separate lines are implicitly conjoined.
   }\label{tbl:logics}
 \end{table*}
 
+% TODO:
+% 1. Rename \UFO{} to what that new paper uses
+% 2. Use FastWFOMC.jl instead, removing the mention of 'privately-obtained'
+% 3. use symbols instead of numbers for the footnotes
 In \cref{tbl:logics}, we outline the differences among three first-order logics
 commonly used in WFOMC:
 \begin{enumerate*}[label=(\roman*)]
@@ -382,6 +421,7 @@ implies that $x$ and $y$ have different sorts, and it would be improper to
 write, for example, $\forall x \in \Delta\text{. }\forall y \in \Gamma\text{.
 } P(x, y) \lor x = y$. \FO{} is also the only logic to support constants,
 formulas with more than two variables, and the equality predicate.
+% TODO: the discussion about sorts isn't featured in the rest of the paper
 
 \begin{remark}
   In the case of \textsc{ForcLift} and its extensions, support for a formula as
@@ -402,6 +442,13 @@ such $x$. The advantage \UFO{} brings over \Ctwo{} is the support for
 \emph{(equality) cardinality constraints}. For example, $|P| = 3$ constrains all
 models to have \emph{precisely three positive literals with the predicate $P$}.
 
+% TODO: The distinctness of domains is important in two ways. First, in terms of
+% expressiveness, writing clause such as "\forall x, P(x, x)" is valid if
+% predicate P is defined over two copies of the same domain and invalid
+% otherwise. Second, having more distinct domains makes the problem more
+% decomposable for the knowledge compilation algorithm. With more distinct
+% domains, it can make assumptions or deductions about, e.g., the first domain
+% of predicate P without worrying how (or if) they apply to the second domain.
 \begin{definition}[Model]\label{def:model}
   Let $\phi$ be a formula in \FO{}. For each predicate $P/n$ in $\phi$, let
   ${(\Delta_{i}^{P})}_{i=1}^{n}$ be a list of the corresponding domains (which
@@ -417,11 +464,16 @@ models to have \emph{precisely three positive literals with the predicate $P$}.
   $\mathbf{t} \in \prod_{i=1}^{n} \sigma(\Delta_{i}^{P})$. A structure is a
   \emph{model} if it satisfies $\phi$.
 \end{definition}
+% TODO: adding to what
 
+% TODO: “Weights in Q” undefined, C2 undefined (and also far from well explained
+% before), endofunction undefined (also endomorphisms missing), weight function
+% undefined, weighted model count imprecise (above it’s called weighted
+% first-order model count/wfmoc),
 \begin{definition}[WFOMC~\cite{DBLP:conf/ijcai/BroeckTMDR11}]
   Continuing from \cref{def:model}, for each predicate $P$ in $\phi$, let
   $w^{+}(P)$ and $w^{-}(P)$ be its \emph{weights} in $\mathbb{Q}$. Unless
-  specified otherwise, we assume all weights are equal to one. The
+  specified otherwise, we assume all weights are equal to 1. The
   \emph{(symmetric) weighted first-order model count} (WFOMC) of $\phi$ (with
   respect to $\sigma$, $w^{+}$, and $w^{-}$) is:
   \[
@@ -445,6 +497,9 @@ models to have \emph{precisely three positive literals with the predicate $P$}.
   model count of \cref{eq:functions1} equal to the number of endofunctions on
   $\Delta$.
 
+  % TODO: Yes, as mentioned at the end of Section 2.1, clauses c and d written
+  % on separate lines are to be interpreted as the conjunction of c and d (maybe
+  % move that sentence here?).
   Equivalently, in \FO{} we would write
   \begin{equation}\label[formula]{eq:fo}
     \begin{gathered}
@@ -483,7 +538,20 @@ $f(\mathbf{x}) = \expr{}$, with $f(\mathbf{x})$ representing a signature.
 \end{definition}
 
 \section{Completing the Definitions of Recursive Functions}\label{sec:main}
+% TODO: As mentioned in the caption of Figure 1, "Compile" refers to the
+% knowledge compilation algorithm of Dilkas and Belle (2023). Its three return
+% values are explained at the beginning of page 4. We do not elaborate on the
+% details of "Simplify" as it primarily consists of elementary algebraic
+% simplifications such as "1x = x" and "0x = 0". However, we highlight one
+% non-trivial aspect of "Simplify" right before Section 3.1. We will improve the
+% structure of Section 3 to make this information more readily available. Maybe
+% write Crane instead of Compile?
 
+% TODO: It would not be entirely accurate to call the algorithms presented in
+% this work a "post-processing step" because Algorithm 1 is recursive. In other
+% words, this "post-processing step" to first-order knowledge compilation can
+% lead to more compilation that then updates/completes the original set of
+% equations.
 \begin{algorithm}[t]
   \caption{\protect\CompileWithBaseCases{$\phi$}}\label{alg:compilewithbasecases}
   \KwIn{formula $\phi$}
@@ -498,6 +566,9 @@ $f(\mathbf{x}) = \expr{}$, with $f(\mathbf{x})$ representing a signature.
     $\mathcal{E} \gets \mathcal{E} \cup \CompileWithBaseCases{$\psi$}$\;
   }
 \end{algorithm}
+% TODO: >> Alg 1, line 5: Why is this not an infinite loop? On line 5 of
+% Algorithm 1, the loop iterates over the indices of \mathbf{x}. The arity of a
+% function is always a finite number, typically equal to 1 or 2.
 
 \Cref{alg:compilewithbasecases} presents our overall approach for compiling a
 formula into equations that include the necessary base cases. To begin, we
@@ -517,6 +588,13 @@ algorithm then calls itself on these simplified formulas and adds the resulting
 base case equations to $\mathcal{E}$. \Cref{example:overall} provides a more
 detailed explanation of \cref{alg:compilewithbasecases}.
 
+% TODO: F missing (also not explained that it’s not needed below). E is not explained other than that we take the example from X. Would not be a problem if it is motivated differently and the focus is on post-processing (defining inputs properly) and not on the entire algorithm.
+% TODO: include a high-level overview of first-order knowledge compilation and the meaning of the resulting functions. For the most part, the compilation process that constructs these function definitions can be treated as a black box for the purposes of this work. However, a few high-level details still ought to be mentioned:
+% 1. Each algebraic variable ("m", "n", and "l" in the example) corresponds to a domain size.
+% 2. \mathcal{D} indicates that "m" denotes the size of \Gamma, "n" denotes the size of \Delta, etc.
+% 3. \mathcal{E} can contain any (positive) number of functions.
+% 4. Function denoted by "f" represents the solution to the model counting problem.
+% 3. The model count of the original formula is computed by evaluating f on the desired domain sizes. For example, f(3, 2) is the model count when |\Gamma| = 3, and |\Delta| = 2.
 \begin{example}[Counting bijections]\label{example:overall}
   Consider the following formula (previously examined by Dilkas and
   Belle~\shortcite{DBLP:conf/kr/DilkasB23}) that defines predicate $P$ as a
@@ -554,6 +632,7 @@ domains $\Gamma$ and $\Delta$, and let $n, m \in \mathbb{N}_{0}$. Then the WFOMC
 of \Propagate{$\phi$, $\Delta$, $n$} assuming $|\Gamma| = m$ is the same as the
 WFOMC of \Propagate{$\phi$, $\Gamma$, $m$} assuming $|\Delta| = n$.
 
+% TODO: maybe omit the word 'iverson'...
 Finally, we highlight the crucial role of the \Simplify procedure in simplifying
 the algebraic pattern $\sum_{m=0}^{n}[a \le m \le b] f(m)$. Here:
 \begin{enumerate*}[label=(\roman*)]
@@ -682,7 +761,7 @@ With the facts and assumptions mentioned above, we prove the following theorem.
 
 \begin{theorem}[Termination]\label{thm:halting}
   Let $f$ be an $n$-ary function in $\mathcal{E}$ and
-  $\mathbf{x} \in \mathbf{N}_{0}^{n}$. Then the evaluation of $f(\mathbf{x})$
+  $\mathbf{x} \in \mathbb{N}_{0}^{n}$. Then the evaluation of $f(\mathbf{x})$
   terminates.
 \end{theorem}
 
@@ -831,6 +910,9 @@ how to adapt smoothing to the compilation rules introduced by Dilkas and
 Belle~\shortcite{DBLP:conf/kr/DilkasB23}.
 
 \subsection{Smoothing for Base Cases}\label{sec:smoothingbase}
+% TODO: To be precise, line 7 of Algorithm 3 checks whether smoothing is
+% necessary, and lines 8-9 execute it. If the condition on line 7 is not
+% satisfied, the clause is not smoothed but rather completely omitted.
 
 In this section, we motivate and describe \cref{line:smoothing1,line:smoothing2}
 of \cref{alg:propagate}. Suppose that \Propagate is called with arguments
@@ -840,6 +922,9 @@ $P$ in $\phi$ that has nothing to do with the domain $\Delta$, smoothing
 preserves all occurrences of $P$ even if all clauses with $P$ become vacuously
 satisfied. It is important to note that the approach presented in this section
 is not unique. We explain it via the example below.
+% TODO: In this context, "not unique" means that there are many different ways
+% to adjust/rewrite the formula to achieve the goal of smoothing. This section
+% (and Algorithm 3) presents one such approach.
 
 \begin{example}\label{example:basecasesmoothing}
   Let $\phi$ be:
@@ -1031,6 +1116,42 @@ $\mathbf{c}$ based on the expression $\expr{}$, store the result in the cache,
 and return it.
 
 \section{Experimental Evaluation}\label{sec:experiments}
+% TODO: A WFOMC instance comprises of a formula in first-order logic, a pair of
+% weights for each predicate, and a domain size (i.e., a non-negative integer)
+% for each domain. We provide the full details of all of these, including how
+% the formulas ought to be rewritten to fit the format of each WFOMC algorithm.
+
+% TODO: must rerun on an HPC
+
+% TODO: "hard to follow", pointing to the DPMC paper as a good example
+
+% TODO: Compilation time is included in the experimental results, and the
+% differences between compilation and inference time are delineated in the
+% second-to-last paragraph of Section 6.
+
+% TODO: It would not have been feasible to increase domain sizes by 1 all the
+% way up to 300000. Thus, the experimental results are presented in two parts,
+% where the first part examines scalability with small domain sizes, and the
+% second part tests the limits of each algorithm within a given timeout.
+
+% TODO: maybe instead of a table I should have an experiment where:
+% 1) Crane scales exponentially (with a base of sqrt(2))
+% 2) other algorithm scale linearly
+% 3) Then I can just draw the usual cumulative plot
+% 4) Stop each algorithm when they reach the timeout value
+
+% TODO: (here or in the introduction) C++ code generation is necessary for any
+% runtime experiments because without it the algorithm is "incomplete" as
+% explained above.
+
+% TODO: I'm claiming that C++ code generation is not the main contribution, but
+% the experiments are mainly about it...
+
+% TODO: The asymptotic analysis of the total number of arithmetic operations
+% required to compute the FOMC of these formulas was already performed in
+% previous work [1].
+
+% TODO: Since FastWFOMC does not support many-sorted logic, our experiments were restricted to formulas with a single domain. However, many of the counting problems examined in [1] become equivalent (in the sense that they generate the same integer sequences) when restricted to a single domain. Moreover, it is challenging to compare Crane2 and FastWFOMC on a larger set of problems because each problem has to be represented in two (fairly different) logics: FO and UFO^2+EQ.
 
 We compared \Cranetwo{}\footnote{\textsc{Crane} has two modes that decide how
   compilation rules are applied to formulas: one that uses greedy search and
@@ -1067,6 +1188,8 @@ where $w^{-}(R) = w^{-}(S) = -1$.
   \caption{The running time of WFOMC algorithms. Note that the $y$-axis is on a
     logarithmic scale.}\label{fig:plot}
 \end{figure}
+% TODO: turn this into two separate plots for clarity. Maybe also attach labels
+% to their corresponding lines
 
 In the first experiment, we ran each of the four algorithms once on each
 combination of benchmark and domain size, ranging from one up to and including
@@ -1089,6 +1212,9 @@ experiments is only \SI{4}{\milli\second}. The runtimes of \Cranetwo{} have
 lower variation than those of \textsc{ForcLift} because we compile the formula
 anew for each domain size with \textsc{ForcLift}, whereas with \Cranetwo{}, we
 compile it once and reuse the resulting C++ program for all domain sizes.
+% TODO: The lines for Crane2 in Figure 4 appear to be completely flat whereas
+% the line for ForcLift has some slight fluctuations. We refer to these
+% fluctuations as variance.
 
 \begin{table}[t]
   \centering
@@ -1144,27 +1270,6 @@ by analysing the equations~\cite{DBLP:conf/kr/DilkasB23}. By doing so,
 efficiency can be reasoned about in a more implementation-independent manner by
 making claims about the maximum degree of the polynomial that characterises any
 given solution.
-
-% \section{TODO: Complete or Remove. Correctness of Smoothing}
-
-% What does it mean for a smoothing algorithm to `do the right thing'?
-
-% \begin{definition}
-%   Let $\Delta$ be a domain. Let $P(\mathbf{c})$ be ground atom, where $P/n$ is a
-%   predicate associated with domains $\Delta_{1}, \dots, \Delta_{n}$. We say
-%   that:
-%   \begin{itemize}
-%     \item $P(\mathbf{c})$ is captured by
-%           $\CR(\Delta' \gets \Delta \setminus \{ d \}) \to n$ if it is captured
-%           by $n$.
-%     \item Let $I \coloneqq \{\, i = 1, \dots, n \mid \Delta_{i} = \Delta \,\}$.
-%           Then $P(\mathbf{c})$ is captured by $\DR(d \in \Delta) \to n$ if
-%           $\{\, P(\mathbf{c})[c_{i} \mapsto d_{i}\text{ for all
-%           }i \in I] \mid d_{i} \in \Delta\text{ for all }i \in I \,\}$ is
-%           captured by $n$.
-%     \item $P(\mathbf{c})$ is captured by\ldots
-%   \end{itemize}
-% \end{definition}
 
 \bibliographystyle{kr}
 \bibliography{paper}
