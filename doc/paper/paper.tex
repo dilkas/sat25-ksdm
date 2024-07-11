@@ -1,23 +1,19 @@
-\documentclass{article}
-\pdfpagewidth=8.5in
-\pdfpageheight=11in
-
-\usepackage{kr}
-
-\usepackage{times}
-\usepackage{soul}
-\usepackage{url}
-\usepackage[hidelinks]{hyperref}
-\usepackage[utf8]{inputenc}
-\usepackage[small]{caption}
-\usepackage{graphicx}
-\usepackage{amsmath}
-\usepackage{amsthm}
-\usepackage{booktabs}
-\urlstyle{same}
+\documentclass[letterpaper]{article} % DO NOT CHANGE THIS
+\usepackage[submission]{aaai25}  % DO NOT CHANGE THIS
+\usepackage{times}  % DO NOT CHANGE THIS
+\usepackage{helvet}  % DO NOT CHANGE THIS
+\usepackage{courier}  % DO NOT CHANGE THIS
+\usepackage[hyphens]{url}  % DO NOT CHANGE THIS
+\usepackage{graphicx} % DO NOT CHANGE THIS
+\urlstyle{rm} % DO NOT CHANGE THIS
+\def\UrlFont{\rm}  % DO NOT CHANGE THIS
+\usepackage{natbib}  % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\usepackage{caption} % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\frenchspacing  % DO NOT CHANGE THIS
+\setlength{\pdfpagewidth}{8.5in} % DO NOT CHANGE THIS
+\setlength{\pdfpageheight}{11in} % DO NOT CHANGE THIS
 
 \usepackage[linesnumbered,ruled,vlined]{algorithm2e}
-\usepackage[capitalize,noabbrev]{cleveref}
 \usepackage{microtype}
 \usepackage{mathtools}
 \usepackage{forest}
@@ -25,47 +21,51 @@
 \usepackage{amsfonts}
 \usepackage{pifont}
 \usepackage[inline]{enumitem}
+\usepackage[capitalize,noabbrev]{cleveref}
+\usepackage{booktabs}
+\usepackage{amsthm}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{assumption}{Assumption}
+\newtheorem{corollary}{Corollary}
+\newtheorem{fact}{Observation}
+\newtheorem{lemma}{Lemma}
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
 
 \usetikzlibrary{arrows.meta}
 \usetikzlibrary{positioning}
-
-\newtheorem{theorem}{Theorem}
-\newtheorem{lemma}{Lemma}
-\newtheorem{fact}{Observation}
-\newtheorem{corollary}{Corollary}
-\newtheorem{assumption}{Assumption}
-\newtheorem{definition}{Definition}
-\newtheorem{example}{Example}
-\theoremstyle{remark}
-\newtheorem*{remark}{Remark}
-
-\pdfinfo{
-/TemplateVersion (KR.2022.0, KR.2023.0, KR.2024.0)
-}
 
 \forestset{
   sn edges/.style={for tree={edge={-Latex}}}
 }
 
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\newcommand{\expr}{\mathtt{expr}}
+\newcommand{\Ctwo}{$\mathsf{C}^{2}$}
+\newcommand{\FO}{$\mathsf{FO}$}
+\newcommand{\UFO}{$\mathsf{UFO}^{2} + \mathsf{EQ}$}
+\newcommand{\Cranetwo}{\textsc{Crane2}}
+\newcommand{\Cranebfs}{\textsc{Crane2-BFS}}
+\newcommand{\Cranegreedy}{\textsc{Crane2-Greedy}}
+
 \newcommand{\crefrangeconjunction}{--}
-
 \crefname{line}{line}{lines}
-
 \crefname{fact}{Observation}{Observations}
 \crefname{assumption}{Assumption}{Assumptions}
-
 \crefalias{enumi}{type}
 \crefname{type}{Type}{Types}
 \creflabelformat{type}{#2\textup{#1}#3}
-
 \crefalias{enumi}{step}
 \crefname{step}{Step}{Steps}
 \creflabelformat{step}{#2\textup{#1}#3}
-
 \crefalias{clause}{equation}
 \crefname{clause}{Clause}{Clauses}
 \creflabelformat{clause}{#2\textup{(#1)}#3}
-
 \crefalias{formula}{equation}
 \crefname{formula}{Formula}{Formulas}
 \creflabelformat{formula}{#2\textup{(#1)}#3}
@@ -73,20 +73,7 @@
 \DeclareMathOperator{\CR}{CR}
 \DeclareMathOperator{\DR}{DR}
 \DeclareMathOperator{\Reff}{Ref}
-
 \DeclareMathOperator{\Doms}{Doms}
-
-\newcommand{\cmark}{\ding{51}}
-\newcommand{\xmark}{\ding{55}}
-
-\newcommand{\expr}{\mathtt{expr}}
-\newcommand{\Ctwo}{$\mathsf{C}^{2}$}
-\newcommand{\FO}{$\mathsf{FO}$}
-\newcommand{\UFO}{$\mathsf{UFO}^{2} + \mathsf{EQ}$}
-
-\newcommand{\Cranetwo}{\textsc{Crane2}}
-\newcommand{\Cranebfs}{\textsc{Crane2-BFS}}
-\newcommand{\Cranegreedy}{\textsc{Crane2-Greedy}}
 
 \SetKwFunction{CompileWithBaseCases}{CompileWithBaseCases}
 \SetKwFunction{Compile}{Compile}
@@ -94,23 +81,15 @@
 \SetKwFunction{FindBaseCases}{FindBaseCases}
 \SetKwFunction{Simplify}{Simplify}
 
-\title{Towards Practical First-Order Model Counting}
+\pdfinfo{
+/TemplateVersion (2025.1)
+}
 
-\author{%
-  Ananth K. Kidambi$^1$\footnote{The first and second authors contributed equally and were affiliated with the National University of Singapore during the completion of this work.}\and
-Guramrit Singh$^1$\and
-Paulius Dilkas$^2$\and
-Kuldeep S. Meel$^3$ \\
-\affiliations
-$^1$Indian Institute of Technology Bombay, Mumbai, India\\
-$^2$National University of Singapore, Singapore, Singapore\\
-$^3$University of Toronto, Toronto, Canada\\
-\emails
-210051002@iitb.ac.in,
-guramrit@iitb.ac.in,
-paulius.dilkas@nus.edu.sg,
-meel@cs.toronto.edu
-}% TODO: update affiliation and email
+\setcounter{secnumdepth}{2} %May be changed to 1 or 2 if section numbers are desired.
+
+\title{Towards Practical First-Order Model Counting}
+\author{Anonymous Submission}
+\affiliations{}
 
 \begin{document}
 
@@ -198,10 +177,10 @@ The complexity of WFOMC is typically characterised in terms of \emph{data
   complexity}. This involves fixing the formula and determining whether an
 algorithm exists that can compute the WFOMC in time polynomial with respect to
 the domain size(s). If such an algorithm exists, the formula is called
-\emph{liftable}~\cite{DBLP:conf/starai/JaegerB12}. Beame et
-al.~\shortcite{DBLP:conf/pods/BeameBGS15} demonstrated the existence of an
-unliftable formula with three variables. It is also known that all formulas with
-up to two variables are
+\emph{liftable}~\cite{DBLP:conf/starai/JaegerB12}.
+\citeauthor{DBLP:conf/pods/BeameBGS15}~\shortcite{DBLP:conf/pods/BeameBGS15}
+demonstrated the existence of an unliftable formula with three variables. It is
+also known that all formulas with up to two variables are
 liftable~\cite{DBLP:conf/nips/Broeck11,DBLP:conf/kr/BroeckMD14}. The liftable
 fragment of formulas with two variables has been expanded with various
 axioms~\cite{DBLP:conf/aaai/TothK23,DBLP:journals/ai/BremenK23}, counting
@@ -518,9 +497,10 @@ models to have \emph{precisely three positive literals with the predicate $P$}.
   both $y$ and $z$, then $y$ must equal $z$. It is important to note that
   \cref{eq:fo} is written with two domains instead of just one. However, we can
   still determine the number of endofunctions by assuming that the sizes of
-  $\Gamma$ and $\Delta$ are equal. This formulation, as observed by Dilkas and
-  Belle~\shortcite{DBLP:conf/kr/DilkasB23}, can prove beneficial in enabling
-  first-order knowledge compilation algorithms to find efficient solutions.
+  $\Gamma$ and $\Delta$ are equal. This formulation, as observed by
+  \citeauthor{DBLP:conf/kr/DilkasB23}~\shortcite{DBLP:conf/kr/DilkasB23}, can
+  prove beneficial in enabling first-order knowledge compilation algorithms to
+  find efficient solutions.
 \end{example}
 
 \subsection{Algebra}\label{sec:algebra}
@@ -602,9 +582,9 @@ detailed explanation of \cref{alg:compilewithbasecases}.
 % 4. Function denoted by "f" represents the solution to the model counting problem.
 % 3. The model count of the original formula is computed by evaluating f on the desired domain sizes. For example, f(3, 2) is the model count when |\Gamma| = 3, and |\Delta| = 2.
 \begin{example}[Counting bijections]\label{example:overall}
-  Consider the following formula (previously examined by Dilkas and
-  Belle~\shortcite{DBLP:conf/kr/DilkasB23}) that defines predicate $P$ as a
-  bijection between two sets $\Gamma$ and $\Delta$:
+  Consider the following formula (previously examined by
+  \citeauthor{DBLP:conf/kr/DilkasB23}~\shortcite{DBLP:conf/kr/DilkasB23}) that
+  defines predicate $P$ as a bijection between two sets $\Gamma$ and $\Delta$:
   \[
     \begin{gathered}
       \forall x \in \Gamma\text{. }\exists y \in \Delta\text{. }P(x, y)\\
@@ -897,10 +877,10 @@ replacing the $m$ variables in $C$ with the $n$ new constants.
 
 \emph{Smoothness} is a property originating in propositional knowledge
 compilation, where it refers to the situation where all disjuncts in a
-disjunction node contain the same atoms~\cite{darwiche2001tractable}. Van den
-Broeck et al.~\shortcite{DBLP:conf/ijcai/BroeckTMDR11} extend this concept to
-first-order logic, introducing set-disjunction and inclusion-exclusion nodes in
-addition to disjunction.
+disjunction node contain the same atoms~\cite{darwiche2001tractable}.
+\citeauthor{DBLP:conf/ijcai/BroeckTMDR11}~\shortcite{DBLP:conf/ijcai/BroeckTMDR11}
+extend this concept to first-order logic, introducing set-disjunction and
+inclusion-exclusion nodes in addition to disjunction.
 
 The purpose of smoothing is as follows. When compilation rules such as unit
 propagation and inclusion-exclusion simplify a formula, certain ground atoms may
@@ -909,11 +889,12 @@ for these atoms during counting, smoothing nodes (i.e., tautological clauses
 such as $P(c) \lor \neg P(c)$) are added to the FCG in the appropriate location.
 
 The remainder of this section presents an extension to the smoothing algorithm
-of Van den Broeck et al.~\shortcite{DBLP:conf/ijcai/BroeckTMDR11}.
+of
+\citeauthor{DBLP:conf/ijcai/BroeckTMDR11}~\shortcite{DBLP:conf/ijcai/BroeckTMDR11}.
 \Cref{sec:smoothingbase} explains the role of smoothing in the base-case-finding
 algorithm described in \cref{sec:main}. \Cref{sec:smoothingfcg1} demonstrates
-how to adapt smoothing to the compilation rules introduced by Dilkas and
-Belle~\shortcite{DBLP:conf/kr/DilkasB23}.
+how to adapt smoothing to the compilation rules introduced by
+\citeauthor{DBLP:conf/kr/DilkasB23}~\shortcite{DBLP:conf/kr/DilkasB23}.
 
 \subsection{Smoothing for Base Cases}\label{sec:smoothingbase}
 % TODO: To be precise, line 7 of Algorithm 3 checks whether smoothing is
@@ -979,22 +960,22 @@ account for missing atoms. In this section, we will
 \end{enumerate*}
 
 Before discussing the proposed changes to smoothing, let us briefly review the
-compilation rules and their corresponding node types introduced by Dilkas and
-Belle~\shortcite{DBLP:conf/kr/DilkasB23}. \emph{Domain recursion} involves
-selecting a domain $\Delta$, introducing a new constant $c \in \Delta$, and
-modifying the formula based on two possibilities for each variable $x$
-quantified over $\Delta$: $x = c$ or $x \ne c$. The resulting node is denoted as
-$\DR(c \in \Delta)$. \emph{Constraint removal} applies to formulas where each
-variable $x$ quantified over a domain $\Delta$ is followed by the inequality
-constraint $x \ne c$. These formulas can be rewritten so that each clause begins
-with $\forall x \in \Delta\text{. }x \ne c \Rightarrow \ldots$ Constraint
-removal replaces $\Delta$ with a new domain $\Delta'$ and removes the $x \ne c$
-constraints. The resulting node is denoted as
-$\CR(\Delta' \gets \Delta \setminus \{\,c\,\})$. Finally, \emph{caching} detects
-when the input formula $\phi$ is equal to a previously encountered formula
-$\psi$ except for having different domains. The resulting node is denoted as
-$\Reff(\sigma)$, with $\sigma$ representing the substitution mapping the domains
-of $\psi$ to their corresponding domains in $\phi$.
+compilation rules and their corresponding node types introduced by
+\citeauthor{DBLP:conf/kr/DilkasB23}~\shortcite{DBLP:conf/kr/DilkasB23}.
+\emph{Domain recursion} involves selecting a domain $\Delta$, introducing a new
+constant $c \in \Delta$, and modifying the formula based on two possibilities
+for each variable $x$ quantified over $\Delta$: $x = c$ or $x \ne c$. The
+resulting node is denoted as $\DR(c \in \Delta)$. \emph{Constraint removal}
+applies to formulas where each variable $x$ quantified over a domain $\Delta$ is
+followed by the inequality constraint $x \ne c$. These formulas can be rewritten
+so that each clause begins with $\forall x \in \Delta\text{.
+}x \ne c \Rightarrow \ldots$ Constraint removal replaces $\Delta$ with a new
+domain $\Delta'$ and removes the $x \ne c$ constraints. The resulting node is
+denoted as $\CR(\Delta' \gets \Delta \setminus \{\,c\,\})$. Finally,
+\emph{caching} detects when the input formula $\phi$ is equal to a previously
+encountered formula $\psi$ except for having different domains. The resulting
+node is denoted as $\Reff(\sigma)$, with $\sigma$ representing the substitution
+mapping the domains of $\psi$ to their corresponding domains in $\phi$.
 
 \paragraph{Stage~1 for Domain Recursion}
 When visiting a $\DR(c \in \Delta)$ node, we replace each occurrence of
@@ -1172,15 +1153,16 @@ We compared \Cranetwo{}\footnote{\textsc{Crane} has two modes that decide how
   another that combines greedy and breadth-first search. In our experiments, we
   refer to these modes as \Cranegreedy{} and \Cranebfs{}, respectively.} with
 \textsc{FastWFOMC} and \textsc{ForcLift} on two problems previously considered
-by Dilkas and Belle~\shortcite{DBLP:conf/kr/DilkasB23}. The first problem is the
-function-counting problem from \cref{example:functions}, and the second problem
-is the bijection-counting problem described below. It is important to note that
-comparing \Cranetwo{} and \textsc{FastWFOMC} on a more substantial set of
-benchmarks is challenging because there is no automated way to translate a
-formula in \FO{} or \Ctwo{} into \UFO{}, or even check if such an encoding is
-possible. We ran the experiments on an AMD~Ryzen~7~5800H processor with
-\SI{16}{\gibi\byte} of memory and Arch Linux~6.8.2-arch2-1 operating system.
-\textsc{FastWFOMC} was executed using Python~3.8.19 with Python-FLINT~0.5.0.
+by \citeauthor{DBLP:conf/kr/DilkasB23}~\shortcite{DBLP:conf/kr/DilkasB23}. The
+first problem is the function-counting problem from \cref{example:functions},
+and the second problem is the bijection-counting problem described below. It is
+important to note that comparing \Cranetwo{} and \textsc{FastWFOMC} on a more
+substantial set of benchmarks is challenging because there is no automated way
+to translate a formula in \FO{} or \Ctwo{} into \UFO{}, or even check if such an
+encoding is possible. We ran the experiments on an AMD~Ryzen~7~5800H processor
+with \SI{16}{\gibi\byte} of memory and Arch Linux~6.8.2-arch2-1 operating
+system. \textsc{FastWFOMC} was executed using Python~3.8.19 with
+Python-FLINT~0.5.0.
 
 The \FO{} formula for bijections is described in \cref{example:overall}. The
 equivalent formula in \Ctwo{} is
@@ -1264,12 +1246,13 @@ In this work, we have presented several contributions. First, we have developed
 algorithmic techniques to find the base cases of recursive functions generated
 by the original \textsc{Crane} algorithm. Second, we have extended the smoothing
 procedure of \textsc{ForcLift} and \textsc{Crane} to support base case formulas
-and the compilation rules introduced by Dilkas and
-Belle~\shortcite{DBLP:conf/kr/DilkasB23}. Third, we have proposed an approach to
-compile function definitions into C++ programs with support for
-arbitrary-precision arithmetic. Lastly, we have provided experimental evidence
-demonstrating that \Cranetwo{} can scale to much larger domain sizes than
-\textsc{FastWFOMC} while handling more formulas than \textsc{ForcLift}.
+and the compilation rules introduced by
+\citeauthor{DBLP:conf/kr/DilkasB23}~\shortcite{DBLP:conf/kr/DilkasB23}. Third,
+we have proposed an approach to compile function definitions into C++ programs
+with support for arbitrary-precision arithmetic. Lastly, we have provided
+experimental evidence demonstrating that \Cranetwo{} can scale to much larger
+domain sizes than \textsc{FastWFOMC} while handling more formulas than
+\textsc{ForcLift}.
 
 There are many potential avenues for future work. Specifically, a more thorough
 experimental study is needed to understand how WFOMC algorithms compare in terms
@@ -1285,7 +1268,6 @@ efficiency can be reasoned about in a more implementation-independent manner by
 making claims about the maximum degree of the polynomial that characterises any
 given solution.
 
-\bibliographystyle{kr}
 \bibliography{paper}
 
 \end{document}
