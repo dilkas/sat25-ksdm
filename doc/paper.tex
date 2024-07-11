@@ -151,12 +151,18 @@ meel@cs.toronto.edu
 % 1) replace x_i-c_i on Line 7 of Algorithm 2 with a generalisation of x_i that can be an arbitrary summation/subtraction of domain sizes
 % 2) a function call with a constant should always mean that that function should have a base case, not just when it's in the same function
 
+% TODO: must find a way to include the implementation in the submission
+
+% TODO: consider restructuring the paper to make it easier to understand
+
 \section{Introduction}
 % TODO: improvements to the introduction (must):
 % * make it extra clear what the gap is that this work is trying to fill
 % * mention Crane earlier and describe its importance
 % * the last two paragraphs should make more of a BOOM (e.g., include the over 9k claim)
 % * (here and elsewhere) clarify the distinction between the weighted and unweighted variants of the problem in the final version of the paper. We focus on the unweighted variant in our implementation and experiments, however, Crane2 can handle WFOMC instances as well simply by switching the main data type from integers to rational numbers. Maybe add some weighted experiments as well.
+% * (must) more related work, situating my contributions in the broader context
+% * (concerning related work) the topic is intimately related to "graded logics", largely investigated in DL, mu-calculus and temporal logics
 
 % 1. What is the problem?
 
@@ -1121,7 +1127,7 @@ and return it.
 % for each domain. We provide the full details of all of these, including how
 % the formulas ought to be rewritten to fit the format of each WFOMC algorithm.
 
-% TODO: must rerun on an HPC
+% TODO: must rerun on an HPC and include more instances
 
 % TODO: "hard to follow", pointing to the DPMC paper as a good example
 
@@ -1151,7 +1157,15 @@ and return it.
 % required to compute the FOMC of these formulas was already performed in
 % previous work [1].
 
-% TODO: Since FastWFOMC does not support many-sorted logic, our experiments were restricted to formulas with a single domain. However, many of the counting problems examined in [1] become equivalent (in the sense that they generate the same integer sequences) when restricted to a single domain. Moreover, it is challenging to compare Crane2 and FastWFOMC on a larger set of problems because each problem has to be represented in two (fairly different) logics: FO and UFO^2+EQ.
+% TODO: Since FastWFOMC does not support many-sorted logic, our experiments were
+% restricted to formulas with a single domain. However, many of the counting
+% problems examined in [1] become equivalent (in the sense that they generate
+% the same integer sequences) when restricted to a single domain. Moreover, it
+% is challenging to compare Crane2 and FastWFOMC on a larger set of problems
+% because each problem has to be represented in two (fairly different) logics:
+% FO and UFO^2+EQ.
+
+% TODO: position some of the experiments as 'practical'
 
 We compared \Cranetwo{}\footnote{\textsc{Crane} has two modes that decide how
   compilation rules are applied to formulas: one that uses greedy search and
