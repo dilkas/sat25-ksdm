@@ -106,8 +106,7 @@
   function definitions that include base cases by modifying the logical formulas
   used in the FOMC algorithm. Second, we extend the well-known circuit
   modification technique in knowledge compilation, known as smoothing, to work
-  with the formulas corresponding to base cases and the recently proposed node
-  types, such as domain recursion and constraint removal. Third, we introduce a
+  with the formulas corresponding to base cases. Third, we introduce a
   compilation algorithm that transforms the function definitions into C++ code,
   equipped with arbitrary-precision arithmetic. These additions allow the new
   FOMC algorithm to scale to domain sizes over \num{9000} times larger than the
@@ -124,13 +123,9 @@
 % computed for social networks of at most 30 people.
 % [1] Richardson, M., & Domingos, P. (2006). Markov logic networks. Machine learning, 62, 107-136.
 
-% TODO: somehow indicate that source code will be available (a redacted link?)
-
 % TODO: Updates to the algorithm
 % 1) replace x_i-c_i on Line 7 of Algorithm 2 with a generalisation of x_i that can be an arbitrary summation/subtraction of domain sizes
 % 2) a function call with a constant should always mean that that function should have a base case, not just when it's in the same function
-
-% TODO: must find a way to include the implementation in the submission
 
 % TODO: consider restructuring the paper to make it easier to understand
 
@@ -274,10 +269,10 @@ recursive functions by:
   and\label[step]{step2}
   \item recursing on these new formulas.
 \end{enumerate*}
-Then, \cref{sec:smoothing} explains post-processing techniques for FCGs and the
-formulas from \cref{step2} above required to preserve the correct model count.
-Next, \cref{sec:cpp} elucidates how function definitions encoding a solution to
-a WFOMC problem are compiled into C++ programs.\footnote{The possibility of
+Then, \cref{sec:smoothing} explains post-processing techniques for the formulas
+from \cref{step2} above required to preserve the correct model count. Next,
+\cref{sec:cpp} elucidates how function definitions encoding a solution to a
+WFOMC problem are compiled into C++ programs.\footnote{The possibility of
   compiling WFOMC solutions to C++ programs has been previously
   considered~\cite{DBLP:conf/kr/KazemiP16}. However, the extent of formulas that
   could be handled was limited.} Finally, \cref{sec:experiments} presents two
@@ -850,7 +845,7 @@ In the case of $n = 0$, there are three types of clauses to consider:
 Clauses of \cref{type1} are transferred to the new formula $\phi'$ without any
 changes. For clauses of \cref{type2}, $C'$ is empty, so these clauses are
 filtered out. As for clauses of \cref{type3}, a new kind of smoothing is
-performed, which will be explained in \cref{sec:smoothingbase}.
+performed, which will be explained in \cref{sec:smoothing}.
 
 In the case of $n>0$, $n$ new constants are introduced. Let $C$ be an arbitrary
 clause in $\phi$, and let $m \in \mathbb{N}_{0}$ be the number of variables in
@@ -873,42 +868,27 @@ replacing the $m$ variables in $C$ with the $n$ new constants.
   Here, $c_{1}$, $c_{2}$, and $c_{3}$ are the new constants.
 \end{example}
 
-\section{Smoothing}\label{sec:smoothing}
+\section{Smoothing the Base Cases}\label{sec:smoothing}
 
-\emph{Smoothness} is a property originating in propositional knowledge
-compilation, where it refers to the situation where all disjuncts in a
-disjunction node contain the same atoms~\cite{darwiche2001tractable}.
-\citeauthor{DBLP:conf/ijcai/BroeckTMDR11}~\shortcite{DBLP:conf/ijcai/BroeckTMDR11}
-extend this concept to first-order logic, introducing set-disjunction and
-inclusion-exclusion nodes in addition to disjunction.
+\emph{Smoothing} is the process of modifying a circuit to re-introduce atoms
+that might have been eliminated, thus ensuring that the circuit preserves the
+correct (weighted) model
+count~\cite{darwiche2001tractable,DBLP:conf/ijcai/BroeckTMDR11}. In this
+section, we motivate and describe a similar process performed on
+\cref{line:smoothing1,line:smoothing2} of \cref{alg:propagate}.
 
-The purpose of smoothing is as follows. When compilation rules such as unit
-propagation and inclusion-exclusion simplify a formula, certain ground atoms may
-be eliminated (see \cref{example:basecasesmoothing} below). To properly account
-for these atoms during counting, smoothing nodes (i.e., tautological clauses
-such as $P(c) \lor \neg P(c)$) are added to the FCG in the appropriate location.
 
-The remainder of this section presents an extension to the smoothing algorithm
-of
-\citeauthor{DBLP:conf/ijcai/BroeckTMDR11}~\shortcite{DBLP:conf/ijcai/BroeckTMDR11}.
-\Cref{sec:smoothingbase} explains the role of smoothing in the base-case-finding
-algorithm described in \cref{sec:main}. \Cref{sec:smoothingfcg1} demonstrates
-how to adapt smoothing to the compilation rules introduced by
-\citeauthor{DBLP:conf/kr/DilkasB23}~\shortcite{DBLP:conf/kr/DilkasB23}.
-
-\subsection{Smoothing for Base Cases}\label{sec:smoothingbase}
 % TODO: To be precise, line 7 of Algorithm 3 checks whether smoothing is
 % necessary, and lines 8-9 execute it. If the condition on line 7 is not
 % satisfied, the clause is not smoothed but rather completely omitted.
 
-In this section, we motivate and describe \cref{line:smoothing1,line:smoothing2}
-of \cref{alg:propagate}. Suppose that \Propagate is called with arguments
-$(\phi, \Delta, 0)$, which means we are simplifying the formula $\phi$ by
-assuming that the domain $\Delta$ is empty. Informally, if there is a predicate
-$P$ in $\phi$ that has nothing to do with the domain $\Delta$, smoothing
-preserves all occurrences of $P$ even if all clauses with $P$ become vacuously
-satisfied. It is important to note that the approach presented in this section
-is not unique. We explain it via the example below.
+Suppose that \Propagate is called with arguments $(\phi, \Delta, 0)$, which
+means we are simplifying the formula $\phi$ by assuming that the domain $\Delta$
+is empty. Informally, if there is a predicate $P$ in $\phi$ that has nothing to
+do with the domain $\Delta$, smoothing preserves all occurrences of $P$ even if
+all clauses with $P$ become vacuously satisfied. It is important to note that
+the approach presented in this section is not unique. We explain it via the
+example below.
 % TODO: In this context, "not unique" means that there are many different ways
 % to adjust/rewrite the formula to achieve the goal of smoothing. This section
 % (and Algorithm 3) presents one such approach.
@@ -947,137 +927,6 @@ is not unique. We explain it via the example below.
 It is worth mentioning that the choice of $l$ on \cref{line:smoothing1} of
 \cref{alg:propagate} is inconsequential because any choice achieves the same
 goal: constructing a tautological clause that retains the literals in $C'$.
-
-\subsection{Smoothing the FCG}\label{sec:smoothingfcg1}
-
-Smoothing is a two-step process that involves propagating unit clauses upwards
-(i.e., in the opposite direction of FCG arcs) and adding smoothing nodes to
-account for missing atoms. In this section, we will
-\begin{enumerate*}[label=(\roman*)]
-  \item describe the relevant node types from previous work,
-  \item explain how smoothing should work for these node types, and
-  \item demonstrate the new smoothing techniques using two example FCGs.
-\end{enumerate*}
-
-Before discussing the proposed changes to smoothing, let us briefly review the
-compilation rules and their corresponding node types introduced by
-\citeauthor{DBLP:conf/kr/DilkasB23}~\shortcite{DBLP:conf/kr/DilkasB23}.
-\emph{Domain recursion} involves selecting a domain $\Delta$, introducing a new
-constant $c \in \Delta$, and modifying the formula based on two possibilities
-for each variable $x$ quantified over $\Delta$: $x = c$ or $x \ne c$. The
-resulting node is denoted as $\DR(c \in \Delta)$. \emph{Constraint removal}
-applies to formulas where each variable $x$ quantified over a domain $\Delta$ is
-followed by the inequality constraint $x \ne c$. These formulas can be rewritten
-so that each clause begins with $\forall x \in \Delta\text{.
-}x \ne c \Rightarrow \ldots$ Constraint removal replaces $\Delta$ with a new
-domain $\Delta'$ and removes the $x \ne c$ constraints. The resulting node is
-denoted as $\CR(\Delta' \gets \Delta \setminus \{\,c\,\})$. Finally,
-\emph{caching} detects when the input formula $\phi$ is equal to a previously
-encountered formula $\psi$ except for having different domains. The resulting
-node is denoted as $\Reff(\sigma)$, with $\sigma$ representing the substitution
-mapping the domains of $\psi$ to their corresponding domains in $\phi$.
-
-\paragraph{Stage~1 for Domain Recursion}
-When visiting a $\DR(c \in \Delta)$ node, we replace each occurrence of
-$\phi(c)$ or $\forall x \in \Delta\text{. } x \ne c \Rightarrow \phi(x)$ with
-$\forall x \in \Delta\text{. }\phi(x)$ for each unit clause received from the
-child node. This way, we ensure that if the subgraph below the domain recursion
-node covers some of the ground atoms affected by domain recursion, it covers all
-of them. If the relevant subgraph already covers those ground atoms, Stage~2
-will not make any changes. Otherwise, smoothing nodes will be added below the
-domain recursion node to account for the difference in the sets of ground atoms
-assigned to the domain recursion node and its child node.
-
-\paragraph{Stage~1 for Constraint Removal and Caching}
-When visiting a $\CR(\Delta' \gets \Delta \setminus \{\,c\,\})$ node, we reverse
-constraint removal by replacing each $\forall x \in \Delta'\text{. }\phi(x)$
-with $\forall x \in \Delta\text{. }x \ne c \Rightarrow \phi(x)$. When visiting a
-$\Reff(\sigma)$ node, we apply the substitution $\sigma$ to the unit clauses
-from the child node.
-
-\paragraph{Stage~2 for Domain Recursion}
-We do not need to add smoothing nodes immediately below constraint removal or
-caching nodes. However, for domain recursion, we follow a specific process.
-\begin{enumerate}
-  \item If the set of unit clauses assigned to the child node during Stage~1
-        contains both $\phi(c)$ and $\forall x \in \Delta\text{.
-        } x \ne c \Rightarrow \phi(x)$, we merge the two clauses into
-        $\forall x \in \Delta\text{. }\phi(x)$. The only difference between
-        these two clauses is that one has the constant $c$ while the other has a
-        variable $x \ne c$.
-  \item If necessary, we add smoothing nodes below the domain recursion node to
-        account for the difference between the unit clauses assigned to the
-        domain recursion node during Stage~1 and the unit clauses of the child
-        node post-processed by the step above.
-\end{enumerate}
-
-\begin{figure}[t]
-  \centering
-  \begin{forest}
-    for tree={sn edges}
-    [$\DR(c \in \Delta)$,name=dr,ellipse,draw
-    [$\land$,ellipse,draw,dashed,edge=dashed
-    [$P(c)$,rectangle,draw,fill=green!20]
-    [$\forall x \in \Delta\text{. }x \ne c \Rightarrow P(x) \lor \neg P(x)$,rectangle,dashed,edge=dashed,draw,fill=blue!20]
-    ]
-    ]
-  \end{forest}
-  \caption{An artificial example of an FCG where a smoothing node needs to be
-    added below a domain recursion node. The dashed nodes and arcs are added
-    during Stage~2 of smoothing.}\label{fig:smoothing2}
-\end{figure}
-
-\begin{example}[An FCG that requires smoothing]
-  \Cref{fig:smoothing2} depicts an FCG with a domain recursion node
-  $\DR(c \in \Delta)$ followed directly by a single $P(c)$ node. In this
-  scenario, Stage~1 assigns $\{\, \forall x \in \Delta\text{. }P(x) \,\}$ to the
-  former node and $\{\, P(c) \,\}$ to the latter. As these two sets of unit
-  clauses cover different ground atoms, Stage~2 adds a smoothing node to address
-  $P(x)$ for all $x \in \Delta \setminus \{\, c \,\}$.
-\end{example}
-
-\begin{figure}[t]
-  \centering
-  \begin{forest}
-    for tree={sn edges}
-    [$\DR(c \in \Delta)$,name=dr,ellipse,draw,label={right:\textcolor{blue}{3. $\{\, \forall x \in \Delta\text{. }P(x) \,\}$}}
-    [$\land$,ellipse,draw,label={left:\textcolor{blue}{2. $\{\, P(c) \,\}$}},label={right:\textcolor{blue}{6. $\{\, P(c), \forall x \in \Delta\text{. }x \ne c \Rightarrow P(x) \,\}$}}
-    [$P(c)$,rectangle,draw,fill=green!20,label={272:\textcolor{blue}{1. $\{\, P(c) \,\}$}}]
-    [$\CR(\Delta' \gets \Delta \setminus \{\, c \,\})$,ellipse,draw,label={87:\textcolor{blue}{5. $\{\, \forall x \in \Delta\text{. }x \ne c \Rightarrow P(x) \,\}$}}
-    [$\Reff(\Delta \mapsto \Delta')$,name=ref,ellipse,draw,label={below:\textcolor{blue}{4. $\{\, \forall x \in \Delta'\text{. }P(x) \,\}$}}]
-    ]
-    ]
-    ]
-  \end{forest}
-  \caption{A smooth FCG based on \cref{example:overall}. For compactness, the
-    arc between the caching node and the domain recursion node is not shown. The
-    labels next to the nodes indicate the sets of unit clauses assigned to each
-    node during Stage~1 and the order in which these assignments were made.
-    Empty assignments that replace a set $S$ with $S$ itself are not
-    included.}\label{fig:smoothing1}
-\end{figure}
-
-\begin{example}[A smooth FCG]\label{example:smooth}
-  Stage~1 of the smoothing process is more complex in the case of the FCG shown
-  in \cref{fig:smoothing1}. The unit clause $P(c)$ propagates to the conjunction
-  node and is then generalised to $\forall x \in \Delta\text{. }P(x)$ by the
-  domain recursion node. It continues to propagate to the caching node, changing
-  its form to $(\forall x \in \Delta\text{.
-  }P(x))[\Delta \mapsto \Delta'] \equiv \forall x \in \Delta'\text{. }P(x)$. The
-  constraint removal node re-introduces the constraints, transforming the clause
-  to $\forall x \in \Delta\text{. }x \ne c \Rightarrow P(x)$, which then
-  propagates to the conjunction node, joining $P(c)$.
-
-  During Stage~2, $P(c)$ and $\forall x \in \Delta\text{.
-  }x \ne c \Rightarrow P(x)$ are combined into $\forall x \in \Delta\text{.
-  }P(x)$. Since the resulting clause matches the clause assigned to the domain
-  recursion node, the FCG is already smooth.
-\end{example}
-
-The algebraic interpretation of \cref{fig:smoothing1} is an equation $e$ that
-defines a recursive function. The right-hand side of $e$ already encompasses
-$P(c)$, and the smoothing algorithm correctly recognises that the recursive call
-also encompasses $P(x)$ for all $x \in \Delta \setminus \{\, c \,\}$.
 
 \section{Generating C++ Code}\label{sec:cpp}
 
@@ -1245,13 +1094,11 @@ greater than 143 and returns $\infty$ instead.
 In this work, we have presented several contributions. First, we have developed
 algorithmic techniques to find the base cases of recursive functions generated
 by the original \textsc{Crane} algorithm. Second, we have extended the smoothing
-procedure of \textsc{ForcLift} and \textsc{Crane} to support base case formulas
-and the compilation rules introduced by
-\citeauthor{DBLP:conf/kr/DilkasB23}~\shortcite{DBLP:conf/kr/DilkasB23}. Third,
-we have proposed an approach to compile function definitions into C++ programs
-with support for arbitrary-precision arithmetic. Lastly, we have provided
-experimental evidence demonstrating that \Cranetwo{} can scale to much larger
-domain sizes than \textsc{FastWFOMC} while handling more formulas than
+procedure of \textsc{ForcLift} and \textsc{Crane} to support base case formulas.
+Third, we have proposed an approach to compile function definitions into C++
+programs with support for arbitrary-precision arithmetic. Lastly, we have
+provided experimental evidence demonstrating that \Cranetwo{} can scale to much
+larger domain sizes than \textsc{FastWFOMC} while handling more formulas than
 \textsc{ForcLift}.
 
 There are many potential avenues for future work. Specifically, a more thorough
@@ -1271,3 +1118,14 @@ given solution.
 \bibliography{paper}
 
 \end{document}
+
+% TODO:
+% must clean pdf metadata before submitting
+% make sure that it's not automatically deducible that I'm the author of Crane
+% no type 3 fonts (including in the PDFs of figures)
+% no overfull boxes (might be the figure)
+% no embedded links (but URLs are fine as long as they're not clickable?)
+% must not use 'input' command. instead, compile to a pdf
+% figures should appear on the page where they are discussed or on the next page
+% colors in figures must be cmyk, not rgb
+% references must not have missing fields
