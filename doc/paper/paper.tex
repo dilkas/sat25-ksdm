@@ -120,6 +120,9 @@
 % computed for social networks of at most 30 people.
 % [1] Richardson, M., & Domingos, P. (2006). Markov logic networks. Machine learning, 62, 107-136.
 
+% TODO: (somewhere) The implementation is only for unweighted (but the
+% definition of WFOMC is still necessary because of Skolemization).
+
 % TODO: consider restructuring the paper (how?)
 
 \section{Introduction}
@@ -649,27 +652,24 @@ $g(l, m) = g(l-1, m) + mg(l-1, m-1)$.
   \KwOut{set $\mathcal{B}$ of base cases}
 
   $\mathcal{B} \gets \emptyset$\;
-  \ForEach{equation $(f(\mathbf{x}) = \expr{}) \in \mathcal{E}$}{
-    \ForEach{function call $f(\mathbf{y}) \in \expr{}$}{\label{line:functioncall}
-      \ForEach{$y_{i} \in \mathbf{y}$} {
-        \uIf{$y_{i} \in \mathbb{N}_{0}$}{
-          $\mathcal{B} \gets \mathcal{B} \cup \{\, f(\mathbf{x})[x_{i} \mapsto y_{i}] \,\}$\;
-        }
-        \ElseIf{$y_{i} = x_{i} - c_{i}$ for some $c_{i} \in \mathbb{N}_{0}$}{
-          \For{$j \gets 0$ \KwTo $c_{i} - 1$}{\label{line:lim}
-            $\mathcal{B} \gets \mathcal{B} \cup \{\, f(\mathbf{x})[x_{i} \mapsto j] \,\}$\;\label{line:insert}
-          }
+  \ForEach{function call $f(\mathbf{y})$ on the right-hand side of an equation in $\mathcal{E}$}{\label{line:functioncall}
+    $\mathbf{x} \gets \text{the parameters of $f$ in its definition}$\;
+    \ForEach{$y_{i} \in \mathbf{y}$} {
+      \uIf{$y_{i} \in \mathbb{N}_{0}$}{
+        $\mathcal{B} \gets \mathcal{B} \cup \{\, f(\mathbf{x})[x_{i} \mapsto y_{i}] \,\}$\;
+      }
+      \ElseIf{$y_{i} = x_{i} - c_{i}$ for some $c_{i} \in \mathbb{N}_{0}$}{
+        \For{$j \gets 0$ \KwTo $c_{i} - 1$}{\label{line:lim}
+          $\mathcal{B} \gets \mathcal{B} \cup \{\, f(\mathbf{x})[x_{i} \mapsto j] \,\}$\;\label{line:insert}
         }
       }
     }
   }
 \end{algorithm}
-% TODO: replace x_i-c_i on Line 7 of Algorithm 2 with a generalisation of x_i
-% that can be an arbitrary summation/subtraction of domain sizes (propagating
-% this change to the rest of the paper)
-
-% TODO: a function call with a constant should always mean that that function
-% should have a base case, not just when it's in the same function
+% TODO (later, let's not bother yet): replace x_i-c_i on Line 7 of Algorithm 2
+% with a generalisation of x_i that can be an arbitrary summation/subtraction of
+% domain sizes (propagating this change to the rest of the paper, particularly
+% Assumption 1, the proof of Lemma 1)
 
 \Cref{alg:findbasecases} summarises the implementation of the \FindBaseCases
 function. When a function $f$ calls itself recursively, \FindBaseCases considers
@@ -685,8 +685,8 @@ including) $c_{i}$. The following discussion explains the reasoning behind this
 approach.
 
 \begin{example}
-  Let us consider the recursive function $g$ from \cref{example:overall}. In
-  this case, \FindBaseCases iterates over two function calls: $g(l-1, m)$ and
+  Consider the recursive function $g$ from \cref{example:overall}. Then
+  \FindBaseCases iterates over two function calls: $g(l-1, m)$ and
   $g(l-1, m-1)$. The former produces the base case $g(0, m)$, while the latter
   produces both $g(0, m)$ and $g(l, 0)$.
 \end{example}
@@ -745,7 +745,7 @@ Additionally, we introduce an assumption about the structure of recursion.
 Finally, we assume a particular order of evaluation for function calls using the
 equations in $\mathcal{E}$. Specifically, we assume that base cases are
 considered before the recursive definition. The exact order in which base cases
-are considered is not relevant.
+are considered is immaterial.
 
 \begin{assumption}
   When multiple equations in $\mathcal{E}$ match a function call
@@ -753,7 +753,8 @@ are considered is not relevant.
   its left-hand side.
 \end{assumption}
 
-With the facts and assumptions mentioned above, we prove the following theorem.
+With the observations and assumptions mentioned above, we prove the following
+theorem.
 
 \begin{theorem}[Termination]\label{thm:halting}
   Let $f$ be an $n$-ary function in $\mathcal{E}$ and
@@ -778,7 +779,7 @@ several lemmas of increasing generality.
   $f(x)$ terminates by \cref{fact}.
 
   Otherwise, let $f(y)$ be an arbitrary function call on the right-hand side of
-  the definition of $f(x)$. If $y$ is a constant, there is a base case for
+  the definition of $f(x)$. If $y$ is a constant, then there is a base case for
   $f(y)$. Otherwise, let $y = x - c$ for some $c > 0$. Then there exists
   $k \in \mathbb{N}_{0}$ such that $0 \le x - kc \le c-1$. So, after $k$
   iterations, the sequence of function calls $f(x), f(x-c), f(x-2c),\dots$ will
@@ -961,8 +962,6 @@ $\mathbf{c}$ based on the expression $\expr{}$, store the result in the cache,
 and return it.
 
 \section{Experimental Evaluation}\label{sec:experiments}
-% TODO: must rerun on an HPC and include more instances
-
 % TODO: this section is apparently "hard to follow"
 
 % TODO: Compilation time is included in the experimental results, and the
@@ -974,22 +973,13 @@ and return it.
 % where the first part examines scalability with small domain sizes, and the
 % second part tests the limits of each algorithm within a given timeout.
 
-% TODO: maybe instead of a table I should have an experiment where:
-% 1) Crane scales exponentially (with a base of sqrt(2))
-% 2) other algorithm scale linearly
-% 3) Then I can just draw the usual cumulative plot
-% 4) Stop each algorithm when they reach the timeout value
-
 % TODO: (here or in the introduction) C++ code generation is necessary for any
 % runtime experiments because without it the algorithm is "incomplete" as
 % explained above.
 
-% TODO: I'm claiming that C++ code generation is not the main contribution, but
-% the experiments are mainly about it...
-
 % TODO: The asymptotic analysis of the total number of arithmetic operations
 % required to compute the FOMC of these formulas was already performed in
-% previous work [1].
+% previous work.
 
 % TODO: Since FastWFOMC does not support many-sorted logic, our experiments were
 % restricted to formulas with a single domain. However, many of the counting
@@ -997,9 +987,7 @@ and return it.
 % the same integer sequences) when restricted to a single domain. Moreover, it
 % is challenging to compare Crane2 and FastWFOMC on a larger set of problems
 % because each problem has to be represented in two (fairly different) logics:
-% FO and UFO^2+EQ.
-
-% TODO: position some of the experiments as 'practical'
+% \FO{} and \UFO{}.
 
 We compared \Cranetwo{}\footnote{\textsc{Crane} has two modes that decide how
   compilation rules are applied to formulas: one that uses greedy search and
