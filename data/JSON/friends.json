@@ -1,0 +1,6 @@
+{
+    "formula": "(S(y) | ~S(x) | ~F(x, y)) & (C(x) | ~S(x))",
+    "arities": {"C": 1, "S": 1, "F": 2},
+    "cardinalities": [],
+    "weights": {}
+}

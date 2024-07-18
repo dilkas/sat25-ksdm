@@ -1,0 +1,8 @@
+a = {1,...,3}
+b = {1,...,3}
+
+p(a, b)
+
+forall x exist y p(x, y).
+p(x, y) ^ p(x, z) => y=z.
+

@@ -349,3 +349,5 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+results/raw/
