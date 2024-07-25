@@ -1,20 +1,28 @@
 #!/usr/bin/env python3
 
 from collections import defaultdict
+from datetime import datetime
 import csv
 import os
 
-RESULTS_DIR = 'results'
-RESULTS_FILE = 'results.csv'
-FIELDNAMES = ['algorithm', 'sequence', 'domain.size', 'count', 'compilation.time', 'inference.time']
-TIMEOUT = 3600000
+RESULTS_DIR = '../results/raw'
+RESULTS_FILE = '../results/processed/{}.csv'.format(
+    datetime.now().strftime('%Y%m%d%H%M%S'))
+FIELDNAMES = [
+    'algorithm',
+    'sequence',
+    'domain.size',
+    'count',
+    'compilation.time',
+    'inference.time']
+TIMEOUT = 15
 VERBOSE = False
 
-sequences = {}
-with open('sequences.csv', newline='') as f:
-    reader = csv.DictReader(f, delimiter=';')
-    for row in reader:
-        sequences[int(row['id'])] = [int(x) for x in row['sequence'].split(',')]
+# sequences = {}
+# with open('sequences.csv', newline='') as f:
+#     reader = csv.DictReader(f, delimiter=';')
+#     for row in reader:
+#         sequences[int(row['id'])] = [int(x) for x in row['sequence'].split(',')]
 
 rows = []
 incorrect_count = 0
@@ -30,9 +38,9 @@ for filename in os.listdir(RESULTS_DIR):
     total_times = []
     with open(RESULTS_DIR + '/' + filename) as f:
         for line in f.readlines():
-            if line.startswith('Compilation time:'): # Crane
+            if line.startswith('Compilation time:'):  # Crane
                 data['compilation.time'] = line.split()[2]
-            elif line.startswith('The model count'): # Crane
+            elif line.startswith('The model count'):  # Crane
                 tokens = line.split()
                 domains.append(tokens[7][:-1])
                 if tokens[8] == 'TIMEOUT':
@@ -41,24 +49,24 @@ for filename in os.listdir(RESULTS_DIR):
                 else:
                     counts.append(tokens[8].translate({ord(','): None}))
                     times.append(tokens[10])
-            elif line.startswith('Domain size:'): # ForcLift and FastWFOMC
+            elif line.startswith('Domain size:'):  # ForcLift and FastWFOMC
                 domains.append(line.split()[2])
-            elif line.startswith('Z = '): # ForcLift
+            elif line.startswith('Z = '):  # ForcLift
                 try:
                     counts.append(int(round(float(line.split()[4]))))
-                except ValueError: # Record 'NaN' as a compilation error
+                except ValueError:  # Record 'NaN' as a compilation error
                     domains = []
                     total_times = []
                     break
-            elif line.startswith('Inference took'): # ForcLift
+            elif line.startswith('Inference took'):  # ForcLift
                 times.append(line.split()[2])
-            elif line.startswith('Elapsed:'): # ForcLift and FastWFOMC
+            elif line.startswith('Elapsed:'):  # ForcLift and FastWFOMC
                 t = float(line.split()[1]) * 1000
                 total_times.append(t)
                 if data['algorithm'] == 'fastwfomc':
                     times.append(t)
-            elif line.strip().isnumeric():
-                counts.append(line.strip())
+            elif line.startswith('WFOMC:'):  # FastWFOMC
+                counts.append(line.split()[1][:-3])
 
     # If the algorithm fails to compile, output no domains
     if len(domains) == 1:
@@ -74,22 +82,32 @@ for filename in os.listdir(RESULTS_DIR):
             print('Total runtimes:', total_times)
         print()
 
+    print(data['algorithm'], len(domains), len(counts))
+
+    if len(counts) == len(domains) - 1:
+        counts.append('')
+        total_times[-1] = TIMEOUT
+
     assert len(domains) == len(counts)
     assert len(domains) == len(times)
     assert len(total_times) == 0 or len(total_times) == len(domains)
 
     # Check correctness of Crane
-    if data['sequence'].isnumeric() and data['algorithm'] != 'forclift':
-        sequence = [str(x) for x in sequences[int(data['sequence'][1:])][:len(counts) + 2]]
-        mutual_len = min(len(counts), len(sequence))
-        if not (counts[:mutual_len] == sequence[:mutual_len] or
-                counts[:mutual_len] == sequence[1:mutual_len + 1] or
-                counts[:mutual_len] == sequence[2:mutual_len + 2]):
-            incorrect_count += 1
-            print('Sequence {} (algorithm {}) is incorrect:'.format(data['sequence'], data['algorithm']))
-            print('Original:', [int(x) for x in sequence])
-            print('Computed: ', [int(x) for x in counts if x != ''])
-            print()
+    # if data['sequence'].isnumeric() and data['algorithm'] != 'forclift':
+    #     sequence = [str(x) for x in sequences[int(
+    #         data['sequence'][1:])][:len(counts) + 2]]
+    #     mutual_len = min(len(counts), len(sequence))
+    #     if not (counts[:mutual_len] == sequence[:mutual_len] or
+    #             counts[:mutual_len] == sequence[1:mutual_len + 1] or
+    #             counts[:mutual_len] == sequence[2:mutual_len + 2]):
+    #         incorrect_count += 1
+    #         print(
+    #             'Sequence {} (algorithm {}) is incorrect:'.format(
+    #                 data['sequence'],
+    #                 data['algorithm']))
+    #         print('Original:', [int(x) for x in sequence])
+    #         print('Computed: ', [int(x) for x in counts if x != ''])
+    #         print()
 
     for i in range(len(domains)):
         new_data = data.copy()
@@ -105,7 +123,7 @@ for filename in os.listdir(RESULTS_DIR):
 #                                                                               len(sequences) - incorrect_count, len(sequences)))
 # for algorithm, count in failed_count.items():
 #     print('{} solved: {:.0f}% ({} out of {})'.format(algorithm, 100 * (len(sequences) - count) / len(sequences),
-#                                                      int(len(sequences) - count), len(sequences)))
+# int(len(sequences) - count), len(sequences)))
 
 with open(RESULTS_FILE, 'w', encoding='UTF8', newline='') as f:
     writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
