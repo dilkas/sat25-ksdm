@@ -2,7 +2,7 @@ library(tidyverse)
 library(scales)
 library(tikzDevice)
 
-df <- read.csv("../results/processed/results1.csv")
+df <- read.csv("../results/processed/results.csv")
 df$compilation.time <- df$compilation.time / 1000
 df$inference.time <- df$inference.time / 1000
 df$time <- df$compilation.time + df$inference.time
@@ -17,13 +17,17 @@ df$algorithm[df$algorithm == "fastwfomc"] <- "\\textsc{FastWFOMC}"
 #  summarise(diff = 100 * (max(count) - min(count)) / min(count))
 
 tikz(file = "../doc/plot.tex", width = 3.32492194445, height = 1.8702685937531252)
-ggplot(df, aes(domain.size, time, colour = algorithm, linetype = sequence)) +
+ggplot(df[df$sequence == "friends",],
+       aes(domain.size, time, colour = algorithm, linetype = algorithm,
+           shape = algorithm)) +
   geom_line() +
-  scale_y_continuous(trans = log10_trans()) +
+  geom_point() +
+  scale_x_continuous(trans = log2_trans()) +
+  scale_y_continuous(trans = log2_trans()) +
   annotation_logticks(sides = "l", colour = "#b3b3b3") +
   ylab("Total runtime (s)") +
   xlab("Domain size") +
-  labs(color = "", linetype = "") +
+  labs(color = "", linetype = "", shape = "") +
   scale_color_brewer(palette = "Dark2") +
   theme_light(base_size = 9)
 dev.off()

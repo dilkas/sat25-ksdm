@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 
 from collections import defaultdict
-from datetime import datetime
 import csv
 import os
 
 RESULTS_DIR = '../results/raw'
-RESULTS_FILE = '../results/processed/{}.csv'.format(
-    datetime.now().strftime('%Y%m%d%H%M%S'))
+RESULTS_FILE = '../results/processed/results.csv'
 FIELDNAMES = [
     'algorithm',
     'sequence',
@@ -15,8 +13,17 @@ FIELDNAMES = [
     'count',
     'compilation.time',
     'inference.time']
-TIMEOUT = 15
-VERBOSE = False
+TIMEOUT = 15 * 1000  # in ms
+
+def chop_trailing_empty_strings(lst):
+    # Iterate from the end to find the first non-empty string
+    last_non_empty_index = len(lst)
+    for i in range(len(lst) - 1, -1, -1):
+        if lst[i] != '':
+            last_non_empty_index = i + 1
+            break
+    # Slice the list to remove trailing empty strings
+    return lst[:last_non_empty_index]
 
 # sequences = {}
 # with open('sequences.csv', newline='') as f:
@@ -28,8 +35,7 @@ rows = []
 incorrect_count = 0
 failed_count = defaultdict(lambda: 0)
 for filename in os.listdir(RESULTS_DIR):
-    if VERBOSE:
-        print('Parsing', filename)
+    print('Parsing', filename)
     data = {}
     data['sequence'], data['algorithm'] = filename.split('.')
     domains = []
@@ -54,7 +60,10 @@ for filename in os.listdir(RESULTS_DIR):
             elif line.startswith('Z = '):  # ForcLift
                 try:
                     counts.append(int(round(float(line.split()[4]))))
-                except ValueError:  # Record 'NaN' as a compilation error
+                except OverflowError:  # Record 'Infinity' as a timeout
+                    counts.append('')
+                except ValueError:
+                    # Record 'NaN' as a compilation error
                     domains = []
                     total_times = []
                     break
@@ -68,29 +77,25 @@ for filename in os.listdir(RESULTS_DIR):
             elif line.startswith('WFOMC:'):  # FastWFOMC
                 counts.append(line.split()[1][:-3])
 
+    # Ignore the timeouts at the end
+    counts = chop_trailing_empty_strings(counts)
+    domains = domains[:len(counts)]
+    times = times[:len(counts)]
+    if len(total_times) != 0:
+        total_times = total_times[:len(counts)]
+
     # If the algorithm fails to compile, output no domains
     if len(domains) == 1:
         domains = []
         total_times = []
+
     if len(domains) == 0:
         failed_count[data['algorithm']] += 1
-
-    if VERBOSE:
-        print('Domains:', domains)
-        print('Counts:', counts)
-        if len(total_times) > 0:
-            print('Total runtimes:', total_times)
-        print()
-
-    print(data['algorithm'], len(domains), len(counts))
-
-    if len(counts) == len(domains) - 1:
-        counts.append('')
-        total_times[-1] = TIMEOUT
 
     assert len(domains) == len(counts)
     assert len(domains) == len(times)
     assert len(total_times) == 0 or len(total_times) == len(domains)
+    assert '' not in counts
 
     # Check correctness of Crane
     # if data['sequence'].isnumeric() and data['algorithm'] != 'forclift':
@@ -117,7 +122,6 @@ for filename in os.listdir(RESULTS_DIR):
         if len(total_times) > 0:
             new_data['compilation.time'] = total_times[i] - float(times[i])
         rows.append(new_data)
-
 
 # print('Correct (treating unsolved as correct): {:.0f}% ({} out of {})'.format(100 * (len(sequences) - incorrect_count) / len(sequences),
 #                                                                               len(sequences) - incorrect_count, len(sequences)))
