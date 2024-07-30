@@ -1,6 +1,7 @@
 library(tidyverse)
 library(scales)
 library(tikzDevice)
+library(ggpubr)
 
 df <- read.csv("../results/processed/results.csv")
 df$compilation.time <- df$compilation.time / 1000
@@ -8,28 +9,36 @@ df$inference.time <- df$inference.time / 1000
 df$time <- df$compilation.time + df$inference.time
 df$algorithm[df$algorithm == "bfs"] <- "\\textsc{Crane2-BFS}"
 df$algorithm[df$algorithm == "greedy"] <- "\\textsc{Crane2-Greedy}"
-df$algorithm[df$algorithm == "forclift"] <- "\\textsc{ForcLift}"
 df$algorithm[df$algorithm == "fastwfomc"] <- "\\textsc{FastWFOMC}"
+df$algorithm[df$algorithm == "forclift"] <- "\\textsc{ForcLift}"
+df$sequence[df$sequence == "bijections"] <- "Bijections"
+df$sequence[df$sequence == "friends"] <- "Friends"
+df$sequence[df$sequence == "functions"] <- "Functions"
 
 # Sanity check: differences between max and min counts as a percentage of the
 # min count
-#differences <- df %>% group_by(sequence, domain.size) %>%
-#  summarise(diff = 100 * (max(count) - min(count)) / min(count))
+# differences <- df %>% group_by(sequence, domain.size) %>%
+#   summarise(diff = 100 * (max(count) - min(count)) / min(count))
 
-tikz(file = "../doc/plot.tex", width = 3.32492194445, height = 1.8702685937531252)
-ggplot(df[df$sequence == "friends",],
-       aes(domain.size, time, colour = algorithm, linetype = algorithm,
-           shape = algorithm)) +
+tikz(file = "../doc/paper/plot.tex", width = 7, height = 3,
+     standAlone = TRUE)
+ggplot(df, aes(domain.size, time, color = algorithm, linetype = algorithm,
+               shape = algorithm)) +
   geom_line() +
   geom_point() +
-  scale_x_continuous(trans = log2_trans()) +
+  scale_x_continuous(trans = log2_trans(),
+                     breaks = c(32, 4096, 524288, 67108864),
+                     labels = c("$2^{5}$", "$2^{12}$", "$2^{19}$",
+                                "$2^{26}$")) +
   scale_y_continuous(trans = log2_trans()) +
-  annotation_logticks(sides = "l", colour = "#b3b3b3") +
+  annotation_logticks(sides = "bl", colour = "#b3b3b3", base = 2) +
   ylab("Total runtime (s)") +
   xlab("Domain size") +
   labs(color = "", linetype = "", shape = "") +
+  theme_grey(base_size = 9) +
+  theme(legend.position = "bottom") +
   scale_color_brewer(palette = "Dark2") +
-  theme_light(base_size = 9)
+  facet_wrap(vars(sequence))
 dev.off()
 
 # ============== DEGREE FINDING (not doing this right now) ================

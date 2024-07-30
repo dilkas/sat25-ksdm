@@ -8,7 +8,9 @@
 
 cd $SLURM_SUBMIT_DIR
 
-# TODO: module load intel/2018.2
+module load java/1.8.0_201
+module load julia/1.10.4
+module load intel/2020u4
 
 ulimit -c 0
 lscpu > cpuinfo.txt

@@ -968,11 +968,6 @@ and return it.
 % differences between compilation and inference time are delineated in the
 % second-to-last paragraph of Section 6.
 
-% TODO: It would not have been feasible to increase domain sizes by 1 all the
-% way up to 300000. Thus, the experimental results are presented in two parts,
-% where the first part examines scalability with small domain sizes, and the
-% second part tests the limits of each algorithm within a given timeout.
-
 % TODO: (here or in the introduction) C++ code generation is necessary for any
 % runtime experiments because without it the algorithm is "incomplete" as
 % explained above.
@@ -991,7 +986,9 @@ and return it.
 
 % TODO: update info about hardware, timeout, and the new domain sequences
 
-% TODO: for FastWFOMC, we also increase domain sizes exponentially
+% TODO: domains increase exponentially for all algorithms
+
+% TODO: mention/update hardware info and modules loaded
 
 We compared \Cranetwo{}\footnote{\textsc{Crane} has two modes that decide how
   compilation rules are applied to formulas: one that uses greedy search and
@@ -1023,18 +1020,12 @@ Similarly, in \UFO{} the same formula can be written as
 \end{gather*}
 where $w^{-}(R) = w^{-}(S) = -1$.
 
-\begin{figure}[t]
+\begin{figure*}[t]
   \centering
-  \input{plot}
+  \includegraphics{plot.pdf}
   \caption{The running time of WFOMC algorithms. Note that the $y$-axis is on a
     logarithmic scale.}\label{fig:plot}
-\end{figure}
-% TODO: turn this into two separate plots for clarity. Maybe also attach labels
-% to their corresponding lines
-
-% TODO: no overfull boxes (might be the fault of the figure)
-
-% TODO: must not use 'input' command. instead, compile to a pdf
+\end{figure*}
 
 In the first experiment, we ran each of the four algorithms once on each
 combination of benchmark and domain size, ranging from one up to and including

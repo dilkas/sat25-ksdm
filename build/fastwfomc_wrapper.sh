@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/bash
 
 for ((i=1; ; i++)); do
     j=$((2 ** $i))
