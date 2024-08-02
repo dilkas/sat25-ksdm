@@ -3,6 +3,10 @@ library(scales)
 library(tikzDevice)
 library(ggpubr)
 
+df <- read.csv("../results/processed/results_with_counts.csv")
+df$count <- NULL
+write.csv(df, "../results/processed/results.csv")
+
 df <- read.csv("../results/processed/results.csv")
 df$compilation.time <- df$compilation.time / 1000
 df$inference.time <- df$inference.time / 1000

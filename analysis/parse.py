@@ -5,7 +5,7 @@ import csv
 import os
 
 RESULTS_DIR = '../results/raw'
-RESULTS_FILE = '../results/processed/results.csv'
+RESULTS_FILE = '../results/processed/results_with_counts.csv'
 FIELDNAMES = [
     'algorithm',
     'sequence',
