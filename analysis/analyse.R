@@ -3,9 +3,9 @@ library(scales)
 library(tikzDevice)
 library(ggpubr)
 
-df <- read.csv("../results/processed/results_with_counts.csv")
-df$count <- NULL
-write.csv(df, "../results/processed/results.csv")
+# df <- read.csv("../results/processed/results_with_counts.csv")
+# df$count <- NULL
+# write.csv(df, "../results/processed/results.csv")
 
 df <- read.csv("../results/processed/results.csv")
 df$compilation.time <- df$compilation.time / 1000
@@ -18,6 +18,7 @@ df$algorithm[df$algorithm == "forclift"] <- "\\textsc{ForcLift}"
 df$sequence[df$sequence == "bijections"] <- "Bijections"
 df$sequence[df$sequence == "friends"] <- "Friends"
 df$sequence[df$sequence == "functions"] <- "Functions"
+df <- df[df$domain.size > 1,]
 
 # Sanity check: differences between max and min counts as a percentage of the
 # min count

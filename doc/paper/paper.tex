@@ -109,8 +109,8 @@
   with the formulas corresponding to base cases. Third, we introduce a
   compilation algorithm that transforms the function definitions into C++ code,
   equipped with arbitrary-precision arithmetic. These additions allow the new
-  FOMC algorithm to scale to domain sizes over \num{9000} times larger than the
-  current state of the art, as demonstrated through experimental results.
+  FOMC algorithm to scale to domain sizes over \num{500000} times larger than
+  the current state of the art, as demonstrated through experimental results.
 \end{abstract}
 
 % TODO: Having an algorithm that can efficiently handle large domain sizes is
@@ -646,6 +646,10 @@ $g(l, m) = g(l-1, m) + mg(l-1, m-1)$.
 
 \subsection{Identifying a Sufficient Set of Base Cases}\label{sec:identifying}
 
+% TODO: The asymptotic analysis of the total number of arithmetic operations
+% required to compute the FOMC of some of these formulas was already performed
+% in previous work~\cite{DBLP:conf/kr/DilkasB23}.
+
 \begin{algorithm}[t]
   \caption{\protect\FindBaseCases{$\mathcal{E}$}}\label{alg:findbasecases}
   \KwIn{set $\mathcal{E}$ of equations}
@@ -963,102 +967,51 @@ and return it.
 
 \section{Experimental Evaluation}\label{sec:experiments}
 
-% TODO: 1. Introduction
+% 1. Introduction
 % Objective: Briefly state the goals of the experiments.
 % Overview: Summarize the structure of the section.
 
-\begin{itemize}
-  \item Note that it would not make sense to experimentally evaluate \Cranetwo{}
-        without the C++ code generation described in \cref{sec:cpp} because the
-        algorithm would only produce mathematical definitions of functions.
-\end{itemize}
-
-% TODO: 2. Experimental Setup
-
-% Environment: Describe the hardware and software environment (e.g.,
-% specifications of the computer, operating system, libraries, and tools used).
-
-\begin{itemize}
-  \item The experiments were run on an Intel Skylake \SI{2.4}{\giga\hertz} CPU
-        with \SI{188}{\gibi\byte} of memory and CentOS~7 operating system. C++
-        programs were compiled using the Intel C++ Compiler 2020u4.
-        \textsc{FastWFOMC} was run on Julia~1.10.4, while all other algorithms
-        were run on the Java Virtual Machine 1.8.0\_201.
-\end{itemize}
-
-% Datasets: Provide details about the datasets used in the experiments,
-% including size, source, and any preprocessing steps.
-
-\begin{itemize}
-  \item The asymptotic analysis of the total number of arithmetic operations
-        required to compute the FOMC of some of these formulas was already
-        performed in previous work~\cite{DBLP:conf/kr/DilkasB23}.
-  \item Since FastWFOMC does not support many-sorted logic, our experiments were
-        restricted to formulas with a single domain. However, many of the
-        counting problems examined in [1] become equivalent (in the sense that
-        they generate the same integer sequences) when restricted to a single
-        domain. Moreover, it is challenging to compare Crane2 and FastWFOMC on a
-        larger set of problems because each problem has to be represented in two
-        (fairly different) logics: \FO{} and \UFO{}.
-  \item It is important to note that comparing \Cranetwo{} and
-        \textsc{FastWFOMC} on a more substantial set of benchmarks is
-        challenging because there is no automated way to translate a formula in
-        \FO{} or \Ctwo{} into \UFO{}, or even check if such an encoding is
-        possible.
-\end{itemize}
+% 2. Experimental Setup
 
 % Baselines: List and describe the baseline methods or systems used for
 % comparison.
 
-\begin{itemize}
-  \item \textsc{Crane} has two modes that decide how compilation rules are
-        applied to formulas: one that uses greedy search and another that
-        combines greedy and breadth-first search. In our experiments, we refer
-        to these modes as \Cranegreedy{} and \Cranebfs{}, respectively.
-\end{itemize}
+In this section, we present experimental results examining the scalability of
+\Cranetwo{} compared to two other notable FOMC algorithms: \textsc{FastWFOMC}
+and \textsc{ForcLift}. Note that it would not make sense to include the original
+\textsc{Crane} algorithm in the experiments or to evaluate \Cranetwo{} without
+the C++ code generation described in \cref{sec:cpp}. Indeed, these algorithms
+can only produce mathematical definitions of functions without evaluating them.
 
-% Metrics: Define the performance metrics used to evaluate the results (e.g.,
-% accuracy, precision, recall, F1-score, runtime).
+In our experiments, we include two versions of \Cranetwo{}: \Cranegreedy{} and
+\Cranebfs{}. Like its predecessor, \Cranetwo{} has two modes that decide how
+compilation rules are applied to formulas: one that uses greedy search similarly
+to \textsc{ForcLift} and another that combines greedy and breadth-first search.
+While greedy search is more efficient (in terms of being able to handle larger
+formulas), it is a heuristic that can miss some solutions.
 
-\begin{itemize}
-  \item Compilation time is included in the experimental results, and the
-        differences between compilation and inference time are delineated in the
-        second-to-last paragraph of Section 6.
-  \item We run each algorithm on each benchmark on domains of size
-        $2^{0}, 2^{1}, 2^{2},\dots$ until the algorithm times out after
-        \SI{1}{\hour}, runs out of memory, or (in the case of \textsc{ForcLift})
-        returns $\infty$.
-\end{itemize}
+% Datasets: Provide details about the datasets used in the experiments,
+% including size, source, and any preprocessing steps.
 
-% TODO: 3. Results and Analysis
-% Presentation of Results: Use tables, graphs, and charts to present the experimental results clearly.
-% Comparison with Baselines: Compare your method’s results with the baselines.
-% Discussion: Analyze and interpret the results, highlighting the strengths and potential weaknesses of your approach.
-% Insights: Provide insights or patterns observed from the results.
-% Challenges: Discuss any challenges or unexpected outcomes.
-% Acknowledgement: Honestly acknowledge any limitations of your experiments or method.
-
-\begin{itemize}
-  \item It is important to note that while \textsc{ForcLift} may have runtime
-        performance comparable to \Cranetwo{}, its finite-precision arithmetic
-        cannot represent model counts for domain sizes greater than 143 and
-        returns $\infty$ instead.
-\end{itemize}
-
-% TODO: 8. Conclusion
-% Summary: Briefly summarize the key findings from the experimental results.
-% Future Work: Suggest directions for future research based on your findings.
-
-
-
-We compare \Cranetwo{} with \textsc{FastWFOMC} and \textsc{ForcLift} on two
-problems previously considered by
-\citeauthor{DBLP:conf/kr/DilkasB23}~\shortcite{DBLP:conf/kr/DilkasB23}. The
-first problem is the function-counting problem from \cref{example:functions},
-and the second problem is the bijection-counting problem described below.
-
-The \FO{} formula for bijections is described in \cref{example:overall}. The
-equivalent formula in \Ctwo{} is
+We compare the algorithms on three benchmarks from previous work. The first is
+the function-counting problem from \cref{example:functions}, previously examined
+by \citeauthor{DBLP:conf/kr/DilkasB23}~\shortcite{DBLP:conf/kr/DilkasB23}. The
+second is a variant of the well-known `Friends \& Smokers' Markov logic
+network~\cite{DBLP:conf/aaai/SinglaD08,DBLP:conf/uai/BroeckCD12}. In \Ctwo{},
+\FO{}, and \UFO{}, it can be formulated as
+\begin{gather*}
+  (\forall x,y \in \Delta\text{. } S(x) \land F(x, y) \Rightarrow S(y)) \land{}\\
+  (\forall x \in \Delta\text{. }S(x) \Rightarrow C(x))
+\end{gather*}
+or, equivalently, in conjunctive normal form as
+\begin{gather*}
+  (\forall x,y \in \Delta\text{. }S(y) \lor \neg S(x) \lor \neg F(x, y)) \land{}\\
+  (\forall x \in \Delta\text{. } C(x) \lor \neg S(x)).
+\end{gather*}
+Finally, we include the bijection-counting problem previously used by
+\citeauthor{DBLP:conf/kr/DilkasB23}~\shortcite{DBLP:conf/kr/DilkasB23}. Its
+formulation in \FO{} is described in \cref{example:overall}. The equivalent
+formula in \Ctwo{} is
 \begin{align*}
   (\forall x \in \Delta\text{. }\exists^{=1} y \in \Delta&\text{. }P(x, y))\land{}\\
   (\forall y \in \Delta\text{. }\exists^{=1} x \in \Delta&\text{. }P(x, y)).
@@ -1071,6 +1024,53 @@ Similarly, in \UFO{} the same formula can be written as
 \end{gather*}
 where $w^{-}(R) = w^{-}(S) = -1$.
 
+Since \textsc{FastWFOMC} does not support many-sorted logic, our experiments are
+restricted to formulas with a single domain. However, many of the counting
+problems examined in the experimental evaluation of
+\textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23} become equivalent (in the sense
+that they generate the same integer sequences) when restricted to a single
+domain. Moreover, it is challenging to compare \Cranetwo{} and
+\textsc{FastWFOMC} on a larger set of problems because each problem has to be
+represented in two (fairly different) logics: \FO{} and \UFO{}. Nonetheless, the
+three benchmarks cover a diverse range of possibilities. Unlike the other two,
+the `friends' benchmark uses multiple predicates and can be written in \FO{}
+using only two variables and no cardinality constraints or counting quantifiers.
+Next, the `functions' benchmark, while still liftable by all of the algorithms,
+requires either the use of cardinality constraints, counting quantifiers, or
+more than two variables. Finally, the `bijections' benchmark is an example of a
+formula that can be handled by \textsc{FastWFOMC} but not \textsc{ForcLift}.
+
+% Metrics: Define the performance metrics used to evaluate the results (e.g.,
+% accuracy, precision, recall, F1-score, runtime).
+
+A major difference between \textsc{ForcLift} and the other two algorithms is
+that \textsc{ForcLift} does not support arbitrary-precision arithmetic whereas
+the other two algorithms both use the GNU Multiple Precision Arithmetic Library.
+Instead, when the numerical value of the count becomes too big to be accurately
+presented using finite precision, \textsc{ForcLift} returns $\infty$. We run
+each algorithm on each benchmark on domains of size $2^{1}, 2^{2}, 2^{3},\dots$
+until the algorithm times out after \SI{1}{\hour}, runs out of memory, or (in
+the case of \textsc{ForcLift}) returns $\infty$. We measure compilation and
+inference time separately, but primarily focus on total runtime (i.e., the sum
+of both), which is dominated by the latter.
+
+% Environment: Describe the hardware and software environment (e.g.,
+% specifications of the computer, operating system, libraries, and tools used).
+
+The experiments were run on an Intel Skylake \SI{2.4}{\giga\hertz} CPU with
+\SI{188}{\gibi\byte} of memory and CentOS~7 operating system. C++ programs were
+compiled using the Intel C++ Compiler 2020u4. \textsc{FastWFOMC} was run on
+Julia~1.10.4, while all other algorithms were run on the Java Virtual Machine
+1.8.0\_201.
+
+% 3. Results and Analysis
+% Presentation of Results: Use tables, graphs, and charts to present the experimental results clearly.
+% Comparison with Baselines: Compare your method’s results with the baselines.
+% Discussion: Analyze and interpret the results, highlighting the strengths and potential weaknesses of your approach.
+% Insights: Provide insights or patterns observed from the results.
+% Challenges: Discuss any challenges or unexpected outcomes.
+% Acknowledgement: Honestly acknowledge any limitations of your experiments or method.
+
 \begin{figure*}[t]
   \centering
   \includegraphics{plot.pdf}
@@ -1078,25 +1078,41 @@ where $w^{-}(R) = w^{-}(S) = -1$.
     that both axes are on a logarithmic scale.}\label{fig:plot}
 \end{figure*}
 
-\Cref{fig:plot} shows the total runtime values as a measure of the overall
-performance of each algorithm. We also separately tracked compilation and
-inference times and commented on them where relevant. It is worth noting that
-\Cranebfs{} can handle more instances than either \textsc{ForcLift} or
-\Cranegreedy{}, including the bijection-counting problem in our experiments as
-well as similar formulas examined previously~\cite{DBLP:conf/kr/DilkasB23}.
+\Cref{fig:plot} summarises the experimental results. Only \textsc{FastWFOMC} and
+\Cranebfs{} could lift the bijection-counting problem. On this benchmark, the
+largest domain sizes that these algorithms could handle were \num{64} and
+\num{4096}, respectively. On the other two benchmarks, \textsc{ForcLift} has the
+lowest runtime, but, as it is finite-precision, only scales up to domain sizes
+of \num{16} and \num{128} in the case of `friends' and `functions',
+respectively. Next, \textsc{FastWFOMC} outperforms \textsc{ForcLift} in the case
+of `friends' but not `functions': it scales up to domains of size \num{1024} and
+\num{64}, respectively. Finally, both \Cranebfs{} and \Cranegreedy{} perform
+nearly identically on both of these benchmarks. Similarly to the `bijections'
+benchmark, \Cranetwo{} significantly surpasses the other two algorithms, scaling
+up to domains of size \num{8192} and \num{67108864}, respectively.
 
-As shown in \cref{fig:plot}, the runtimes of all compilation-based algorithms
-remained practically constant, in contrast to the rapidly increasing runtimes of
-\textsc{FastWFOMC}. Although the search/compilation part is slower in
-\Cranetwo{} than in \textsc{ForcLift}, the difference is negligible. The
-runtimes of the FOKC algorithms appear constant because, for these counting
-problems and domain sizes, compilation time dominates inference time (remember
-that compilation time is independent of domain sizes). Indeed, the maximum
-inference time of \Cranebfs{} and \Cranegreedy{} across these experiments is
-only \SI{4}{\milli\second}. The runtimes of \Cranetwo{} have lower variation
-than those of \textsc{ForcLift} because we compile the formula anew for each
-domain size with \textsc{ForcLift}, whereas with \Cranetwo{}, we compile it once
-and reuse the resulting C++ program for all domain sizes.
+Another aspect of the experimental results worth discussing separately is that
+of compilation. As both Julia and Scala use just-in-time (JIT) compilation, both
+\textsc{FastWFOMC} and \textsc{ForcLift} take longer when run on the smallest
+domain size, as that is when most JIT compilation happens. As \Cranetwo{} is run
+only once per benchmark, JIT compilation time is incorporated into its runtime
+across all domain sizes. Moreover, while \textsc{ForcLift} compilation is
+generally faster than that of \Cranetwo{}, neither is significant in comparison
+to inference time. Indeed, typically, \textsc{ForcLift} compilation took around
+\SI{0.5}{\second}, while \Cranetwo{} compilation took around \SI{2.3}{\second}.
+
+% 8. Conclusion
+% Summary: Briefly summarize the key findings from the experimental results.
+% Future Work: Suggest directions for future research based on your findings.
+
+So what do our experiments reveal about which algorithm should one use in
+practice? If the formula can be handled by \textsc{ForcLift} and the domain
+sizes are reasonably small, it is likely to be the fastest algorithm. In other
+cases, \Cranetwo{} is likely to be significantly faster than \textsc{FastWFOMC}
+across all domain sizes (but especially with higher domain sizes), assuming the
+formula can be handled by both algorithms.
+
+% TODO: run this section through editgpt and grammarly
 
 \section{Conclusion and Future Work}
 
