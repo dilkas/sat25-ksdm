@@ -123,8 +123,6 @@
 % TODO: (somewhere) The implementation is only for unweighted (but the
 % definition of WFOMC is still necessary because of Skolemization).
 
-% TODO: consider restructuring the paper (how?)
-
 \section{Introduction}
 % TODO: make it extra clear what the gap is that this work is trying to fill
 
@@ -363,8 +361,6 @@ clause as a set of literals.
   }\label{tbl:logics}
 \end{table*}
 
-% TODO: Use FastWFOMC.jl instead, removing the mention of 'privately-obtained'
-
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}
 
 In \cref{tbl:logics}, we outline the differences among three first-order logics
@@ -378,17 +374,16 @@ commonly used in WFOMC:
   \item \Ctwo{} is often used in the literature on \textsc{FastWFOMC} and
   related
   methods~\cite{DBLP:journals/jair/Kuzelka21,DBLP:conf/aaai/MalhotraS22};
-  \item \UFO{} is the input format supported by a private version of
-  \textsc{FastWFOMC} obtained directly from the authors.
+  \item \UFO{} is the input format supported by the most recent implementation
+  of
+  \textsc{FastWFOMC}\footnote{\url{https://github.com/jan-toth/FastWFOMC.jl}}.
 \end{enumerate*}
-Note that the publicly available
-version\footnote{\url{https://comp.nus.edu.sg/~tvanbr/software/fastwfomc.tar.gz}}
-of \textsc{FastWFOMC} does not support any cardinality constraints. The notation
-we use to refer to each logic is standard in the case of \Ctwo{} and redefined
-to be more specific in the case of the other two logics. All three logics are
-function-free, and domains are always assumed to be finite. As usual, we
-presuppose the \emph{unique name assumption}, which states that two constants
-are equal if and only if they are the same constant~\cite{DBLP:books/aw/RN2020}.
+The notation we use to refer to each logic is standard in the case of \Ctwo{}
+and \UFO{}~\cite{tóth2024complexityweightedfirstordermodel} and redefined to be
+more specific in the case of \FO{}. All three logics are function-free, and
+domains are always assumed to be finite. As usual, we presuppose the
+\emph{unique name assumption}, which states that two constants are equal if and
+only if they are the same constant~\cite{DBLP:books/aw/RN2020}.
 
 \renewcommand*{\thefootnote}{\arabic{footnote}}
 
@@ -534,6 +529,20 @@ $f(\mathbf{x}) = \expr{}$, with $f(\mathbf{x})$ representing a signature.
 
 \section{Completing the Definitions of Functions}\label{sec:main}
 
+Before describing the main contribution of this work, let us review the key
+aspects of FOKC as realised by \textsc{Crane}. The input formula is compiled
+into:
+\begin{enumerate*}[label=(\roman*)]
+  \item set $\mathcal{E}$ of equations,
+  \item map $\mathcal{F}$ from function names to formulas, and
+  \item map $\mathcal{D}$ from function names and argument indices to domains.
+\end{enumerate*}
+$\mathcal{E}$ can contain any number of functions, one of which (denoted by $f$)
+represents the solution to the FOMC problem. To compute the FOMC of the formula
+for particular domain sizes, $f$ must be evaluated with those domain sizes as
+arguments. $\mathcal{D}$ records this correspondence between function arguments
+and domains.
+
 \begin{algorithm}[t]
   \caption{\protect\CompileWithBaseCases{$\phi$}}\label{alg:compilewithbasecases}
   \KwIn{formula $\phi$}
@@ -552,18 +561,11 @@ $f(\mathbf{x}) = \expr{}$, with $f(\mathbf{x})$ representing a signature.
 \Cref{alg:compilewithbasecases} presents our overall approach for compiling a
 formula into equations that include the necessary base cases. To begin, we use
 the FOKC algorithm of the original \textsc{Crane} to compile the formula into
-three components:
-\begin{enumerate*}[label=(\roman*)]
-  \item set $\mathcal{E}$ of equations,
-  \item map $\mathcal{F}$ from function names to formulas, and
-  \item map $\mathcal{D}$ from function names and argument indices to domains.
-\end{enumerate*}
-After some algebraic simplification (explained at the end of this section),
+the three components: $\mathcal{E}$, $\mathcal{F}$, and $\mathcal{D}$. After
+some algebraic simplification (explained at the end of this section),
 $\mathcal{E}$ is passed to the \FindBaseCases procedure (explained in
 \cref{sec:identifying}), which identifies the base cases that need to be
-defined.
-
-For each base case $f(\mathbf{x})$, we retrieve the logical formula
+defined. For each base case $f(\mathbf{x})$, we retrieve the logical formula
 $\mathcal{F}(f)$ associated with the function name $f$ and simplify it using the
 \Propagate procedure (explained in detail in \cref{sec:simplifying}). We do this
 by iterating over all indices of $\mathbf{x}$, where $x_{i}$ is a constant, and
@@ -579,16 +581,6 @@ $\mathcal{E}$. \Cref{example:overall} below provides more detail.
   \textsc{Crane} on various derived formulas.
 \end{remark}
 
-% TODO: F missing
-
-% TODO: E is not explained other than that we take the example from X
-
-% TODO: include a high-level overview of first-order knowledge compilation and the meaning of the resulting functions. For the most part, the compilation process that constructs these function definitions can be treated as a black box for the purposes of this work. However, a few high-level details still ought to be mentioned:
-% 1. Each algebraic variable ("m", "n", and "l" in the example) corresponds to a domain size.
-% 2. \mathcal{D} indicates that "m" denotes the size of \Gamma, "n" denotes the size of \Delta, etc.
-% 3. \mathcal{E} can contain any (positive) number of functions.
-% 4. Function denoted by "f" represents the solution to the model counting problem.
-% 3. The model count of the original formula is computed by evaluating f on the desired domain sizes. For example, f(3, 2) is the model count when |\Gamma| = 3, and |\Delta| = 2.
 \begin{example}[Counting bijections]\label{example:overall}
   Consider the following formula (previously examined by
   \citeauthor{DBLP:conf/kr/DilkasB23}~\shortcite{DBLP:conf/kr/DilkasB23}) that
@@ -609,7 +601,8 @@ $\mathcal{E}$. \Cref{example:overall} below provides more detail.
     \mathcal{E} &= \left\{\,\begin{aligned}f(m, n) &= \sum_{l=0}^{n} \binom{n}{l}{(-1)}^{n-l}g(l, m),\\ g(l, m) &= g(l-1, m) + mg(l-1, m-1)\end{aligned}\,\right\};\\
     \mathcal{D} &= \{\, (f, 1) \mapsto \Gamma, (f, 2) \mapsto \Delta, (g, 1) \mapsto \Delta^{\top}, (g, 2) \mapsto \Gamma \,\},
   \end{align*}
-  where $\Delta^{\top}$ is a new domain introduced by \Compile. Then
+  where $\Delta^{\top}$ is a new domain introduced by \Compile. (We omit the
+  definition of $\mathcal{F}$ as the formulas can get a bit verbose.) Then
   \FindBaseCases identifies two base cases: $g(0, m)$ and $g(l, 0)$. In both
   cases, \CompileWithBaseCases recurses on the formula $\mathcal{F}(g)$
   simplified by assuming that one of the domains is empty. In the first case, we
@@ -645,10 +638,6 @@ $g(l, m) = \sum_{k=0}^{m}[0 \le k \le 1]\binom{m}{k}g(l-1, m-k)$ into
 $g(l, m) = g(l-1, m) + mg(l-1, m-1)$.
 
 \subsection{Identifying a Sufficient Set of Base Cases}\label{sec:identifying}
-
-% TODO: The asymptotic analysis of the total number of arithmetic operations
-% required to compute the FOMC of some of these formulas was already performed
-% in previous work~\cite{DBLP:conf/kr/DilkasB23}.
 
 \begin{algorithm}[t]
   \caption{\protect\FindBaseCases{$\mathcal{E}$}}\label{alg:findbasecases}
@@ -695,11 +684,17 @@ approach.
   produces both $g(0, m)$ and $g(l, 0)$.
 \end{example}
 
+In the rest of this section, we show that the base cases identified by
+\FindBaseCases are sufficient for the algorithm to terminate. Note that
+characterising the fine-grained complexity of the solutions found by \Cranetwo{}
+or other FOMC algorithms is an emerging area of research partially addressed by
+\citeauthor{DBLP:conf/kr/DilkasB23}~\shortcite{DBLP:conf/kr/DilkasB23} and
+\citeauthor{tóth2024complexityweightedfirstordermodel}~\shortcite{tóth2024complexityweightedfirstordermodel}.
 For the rest of this section, let $\mathcal{E}$ represent the equations returned
 by \CompileWithBaseCases. To demonstrate that the base cases identified by
 \FindBaseCases are sufficient, we begin with a few observations that stem from
-the details of previous
-work~\cite{DBLP:conf/ijcai/BroeckTMDR11,DBLP:conf/kr/DilkasB23} and this work.
+previous~\cite{DBLP:conf/ijcai/BroeckTMDR11,DBLP:conf/kr/DilkasB23} and this
+work.
 
 \begin{fact}\label{assumption1}
   For each function $f$, there is precisely one equation $e \in \mathcal{E}$
