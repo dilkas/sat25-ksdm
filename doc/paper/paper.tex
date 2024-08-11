@@ -113,47 +113,22 @@
   the current state of the art, as demonstrated through experimental results.
 \end{abstract}
 
-% TODO: Having an algorithm that can efficiently handle large domain sizes is
-% crucial in the weighted setting. For example, consider the well-known "friends
-% and smokers" Markov logic network [1]. The utility of such a model would be
-% significantly limited if exact probabilities could only be efficiently
-% computed for social networks of at most 30 people.
-% [1] Richardson, M., & Domingos, P. (2006). Markov logic networks. Machine learning, 62, 107-136.
-
-% TODO: (somewhere) The implementation is only for unweighted (but the
-% definition of WFOMC is still necessary because of Skolemization).
-
 \section{Introduction}
-% TODO: make it extra clear what the gap is that this work is trying to fill
-
-% TODO: mention Crane earlier and describe its importance
-
-% TODO: the last two paragraphs should make more of a BOOM (e.g., include the
-% over 9k claim)
-
-% TODO (here and elsewhere): clarify the distinction between the weighted and
-% unweighted variants of the problem in the final version of the paper. We focus
-% on the unweighted variant in our implementation and experiments, however,
-% Crane2 can handle WFOMC instances as well simply by switching the main data
-% type from integers to rational numbers. Maybe add some weighted experiments as
-% well.
-
-% TODO: (must) more related work, situating my contributions in the broader
-% context
-
-% TODO: (concerning related work) the topic is intimately related to "graded
-% logics", largely investigated in DL, mu-calculus and temporal logics
 
 % 1. What is the problem?
 
-\emph{First-order model counting} is the task of counting the number of models
-of a sentence in first-order logic over some given domain(s). The (symmetric)
-weighted variant of this problem, known as WFOMC, seeks to calculate the sum of
-model weights. In WFOMC, the weight of a model is determined by predicate
-weights~\cite{DBLP:conf/ijcai/BroeckTMDR11}. WFOMC is a key approach to
-\emph{lifted (probabilistic) inference}, which aims to compute probabilities
-more efficiently by leveraging symmetries inherent in the problem
-description~\cite{DBLP:conf/ecai/Kersting12}.
+\emph{First-order model counting} (FOMC) is the task of counting the number of
+models of a sentence in first-order logic over some given domain(s). The
+(symmetric) weighted variant of this problem, known as WFOMC, seeks to compute
+the total weight of the models~\cite{DBLP:conf/ijcai/BroeckTMDR11}. WFOMC
+relates to its propositional predecessor weighted model
+counting~\cite{DBLP:journals/ai/ChaviraD08} and, more conceptually, to other
+attempts to unify logic and probability such as probabilistic
+logic~\cite{DBLP:journals/ai/Nilsson86}, fuzzy
+logic~\cite{novak2012mathematical}, and graded logics~\cite{vsaletic2024graded}.
+Moreover, WFOMC is a key approach to \emph{lifted (probabilistic) inference},
+which aims to compute probabilities more efficiently by leveraging symmetries
+inherent in the problem description~\cite{DBLP:conf/ecai/Kersting12}.
 
 % 2. Why is it interesting and important?
 
@@ -163,20 +138,20 @@ probabilistic answer set programming~\cite{DBLP:journals/ijar/AzzoliniR23}.
 WFOMC has been used for inference on probabilistic
 databases~\cite{DBLP:journals/debu/GribkoffSB14} and probabilistic logic
 programs~\cite{DBLP:journals/ijar/RiguzziBZCL17}. By considering domains of
-increasing sizes, the model count of a formula can be seen as an integer
-sequence. WFOMC algorithms have been utilised for discovering new
+increasing sizes, the FOMC of a formula can be seen as an integer sequence. FOMC
+algorithms have been utilised for discovering new
 sequences~\cite{DBLP:conf/ijcai/SvatosJT0K23} as well as
 conjecturing~\cite{DBLP:conf/ilp/BarvinekB0ZK21} and
 constructing~\cite{DBLP:conf/kr/DilkasB23} recurrence relations and other
-recursive structures that describe these sequences. Additionally, WFOMC
+recursive structures that describe these sequences. Additionally, FOMC
 algorithms have been extended to perform
 \emph{sampling}~\cite{DBLP:conf/aaai/WangB0K22,DBLP:conf/lics/WangP0K23}.
 
 % 3. Why is it hard? (E.g., why do naive approaches fail?)
 
-The complexity of WFOMC is typically characterised in terms of \emph{data
+The complexity of FOMC is typically characterised in terms of \emph{data
   complexity}. This involves fixing the formula and determining whether an
-algorithm exists that can compute the WFOMC in time polynomial with respect to
+algorithm exists that can compute the FOMC in time polynomial with respect to
 the domain size(s). If such an algorithm exists, the formula is called
 \emph{liftable}~\cite{DBLP:conf/starai/JaegerB12}.
 \citeauthor{DBLP:conf/pods/BeameBGS15}~\shortcite{DBLP:conf/pods/BeameBGS15}
@@ -191,16 +166,16 @@ ways~\cite{DBLP:conf/nips/KazemiKBP16}.
 % 4. Why hasn't it been solved before? (Or, what's wrong with previous proposed
 % solutions? How does mine differ?)
 
-There are various WFOMC algorithms with different underlying principles. Perhaps
-the most prominent class of WFOMC algorithms is based on \emph{first-order
+There are various FOMC algorithms with different underlying principles. Perhaps
+the most prominent class of FOMC algorithms is based on \emph{first-order
   knowledge compilation} (FOKC). In this approach, the formula is compiled into
 a representation (such as a circuit or graph) by iteratively applying
 \emph{compilation rules}. This representation can then be used to compute the
-WFOMC for any combination of domain sizes (or weights). Algorithms in this class
-include \textsc{ForcLift}~\cite{DBLP:conf/ijcai/BroeckTMDR11} and its recent
-extension \textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23}. The former compiles
-formulas into circuits, while the latter compiles them first to graphs and then
-to (algebraic) equations. Another WFOMC algorithm,
+FOMC for any combination of domain sizes. Algorithms in this class include
+\textsc{ForcLift}~\cite{DBLP:conf/ijcai/BroeckTMDR11} and its recent extension
+\textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23}. The former compiles formulas into
+circuits, while the latter compiles them first to graphs and then to (algebraic)
+equations. Another FOMC algorithm,
 \textsc{FastWFOMC}~\cite{DBLP:conf/uai/BremenK21}, is based on cell enumeration.
 Other algorithms utilise local search~\cite{DBLP:journals/pvldb/NiuRDS11},
 junction trees~\cite{DBLP:conf/aaai/VenugopalSG15}, Monte Carlo
@@ -210,15 +185,21 @@ upper/lower bound construction~\cite{DBLP:conf/ijcai/BremenK20}.
 % 5. What are the key components of my approach and results? Also include any
 % specific limitations.
 
-% TODO: introduce MLNs somewhere? maybe use an acronym?
-The recently proposed \textsc{Crane} algorithm, while capable of handling
-formulas beyond the reach of \textsc{ForcLift}, was `incomplete' as it could
-only construct function definitions, which would then need to be evaluated to
-compute the WFOMC.\@ In other words, it could not be used as a black box that
-takes Markov logic networks (or weighted formulas in some other format) and
-outputs numbers (i.e., model counts or probabilities). Additionally, recursive
-functions were presented without base cases. In this work, we introduce
-\Cranetwo{}, an extension of \textsc{Crane} that addresses these two weaknesses.
+The recently proposed \textsc{Crane} algorithm marked significant progress in
+handling formulas beyond the capabilities of \textsc{FastWFOMC} and
+\textsc{ForcLift}, yet it fell short in critical aspects. \textsc{Crane} was
+incomplete in that it could only construct function definitions, leaving users
+to manually evaluate these functions to obtain model counts. This limitation
+prevented \textsc{Crane} from serving as a convenient black box solution for
+FOMC. Furthermore, it introduced recursive functions without defining necessary
+base cases, adding further complexity to the user.
+
+In this work, we present \Cranetwo{}, the breakthrough that not only addresses
+these gaps but also pushes the boundaries of scalability to unprecedented
+levels. With \Cranetwo{}, we eliminate the manual steps, providing a fully
+automated FOMC algorithm. Moreover, \Cranetwo{} can scale to domain sizes over
+\num{500000} times larger than the previous state of the art, redefining what is
+possible in the field of first-order model counting.
 
 \begin{figure*}[t]
   \centering
@@ -272,20 +253,20 @@ recursive functions by:
 \end{enumerate*}
 Then, \cref{sec:smoothing} explains post-processing techniques for the formulas
 from \cref{step2} above required to preserve the correct model count. Next,
-\cref{sec:cpp} elucidates how function definitions encoding a solution to a
-WFOMC problem are compiled into C++ programs. Note that a solution to WFOMC that
-uses compilation to C++ has been considered
-before~\cite{DBLP:conf/kr/KazemiP16}, however, the extent of formulas that could
-be handled was limited. Finally, \cref{sec:experiments} presents experiments
-results comparing \Cranetwo{} with other state-of-the-art WFOMC algorithms.
+\cref{sec:cpp} elucidates how function definitions encoding a solution to a FOMC
+problem are compiled into C++ programs. Note that a solution to FOMC that uses
+compilation to C++ has been considered before~\cite{DBLP:conf/kr/KazemiP16},
+however, the extent of formulas that could be handled was limited. Finally,
+\cref{sec:experiments} presents experiments results comparing \Cranetwo{} with
+other state-of-the-art FOMC algorithms.
 
 \section{Preliminaries}
 
 In \cref{sec:logic}, we provide a summary of the basic principles of first-order
-logic. Then, in \cref{sec:threelogics}, we formally define WFOMC and discuss the
-distinctions between three variations of first-order logic that are utilised for
-WFOMC.\@ Finally, in \cref{sec:algebra}, we introduce the terminology used to
-describe the output of the original \textsc{Crane} algorithm, i.e., functions
+logic. Then, in \cref{sec:threelogics}, we formally define (W)FOMC and discuss
+the distinctions between three variations of first-order logic that are utilised
+for FOMC.\@ Finally, in \cref{sec:algebra}, we introduce the terminology used
+to describe the output of the original \textsc{Crane} algorithm, i.e., functions
 and equations that define them.
 
 We use $\mathbb{N}_{0}$ to represent the set of non-negative integers. In both
@@ -331,7 +312,7 @@ Finally, a \emph{formula} is a conjunction of clauses. Throughout the paper, we
 use set-theoretic notation, interpreting a formula as a set of clauses and a
 clause as a set of literals.
 
-\subsection{WFOMC Algorithms and Their Logics}\label{sec:threelogics}
+\subsection{FOMC Algorithms and Their Logics}\label{sec:threelogics}
 
 \begin{table*}[t]
   \centering
@@ -344,7 +325,7 @@ clause as a set of literals.
     \UFO & one & \xmark & two & $\forall$ & $|P| = m$\\
     \bottomrule
   \end{tabular}
-  \caption[]{A comparison of the three logics used in WFOMC based on the following aspects:
+  \caption[]{A comparison of the three logics used in FOMC based on the following aspects:
     \begin{enumerate*}[label=(\roman*)]
       \item the number of sorts,
       \item support for constants,
@@ -364,7 +345,7 @@ clause as a set of literals.
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}
 
 In \cref{tbl:logics}, we outline the differences among three first-order logics
-commonly used in WFOMC:
+commonly used in FOMC:
 \begin{enumerate*}[label=(\roman*)]
   \item \FO{} is the input format for
   \textsc{ForcLift}\footnote{\url{https://github.com/UCLA-StarAI/Forclift}} and
@@ -453,6 +434,9 @@ constrains all models to have \emph{precisely three positive literals with the
   can make assumptions or deductions about, e.g., the first domain of predicate
   $P$ without worrying how (or if) they apply to the second domain.
 \end{remark}
+
+While the focus of this work is on FOMC, we still define the weighted variant of
+the problem as Skolemization relies on weights even for unweighted FOMC.
 
 \begin{definition}[WFOMC Instance]\label{def:instance}
   A \emph{WFOMC instance} comprises of:
@@ -615,9 +599,9 @@ $\mathcal{E}$. \Cref{example:overall} below provides more detail.
 
 It is worth noting that these base cases overlap when $l = m = 0$ but remain
 consistent since $0^{0} = 1$. Generally, let $\phi$ be a formula with two
-domains $\Gamma$ and $\Delta$, and let $n, m \in \mathbb{N}_{0}$. Then the WFOMC
+domains $\Gamma$ and $\Delta$, and let $n, m \in \mathbb{N}_{0}$. Then the FOMC
 of \Propagate{$\phi$, $\Delta$, $n$} assuming $|\Gamma| = m$ is the same as the
-WFOMC of \Propagate{$\phi$, $\Gamma$, $m$} assuming $|\Delta| = n$.
+FOMC of \Propagate{$\phi$, $\Gamma$, $m$} assuming $|\Delta| = n$.
 
 Finally, we main responsibility of the \Simplify procedure is in handling the
 algebraic pattern $\sum_{m=0}^{n}[a \le m \le b] f(m)$. Here:
@@ -659,9 +643,9 @@ $g(l, m) = g(l-1, m) + mg(l-1, m-1)$.
     }
   }
 \end{algorithm}
-% TODO (later, let's not bother yet): replace x_i-c_i on Line 7 of Algorithm 2
-% with a generalisation of x_i that can be an arbitrary summation/subtraction of
-% domain sizes (propagating this change to the rest of the paper, particularly
+% (later, let's not bother yet): replace x_i-c_i on Line 7 of Algorithm 2 with a
+% generalisation of x_i that can be an arbitrary summation/subtraction of domain
+% sizes (propagating this change to the rest of the paper, particularly
 % Assumption 1, the proof of Lemma 1)
 
 \Cref{alg:findbasecases} summarises the implementation of the \FindBaseCases
@@ -918,7 +902,7 @@ $P$ become vacuously satisfied.
   but it is allowed to vary freely over
   $(\Gamma \times \Gamma) \setminus (\Gamma' \times \Gamma')$ since
   \cref{eq:example1} is vacuously satisfied by all structures. Therefore, the
-  correct WFOMC should be $2^{|\Gamma|^2 - |\Gamma'|^2}$.
+  correct FOMC should be $2^{|\Gamma|^2 - |\Gamma'|^2}$.
 
   However, without \cref{line:smoothing2}, \Propagate would simplify $\phi$ to
   $\forall y, z \in \Gamma'\text{. }P(y, z)$. In this case, $P$ is a subset of
@@ -991,7 +975,7 @@ formulas), it is a heuristic that can miss some solutions.
 We compare the algorithms on three benchmarks from previous work. The first is
 the function-counting problem from \cref{example:functions}, previously examined
 by \citeauthor{DBLP:conf/kr/DilkasB23}~\shortcite{DBLP:conf/kr/DilkasB23}. The
-second is a variant of the well-known `Friends \& Smokers' Markov logic
+second is a variant of the well-known `Friends and Smokers' Markov logic
 network~\cite{DBLP:conf/aaai/SinglaD08,DBLP:conf/uai/BroeckCD12}. In \Ctwo{},
 \FO{}, and \UFO{}, it can be formulated as
 \begin{gather*}
@@ -1107,8 +1091,6 @@ cases, \Cranetwo{} is likely to be significantly faster than \textsc{FastWFOMC}
 across all domain sizes (but especially with higher domain sizes), assuming the
 formula can be handled by both algorithms.
 
-% TODO: run this section through editgpt and grammarly
-
 \section{Conclusion and Future Work}
 
 In this work, we have presented several contributions. First, we have developed
@@ -1119,15 +1101,21 @@ Third, we have proposed an approach to compile function definitions into C++
 programs with support for arbitrary-precision arithmetic. Lastly, we have
 provided experimental evidence demonstrating that \Cranetwo{} can scale to much
 larger domain sizes than \textsc{FastWFOMC} while handling more formulas than
-\textsc{ForcLift}.
+\textsc{ForcLift}. Having FOMC algorithms that can efficiently handle large
+domain sizes is especially crucial in the weighted setting. For example,
+consider the `friends' instance examined in \cref{sec:experiments}, which models
+a social network with friendships, smoking habits, and the probability of having
+cancer. The utility of such a model would be significantly limited if
+probabilities could only be efficiently computed for networks of at most
+\num{1000} people.
 
 There are many potential avenues for future work. Specifically, a more thorough
-experimental study is needed to understand how WFOMC algorithms compare in terms
+experimental study is needed to understand how FOMC algorithms compare in terms
 of their ability to handle different formulas and their scalability with respect
 to domain size. Additionally, further characterisation of the capabilities of
 \Cranetwo{} can be explored. For example, \emph{completeness} could be proven
 for a fragment of first-order logic such as \Ctwo{} (using a suitable encoding
-of counting quantifiers). Moreover, the efficiency of a WFOMC algorithm in
+of counting quantifiers). Moreover, the efficiency of a FOMC algorithm in
 handling a particular formula can be assessed using \emph{fine-grained
   complexity}. In the case of \textsc{Crane} and \Cranetwo{}, this can be done
 by analysing the equations~\cite{DBLP:conf/kr/DilkasB23}. By doing so,
