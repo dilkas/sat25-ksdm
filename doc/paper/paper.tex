@@ -55,7 +55,7 @@
 
 \newcommand{\crefrangeconjunction}{--}
 \crefname{line}{line}{lines}
-\crefname{fact}{Observation}{Observations}
+%\crefname{fact}{Observation}{Observations}
 \crefname{assumption}{Assumption}{Assumptions}
 \crefalias{enumi}{type}
 \crefname{type}{Type}{Types}
@@ -119,16 +119,15 @@
 
 \emph{First-order model counting} (FOMC) is the task of counting the number of
 models of a sentence in first-order logic over some given domain(s). The
-(symmetric) weighted variant of this problem, known as WFOMC, seeks to compute
-the total weight of the models~\cite{DBLP:conf/ijcai/BroeckTMDR11}. WFOMC
-relates to its propositional predecessor weighted model
-counting~\cite{DBLP:journals/ai/ChaviraD08} and, more conceptually, to other
-attempts to unify logic and probability such as probabilistic
-logic~\cite{DBLP:journals/ai/Nilsson86}, fuzzy
-logic~\cite{novak2012mathematical}, and graded logics~\cite{vsaletic2024graded}.
-Moreover, WFOMC is a key approach to \emph{lifted (probabilistic) inference},
-which aims to compute probabilities more efficiently by leveraging symmetries
-inherent in the problem description~\cite{DBLP:conf/ecai/Kersting12}.
+weighted variant of this problem, known as WFOMC, seeks to compute the total
+weight of the models~\cite{DBLP:conf/ijcai/BroeckTMDR11}. WFOMC is related to
+its propositional predecessor weighted model
+counting~\cite{DBLP:journals/ai/ChaviraD08} and other attempts to unify logic
+and
+probability~\cite{DBLP:journals/ai/Nilsson86,novak2012mathematical,vsaletic2024graded}.
+It is also a key approach to \emph{lifted inference}, which aims to compute
+probabilities more efficiently by leveraging symmetries in the
+problem~\cite{DBLP:conf/ecai/Kersting12}.
 
 % 2. Why is it interesting and important?
 
@@ -137,50 +136,58 @@ as constraint satisfaction problems~\cite{DBLP:journals/jair/TotisDRK23} and
 probabilistic answer set programming~\cite{DBLP:journals/ijar/AzzoliniR23}.
 WFOMC has been used for inference on probabilistic
 databases~\cite{DBLP:journals/debu/GribkoffSB14} and probabilistic logic
-programs~\cite{DBLP:journals/ijar/RiguzziBZCL17}. By considering domains of
-increasing sizes, the FOMC of a formula can be seen as an integer sequence. FOMC
-algorithms have been utilised for discovering new
-sequences~\cite{DBLP:conf/ijcai/SvatosJT0K23} as well as
+programs~\cite{DBLP:journals/ijar/RiguzziBZCL17}. FOMC algorithms have been
+utilised for discovering new integer
+sequences~\cite{DBLP:conf/ijcai/SvatosJT0K23}, and for
 conjecturing~\cite{DBLP:conf/ilp/BarvinekB0ZK21} and
 constructing~\cite{DBLP:conf/kr/DilkasB23} recurrence relations and other
-recursive structures that describe these sequences. Additionally, FOMC
-algorithms have been extended to perform
+recursive structures that describe these sequences. FOMC algorithms have also
+been extended to perform
 \emph{sampling}~\cite{DBLP:conf/aaai/WangB0K22,DBLP:conf/lics/WangP0K23}.
+
+% By considering domains of increasing sizes, the FOMC of a formula can be seen
+% as an integer sequence.
 
 % 3. Why is it hard? (E.g., why do naive approaches fail?)
 
 The complexity of FOMC is typically characterised in terms of \emph{data
-  complexity}. This involves fixing the formula and determining whether an
-algorithm exists that can compute the FOMC in time polynomial with respect to
-the domain size(s). If such an algorithm exists, the formula is called
+  complexity}. If there is an algorithm that can compute the FOMC of a formula
+in polynomial time with respect to the domain size(s), that formula is called
 \emph{liftable}~\cite{DBLP:conf/starai/JaegerB12}.
 \citeauthor{DBLP:conf/pods/BeameBGS15}~\shortcite{DBLP:conf/pods/BeameBGS15}
 demonstrated the existence of an unliftable formula with three variables. It is
-also known that all formulas with up to two variables are
+also known that formulas with up to two variables are
 liftable~\cite{DBLP:conf/nips/Broeck11,DBLP:conf/kr/BroeckMD14}. The liftable
 fragment of formulas with two variables has been expanded with various
 axioms~\cite{DBLP:conf/aaai/TothK23,DBLP:journals/ai/BremenK23}, counting
 quantifiers~\cite{DBLP:journals/jair/Kuzelka21} and in other
 ways~\cite{DBLP:conf/nips/KazemiKBP16}.
 
+% This involves fixing the formula and determining whether an
+% algorithm exists that can compute the FOMC in time polynomial with respect to
+% the domain size(s).
+
 % 4. Why hasn't it been solved before? (Or, what's wrong with previous proposed
 % solutions? How does mine differ?)
 
-There are various FOMC algorithms with different underlying principles. Perhaps
-the most prominent class of FOMC algorithms is based on \emph{first-order
-  knowledge compilation} (FOKC). In this approach, the formula is compiled into
-a representation (such as a circuit or graph) by iteratively applying
-\emph{compilation rules}. This representation can then be used to compute the
-FOMC for any combination of domain sizes. Algorithms in this class include
-\textsc{ForcLift}~\cite{DBLP:conf/ijcai/BroeckTMDR11} and its recent extension
-\textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23}. The former compiles formulas into
-circuits, while the latter compiles them first to graphs and then to (algebraic)
-equations. Another FOMC algorithm,
+There are many FOMC algorithms with different underlying principles. Perhaps the
+most prominent class of FOMC algorithms is based on \emph{first-order knowledge
+  compilation} (FOKC). In this approach, the formula is compiled into a
+representation (such as a circuit or graph) by applying \emph{compilation
+  rules}. Algorithms in this class include
+\textsc{ForcLift}~\cite{DBLP:conf/ijcai/BroeckTMDR11} and its extension
+\textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23}. Another FOMC algorithm,
 \textsc{FastWFOMC}~\cite{DBLP:conf/uai/BremenK21}, is based on cell enumeration.
 Other algorithms utilise local search~\cite{DBLP:journals/pvldb/NiuRDS11},
 junction trees~\cite{DBLP:conf/aaai/VenugopalSG15}, Monte Carlo
 sampling~\cite{DBLP:journals/cacm/GogateD16}, and anytime approximation via
 upper/lower bound construction~\cite{DBLP:conf/ijcai/BremenK20}.
+
+% This representation can then be used to compute the FOMC for any combination
+% of domain sizes.
+
+% The former compiles formulas into circuits, while the latter compiles them
+% first to graphs and then to (algebraic) equations.
 
 % 5. What are the key components of my approach and results? Also include any
 % specific limitations.
@@ -188,18 +195,15 @@ upper/lower bound construction~\cite{DBLP:conf/ijcai/BremenK20}.
 The recently proposed \textsc{Crane} algorithm marked significant progress in
 handling formulas beyond the capabilities of \textsc{FastWFOMC} and
 \textsc{ForcLift}, yet it fell short in critical aspects. \textsc{Crane} was
-incomplete in that it could only construct function definitions, leaving users
+incomplete since it could only construct function definitions, requiring users
 to manually evaluate these functions to obtain model counts. This limitation
 prevented \textsc{Crane} from serving as a convenient black box solution for
 FOMC. Furthermore, it introduced recursive functions without defining necessary
-base cases, adding further complexity to the user.
-
-In this work, we present \Cranetwo{}, the breakthrough that not only addresses
-these gaps but also pushes the boundaries of scalability to unprecedented
-levels. With \Cranetwo{}, we eliminate the manual steps, providing a fully
-automated FOMC algorithm. Moreover, \Cranetwo{} can scale to domain sizes over
-\num{500000} times larger than the previous state of the art, redefining what is
-possible in the field of first-order model counting.
+base cases, adding further complexity to the users. In this work, we present
+\Cranetwo{}, addressing these gaps and pushing scalability to unprecedented
+levels. Unlike its predecessor, \Cranetwo{} is a fully automated FOMC algorithm,
+capable of handling domain sizes over \num{500000} times larger than previous
+algorithms.
 
 \begin{figure*}[t]
   \centering
@@ -243,31 +247,31 @@ possible in the field of first-order model counting.
 \end{figure*}
 
 \Cref{fig:overview} outlines the workflow of the new algorithm. In
-\cref{sec:main}, we describe how \CompileWithBaseCases finds the base cases for
-recursive functions by:
-\begin{enumerate*}[label=(\roman*)]
-  \item identifying a sufficient set of base cases for each function,
-  \item constructing formulas corresponding to these base cases,
-  and\label[step]{step2}
-  \item recursing on these new formulas.
-\end{enumerate*}
-Then, \cref{sec:smoothing} explains post-processing techniques for the formulas
-from \cref{step2} above required to preserve the correct model count. Next,
-\cref{sec:cpp} elucidates how function definitions encoding a solution to a FOMC
-problem are compiled into C++ programs. Note that a solution to FOMC that uses
-compilation to C++ has been considered before~\cite{DBLP:conf/kr/KazemiP16},
-however, the extent of formulas that could be handled was limited. Finally,
-\cref{sec:experiments} presents experiments results comparing \Cranetwo{} with
-other state-of-the-art FOMC algorithms.
+\cref{sec:main}, we describe how \CompileWithBaseCases finds base cases for
+recursive functions. \Cref{sec:smoothing} explains post-processing techniques to
+preserve the correct model count. \Cref{sec:cpp} elucidates how function
+definitions are compiled into C++ programs. Note that a solution to FOMC that
+uses compilation to C++ has been considered
+before~\cite{DBLP:conf/kr/KazemiP16}, however, the extent of formulas that could
+be handled was limited. Finally, \cref{sec:experiments} presents experimental
+results comparing \Cranetwo{} with other FOMC algorithms.
+
+% by:
+% \begin{enumerate*}[label=(\roman*)]
+%   \item identifying a sufficient set of base cases for each function,
+%   \item constructing formulas corresponding to these base cases,
+%   and\label[step]{step2}
+%   \item recursing on these new formulas.
+% \end{enumerate*}
 
 \section{Preliminaries}
 
-In \cref{sec:logic}, we provide a summary of the basic principles of first-order
-logic. Then, in \cref{sec:threelogics}, we formally define (W)FOMC and discuss
-the distinctions between three variations of first-order logic that are utilised
-for FOMC.\@ Finally, in \cref{sec:algebra}, we introduce the terminology used
-to describe the output of the original \textsc{Crane} algorithm, i.e., functions
-and equations that define them.
+In \cref{sec:logic}, we summarise the basic principles of first-order logic.
+Then, in \cref{sec:threelogics}, we formally define (W)FOMC and discuss the
+distinctions between three variations of first-order logic used for FOMC.\@
+Finally, in \cref{sec:algebra}, we introduce the terminology used to describe
+the output of the original \textsc{Crane} algorithm, i.e., functions and
+equations that define them.
 
 We use $\mathbb{N}_{0}$ to represent the set of non-negative integers. In both
 algebra and logic, we write $S\sigma$ to denote the application of a
@@ -278,39 +282,40 @@ $i = 1, \dots, n$.
 
 \subsection{First-Order Logic}\label{sec:logic}
 
-In this section, we review the basic concepts of first-order logic as they are
-used in FOKC algorithms. There are two key differences between the logic used by
-such algorithms and the logic supported as input. First,
-Skolemization~\cite{DBLP:conf/kr/BroeckMD14} is employed to eliminate
-existential quantifiers by introducing additional predicates. Note that
-Skolemization here is different from the standard Skolemization procedure that
-introduces function symbols~\cite{DBLP:books/daglib/0030198}. Second, the input
-formula is rewritten as a conjunction of clauses, each of which is in
-\emph{prenex normal form}~\cite{hinman2018fundamentals}.
+In this section, we will review the basic concepts of first-order logic as they
+are used in FOKC algorithms. There are two key differences between the logic
+used by these algorithms and the logic supported as input. First,
+Skolemization~\cite{DBLP:conf/kr/BroeckMD14} eliminates existential quantifiers
+by introducing additional predicates. Please note that Skolemization here
+differs from the standard Skolemization procedure that introduces function
+symbols~\cite{DBLP:books/daglib/0030198}. Second, the input formula is rewritten
+as a conjunction of clauses, each in \emph{prenex normal
+  form}~\cite{hinman2018fundamentals}.
 
-A \emph{term} is either a variable or a constant. An \emph{atom} is either
+A \emph{term} can be either a variable or a constant. An \emph{atom} can be
+either
 \begin{enumerate*}[label=(\roman*)]
   \item $P(t_{1}, \dots, t_{m})$ for some predicate $P$ and terms
   $t_{1}, \dots, t_{m}$ (written as $P(\mathbf{t})$ for short) or
   \item $x=y$ for some terms $x$ and $y$.
 \end{enumerate*}
 The \emph{arity} of a predicate is the number of arguments it takes, i.e., $m$
-in the case of predicate $P$ above. We write $P/m$ to denote a predicate
-together with its arity. A \emph{literal} is either an atom (i.e., a
+in the case of the predicate $P$ mentioned above. We write $P/m$ to denote a
+predicate along with its arity. A \emph{literal} can be either an atom (i.e., a
 \emph{positive} literal) or its negation (i.e., a \emph{negative} literal). An
 atom is \emph{ground} if it contains no variables, i.e., only constants. A
-\emph{clause} is of the form
-$\forall x_{1} \in \Delta_{1}\text{.}\forall x_{2} \in \Delta_{2}\dots\text{}\forall x_{n} \in \Delta_{n}\text{.}\phi(x_{1}, x_{2}, \dots, x_{n})$,
-where $\phi$ is a disjunction of literals that only contain variables
-$x_{1}, \dots, x_{n}$ (and any constants). We say that a clause is a
-\emph{(positive) unit clause} if
+\emph{clause} is of the form $\forall x_{1} \in \Delta_{1}\text{.
+}\forall x_{2} \in \Delta_{2}\dots\text{ }\forall x_{n} \in \Delta_{n}\text{.
+}\phi(x_{1}, x_{2}, \dots, x_{n})$, where $\phi$ is a disjunction of literals
+that only contain variables $x_{1}, \dots, x_{n}$ (and any constants). We say
+that a clause is a \emph{(positive) unit clause} if
 \begin{enumerate*}[label=(\roman*)]
   \item there is only one literal with a predicate, and
   \item it is a positive literal.
 \end{enumerate*}
 Finally, a \emph{formula} is a conjunction of clauses. Throughout the paper, we
-use set-theoretic notation, interpreting a formula as a set of clauses and a
-clause as a set of literals.
+will use set-theoretic notation, interpreting a formula as a set of clauses and
+a clause as a set of literals.
 
 \subsection{FOMC Algorithms and Their Logics}\label{sec:threelogics}
 
@@ -331,7 +336,7 @@ clause as a set of literals.
       \item support for constants,
       \item the maximum number of variables,
       \item supported quantifiers, and
-      \item supported atoms in addition to those of the form $P(\mathbf{t})$ for a predicate $P/n$ and $n$-tuple of terms $\mathbf{t}$.
+      \item supported atoms in addition to those of the form $P(\mathbf{t})$ for a predicate $P/n$ and an $n$-tuple of terms $\mathbf{t}$.
     \end{enumerate*}
     Here:
     \begin{enumerate*}[label=(\roman*)]
@@ -390,7 +395,7 @@ many-sorted nature of \FO{} is paramount to the algorithms presented therein.
   variables~\cite{DBLP:conf/nips/Broeck11,DBLP:conf/kr/BroeckMD14}.
 \end{remark}
 
-Compared to \FO{}, \Ctwo{} and \UFO{} lack support for:
+Compared to \FO{}, \Ctwo{} and \UFO{} lack support for
 \begin{enumerate*}[label=(\roman*)]
   \item constants,
   \item the equality predicate,
@@ -410,36 +415,37 @@ constrains all models to have \emph{precisely three positive literals with the
 
 \begin{definition}[Model]\label{def:model}
   Let $\phi$ be a formula in \FO{}. For each predicate $P/n$ in $\phi$, let
-  ${(\Delta_{i}^{P})}_{i=1}^{n}$ be a list of the corresponding domains (which
-  may not be distinct). Let $\sigma$ be a map from the domains of $\phi$ to
-  their interpretations as sets, satisfying the following conditions:
+  ${(\Delta_{i}^{P})}_{i=1}^{n}$ be a list of the corresponding domains. Let
+  $\sigma$ be a map from the domains of $\phi$ to their interpretations as sets,
+  satisfying the following conditions:
   \begin{enumerate*}[label=(\roman*)]
     \item the sets are pairwise disjoint, and
     \item the constants in $\phi$ are included in the corresponding domains.
   \end{enumerate*}
-  (In practice, we typically only specify the size of each domain.) A
-  \emph{structure} of $\phi$ (with respect to $\sigma$) is a set $M$ of ground
-  literals defined by adding to $M$ either $P(\mathbf{t})$ or
-  $\neg P(\mathbf{t})$ for every predicate $P/n$ in $\phi$ and $n$-tuple
+  A \emph{structure} of $\phi$ is a set $M$ of ground literals defined by adding
+  to $M$ either $P(\mathbf{t})$ or $\neg P(\mathbf{t})$ for every predicate
+  $P/n$ in $\phi$ and $n$-tuple
   $\mathbf{t} \in \prod_{i=1}^{n} \sigma(\Delta_{i}^{P})$. A structure is a
   \emph{model} if it satisfies $\phi$.
 \end{definition}
 
+% (In practice, we typically only specify the size of each domain.)
+
 \begin{remark}
   The distinctness of domains is important in two ways. First, in terms of
-  expressiveness, clauses such as $\forall x \in \Delta\text{. }P(x, x)$ are
+  expressiveness, a clause such as $\forall x \in \Delta\text{. }P(x, x)$ is
   valid if predicate $P$ is defined over two copies of the same domain and
   invalid otherwise. Second, having more distinct domains makes the problem more
-  decomposable for the FOKC algorithm. With more distinct domains, the algorithm
-  can make assumptions or deductions about, e.g., the first domain of predicate
-  $P$ without worrying how (or if) they apply to the second domain.
+  decomposable for the FOKC algorithm. With distinct domains, the algorithm can
+  make assumptions or deductions about, e.g., the first domain of predicate $P$
+  without worrying how (or if) they apply to the second domain.
 \end{remark}
 
-While the focus of this work is on FOMC, we still define the weighted variant of
-the problem as Skolemization relies on weights even for unweighted FOMC.
+While this work focuses on FOMC, we still define the weighted variant of the
+problem as Skolemization relies on weights even for unweighted FOMC.
 
-\begin{definition}[WFOMC Instance]\label{def:instance}
-  A \emph{WFOMC instance} comprises of:
+\begin{definition}[WFOMC instance]\label{def:instance}
+  A \emph{WFOMC instance} comprises:
   \begin{enumerate*}[label=(\roman*)]
     \item a formula $\phi$ in \FO{},
     \item two (rational) \emph{weights} $w^{+}(P)$ and $w^{-}(P)$ assigned to
@@ -452,7 +458,7 @@ the problem as Skolemization relies on weights even for unweighted FOMC.
 \begin{definition}[WFOMC~\cite{DBLP:conf/ijcai/BroeckTMDR11}]
   Given a WFOMC instance $(\phi, w^{+}, w^{-}, \sigma)$ as in
   \cref{def:instance}, the \emph{(symmetric) weighted first-order model count}
-  (WFOMC) of $\phi$ (with respect to $\sigma$, $w^{+}$, and $w^{-}$) is
+  (WFOMC) of $\phi$ is
   \begin{equation}\label{eq:wfomc}
     \sum_{M \models \phi} \prod_{P(\mathbf{t}) \in M} w^{+}(P) \prod_{\neg P(\mathbf{t}) \in M} w^{-}(P),
   \end{equation}
@@ -494,7 +500,7 @@ the problem as Skolemization relies on weights even for unweighted FOMC.
 \subsection{Algebra}\label{sec:algebra}
 
 We write $\expr{}$ to represent an arbitrary algebraic expression. It is
-important to note that some terms have different meanings in algebra compared to
+important to note that some terms have different meanings in algebra and
 logic. In algebra, a \emph{constant} refers to a non-negative integer. Likewise,
 a \emph{variable} can either be a parameter of a function or a variable
 introduced through summation, such as $i$ in the expression
@@ -513,19 +519,19 @@ $f(\mathbf{x}) = \expr{}$, with $f(\mathbf{x})$ representing a signature.
 
 \section{Completing the Definitions of Functions}\label{sec:main}
 
-Before describing the main contribution of this work, let us review the key
-aspects of FOKC as realised by \textsc{Crane}. The input formula is compiled
-into:
+Before describing the main contribution of this work, let us review the
+essential aspects of FOKC as realised by \textsc{Crane}. The input formula is
+compiled into:
 \begin{enumerate*}[label=(\roman*)]
   \item set $\mathcal{E}$ of equations,
   \item map $\mathcal{F}$ from function names to formulas, and
   \item map $\mathcal{D}$ from function names and argument indices to domains.
 \end{enumerate*}
 $\mathcal{E}$ can contain any number of functions, one of which (denoted by $f$)
-represents the solution to the FOMC problem. To compute the FOMC of the formula
-for particular domain sizes, $f$ must be evaluated with those domain sizes as
-arguments. $\mathcal{D}$ records this correspondence between function arguments
-and domains.
+represents the solution to the FOMC problem. To compute the FOMC for particular
+domain sizes, $f$ must be evaluated with those domain sizes as arguments.
+$\mathcal{D}$ records this correspondence between function arguments and
+domains.
 
 \begin{algorithm}[t]
   \caption{\protect\CompileWithBaseCases{$\phi$}}\label{alg:compilewithbasecases}
@@ -546,17 +552,16 @@ and domains.
 formula into equations that include the necessary base cases. To begin, we use
 the FOKC algorithm of the original \textsc{Crane} to compile the formula into
 the three components: $\mathcal{E}$, $\mathcal{F}$, and $\mathcal{D}$. After
-some algebraic simplification (explained at the end of this section),
-$\mathcal{E}$ is passed to the \FindBaseCases procedure (explained in
-\cref{sec:identifying}), which identifies the base cases that need to be
-defined. For each base case $f(\mathbf{x})$, we retrieve the logical formula
-$\mathcal{F}(f)$ associated with the function name $f$ and simplify it using the
-\Propagate procedure (explained in detail in \cref{sec:simplifying}). We do this
-by iterating over all indices of $\mathbf{x}$, where $x_{i}$ is a constant, and
-using \Propagate to simplify $\psi$ by assuming that domain $\mathcal{D}(f, i)$
-has size $x_{i}$. Finally, on \cref{line:final}, \CompileWithBaseCases recurses
-on these simplified formulas and adds the resulting base case equations to
-$\mathcal{E}$. \Cref{example:overall} below provides more detail.
+some algebraic simplification, $\mathcal{E}$ is passed to the \FindBaseCases
+procedure (see \cref{sec:identifying}). For each base case $f(\mathbf{x})$, we
+retrieve the logical formula $\mathcal{F}(f)$ associated with the function name
+$f$ and simplify it using the \Propagate procedure (explained in detail in
+\cref{sec:simplifying}). We do this by iterating over all indices of
+$\mathbf{x}$, where $x_{i}$ is a constant, and using \Propagate to simplify
+$\psi$ by assuming that domain $\mathcal{D}(f, i)$ has size $x_{i}$. Finally, on
+\cref{line:final}, \CompileWithBaseCases recurses on these simplified formulas
+and adds the resulting base case equations to $\mathcal{E}$.
+\Cref{example:overall} below provides more detail.
 
 \begin{remark}
   Although \CompileWithBaseCases starts with a call to \textsc{Crane}, the
@@ -585,16 +590,16 @@ $\mathcal{E}$. \Cref{example:overall} below provides more detail.
     \mathcal{E} &= \left\{\,\begin{aligned}f(m, n) &= \sum_{l=0}^{n} \binom{n}{l}{(-1)}^{n-l}g(l, m),\\ g(l, m) &= g(l-1, m) + mg(l-1, m-1)\end{aligned}\,\right\};\\
     \mathcal{D} &= \{\, (f, 1) \mapsto \Gamma, (f, 2) \mapsto \Delta, (g, 1) \mapsto \Delta^{\top}, (g, 2) \mapsto \Gamma \,\},
   \end{align*}
-  where $\Delta^{\top}$ is a new domain introduced by \Compile. (We omit the
-  definition of $\mathcal{F}$ as the formulas can get a bit verbose.) Then
-  \FindBaseCases identifies two base cases: $g(0, m)$ and $g(l, 0)$. In both
-  cases, \CompileWithBaseCases recurses on the formula $\mathcal{F}(g)$
-  simplified by assuming that one of the domains is empty. In the first case, we
-  recurse on the formula $\forall x \in \Gamma\text{. }S(x) \lor \neg S(x)$,
-  where $S$ is a predicate introduced by Skolemization with weights
-  $w^{+}(S) = 1$ and $w^{-}(S) = -1$. Hence, we obtain the base case
-  $g(0, m) = 0^{m}$. In the case of $g(l, 0)$, \Propagate{$\psi$, $\Gamma$, $0$}
-  returns an empty formula, resulting in $g(l, 0) = 1$.
+  where $\Delta^{\top}$ is a new domain. (We omit the definition of
+  $\mathcal{F}$ as the formulas can get a bit verbose.) Then \FindBaseCases
+  identifies two base cases: $g(0, m)$ and $g(l, 0)$. In both cases,
+  \CompileWithBaseCases recurses on the formula $\mathcal{F}(g)$ simplified by
+  assuming that one of the domains is empty. In the first case, we recurse on
+  the formula $\forall x \in \Gamma\text{. }S(x) \lor \neg S(x)$, where $S$ is a
+  predicate introduced by Skolemization with weights $w^{+}(S) = 1$ and
+  $w^{-}(S) = -1$. Hence, we obtain the base case $g(0, m) = 0^{m}$. In the case
+  of $g(l, 0)$, \Propagate{$\psi$, $\Gamma$, $0$} returns an empty formula,
+  resulting in $g(l, 0) = 1$.
 \end{example}
 
 It is worth noting that these base cases overlap when $l = m = 0$ but remain
@@ -603,7 +608,7 @@ domains $\Gamma$ and $\Delta$, and let $n, m \in \mathbb{N}_{0}$. Then the FOMC
 of \Propagate{$\phi$, $\Delta$, $n$} assuming $|\Gamma| = m$ is the same as the
 FOMC of \Propagate{$\phi$, $\Gamma$, $m$} assuming $|\Delta| = n$.
 
-Finally, we main responsibility of the \Simplify procedure is in handling the
+Finally, the main responsibility of the \Simplify procedure is to handle the
 algebraic pattern $\sum_{m=0}^{n}[a \le m \le b] f(m)$. Here:
 \begin{enumerate*}[label=(\roman*)]
   \item $n$ is a variable,
@@ -648,151 +653,44 @@ $g(l, m) = g(l-1, m) + mg(l-1, m-1)$.
 % sizes (propagating this change to the rest of the paper, particularly
 % Assumption 1, the proof of Lemma 1)
 
-\Cref{alg:findbasecases} summarises the implementation of the \FindBaseCases
-function. When a function $f$ calls itself recursively, \FindBaseCases considers
-two types of arguments:
+\Cref{alg:findbasecases} summarises the implementation of \FindBaseCases.
+\FindBaseCases considers two types of arguments when a function $f$ calls itself
+recursively:
 \begin{enumerate*}[label=(\roman*)]
   \item constants and
   \item arguments of the form $x_{i} - c_{i}$, where $c_{i}$ is a constant and
   $x_{i}$ is the $i$-th argument of the signature of $f$.
 \end{enumerate*}
-If the argument is a constant $c_{i}$, a base case with $c_{i}$ is added. In the
-second case, a base case is added for each constant from zero up to (but not
-including) $c_{i}$. The following discussion explains the reasoning behind this
-approach.
+When the argument is a constant $c_{i}$, a base case with $c_{i}$ is added. In
+the second case, a base case is added for each constant from $0$ up to (but not
+including) $c_{i}$.
 
 \begin{example}
-  Consider the recursive function $g$ from \cref{example:overall}. Then
+  Consider the recursive function $g$ from \cref{example:overall}.
   \FindBaseCases iterates over two function calls: $g(l-1, m)$ and
   $g(l-1, m-1)$. The former produces the base case $g(0, m)$, while the latter
   produces both $g(0, m)$ and $g(l, 0)$.
 \end{example}
 
-In the rest of this section, we show that the base cases identified by
-\FindBaseCases are sufficient for the algorithm to terminate. Note that
-characterising the fine-grained complexity of the solutions found by \Cranetwo{}
-or other FOMC algorithms is an emerging area of research partially addressed by
-\citeauthor{DBLP:conf/kr/DilkasB23}~\shortcite{DBLP:conf/kr/DilkasB23} and
-\citeauthor{tóth2024complexityweightedfirstordermodel}~\shortcite{tóth2024complexityweightedfirstordermodel}.
-For the rest of this section, let $\mathcal{E}$ represent the equations returned
-by \CompileWithBaseCases. To demonstrate that the base cases identified by
-\FindBaseCases are sufficient, we begin with a few observations that stem from
-previous~\cite{DBLP:conf/ijcai/BroeckTMDR11,DBLP:conf/kr/DilkasB23} and this
-work.
-
-\begin{fact}\label{assumption1}
-  For each function $f$, there is precisely one equation $e \in \mathcal{E}$
-  with $f(\mathbf{x})$ on the left-hand side where all $x_{i}$'s are variables
-  (i.e., $e$ is not a base case). We refer to $e$ as the \emph{definition} of
-  $f$.
-\end{fact}
-
-\begin{fact}\label{assumption2}
-  There is a \emph{topological ordering} of all functions ${(f_{i})}_{i}$ in
-  $\mathcal{E}$ such that equations in $\mathcal{E}$ with $f_{i}$ on the
-  left-hand side do not contain function calls to $f_{j}$ with $j > i$. This
-  condition prevents mutual recursion and other cyclic scenarios.
-\end{fact}
-
-\begin{fact}\label{assumption3}
-  For every equation $(f(\mathbf{x}) = \expr) \in \mathcal{E}$, the evaluation
-  of $\expr$ terminates when provided with the values of all relevant function
-  calls.
-\end{fact}
-
-\begin{corollary}\label{fact}
-  If $f$ is a non-recursive function with no function calls on the right-hand
-  side of its definition, then the evaluation of any function call
-  $f(\mathbf{x})$ terminates.
-\end{corollary}
-
-\begin{fact}\label{fact2}
-  For any equation $f(\mathbf{x}) = \expr{}$, if $\mathbf{x}$ contains only
-  constants, then $\expr{}$ cannot include any function calls to $f$.
-\end{fact}
-
-Additionally, we introduce an assumption about the structure of recursion.
-
-\begin{assumption}\label{assumption4}
-  For every equation $(f(\mathbf{x}) = \expr) \in \mathcal{E}$, every recursive
-  function call $f(\mathbf{y}) \in \expr$ satisfies the
-  following:
-  \begin{itemize}
-    \item Each $y_{i}$ is either $x_{i} - c_{i}$ or $c_{i}$ for some constant
-          $c_{i}$.
-    \item There exists $i$ such that $y_{i} = x_{i} - c_{i}$ for some
-          $c_{i} > 0$.
-  \end{itemize}
-\end{assumption}
-
-Finally, we assume a particular order of evaluation for function calls using the
-equations in $\mathcal{E}$. Specifically, we assume that base cases are
-considered before the recursive definition. The exact order in which base cases
-are considered is immaterial.
-
-\begin{assumption}
-  When multiple equations in $\mathcal{E}$ match a function call
-  $f(\mathbf{x})$, preference is given to an equation with the most constants on
-  its left-hand side.
-\end{assumption}
-
-With the observations and assumptions mentioned above, we prove the following
-theorem.
+It can be shown that the base cases identified by \FindBaseCases are sufficient
+for the algorithm to terminate.\footnote{Note that characterising the
+  fine-grained complexity of the solutions found by \Cranetwo{} or other FOMC
+  algorithms is an emerging area of research. These questions have been
+  partially addressed in previous
+  work~\cite{DBLP:conf/kr/DilkasB23,tóth2024complexityweightedfirstordermodel}
+  and are orthogonal to the goals of this section.}
 
 \begin{theorem}[Termination]\label{thm:halting}
+  Let $\mathcal{E}$ represent the equations returned by \CompileWithBaseCases.
   Let $f$ be an $n$-ary function in $\mathcal{E}$ and
   $\mathbf{x} \in \mathbb{N}_{0}^{n}$. Then the evaluation of $f(\mathbf{x})$
   terminates.
 \end{theorem}
 
-We prove \cref{thm:halting} using double induction. First, we apply induction on
+We prove \cref{thm:halting} using double induction. First, we apply induction to
 the number of functions in $\mathcal{E}$. Then, we use induction on the arity of
-the `last' function in $\mathcal{E}$ according to some topological ordering (as
-defined in \cref{assumption2}). For readability, we divide the proof into
-several lemmas of increasing generality.
-
-\begin{lemma}\label{lemma:oneunary}
-  Assume that $\mathcal{E}$ consists of just \emph{one unary} function $f$. Then
-  the evaluation of a function call $f(x)$ terminates for any
-  $x \in \mathbb{N}_{0}$.
-\end{lemma}
-\begin{proof}
-  If $f(x)$ is captured by a base case, then its evaluation terminates by
-  \cref{fact,fact2}. If $f$ is not recursive, the evaluation of
-  $f(x)$ terminates by \cref{fact}.
-
-  Otherwise, let $f(y)$ be an arbitrary function call on the right-hand side of
-  the definition of $f(x)$. If $y$ is a constant, then there is a base case for
-  $f(y)$. Otherwise, let $y = x - c$ for some $c > 0$. Then there exists
-  $k \in \mathbb{N}_{0}$ such that $0 \le x - kc \le c-1$. So, after $k$
-  iterations, the sequence of function calls $f(x), f(x-c), f(x-2c),\dots$ will
-  be captured by the base case $f(x \mod c)$.
-\end{proof}
-
-\begin{lemma}\label{lemma:onefunction}
-  Generalising \cref{lemma:oneunary}, let $\mathcal{E}$ be a set of equations
-  for \emph{one} $n$-ary function $f$ for some $n \ge 1$. Then the evaluation of
-  $f(\mathbf{x})$ terminates for any $\mathbf{x} \in \mathbb{N}_{0}^{n}$.
-\end{lemma}
-\begin{proof}
-  If $f$ is non-recursive, the evaluation of $f(\mathbf{x})$ terminates by
-  previous arguments. We proceed by induction on $n$, with the base case of
-  $n=1$ handled by \cref{lemma:oneunary}. Assume that $n > 1$. Any base case of
-  $f$ can be seen as a function of arity $n-1$, since one of the parameters is
-  fixed. Thus, the evaluation of any base case terminates by the inductive
-  hypothesis. It remains to show that the evaluation of the recursive equation
-  for $f$ terminates, but that follows from \cref{assumption3}.
-\end{proof}
-
-\begin{proof}[Proof of \cref{thm:halting}]
-  We proceed by induction on the number of functions $n$. The base case of $n=1$
-  is handled by \cref{lemma:onefunction}. Let ${(f_{i})}_{i=1}^{n}$ be some
-  topological ordering of these $n > 1$ functions. If $f = f_{j}$ for $j < n$,
-  then the evaluation of $f(\mathbf{x})$ terminates by the inductive hypothesis
-  since $f_{j}$ cannot call $f_{n}$ by \cref{assumption2}. Using the inductive
-  hypothesis that all function calls to $f_{j}$ (with $j < n$) terminate, the
-  proof proceeds similarly to the Proof of \cref{lemma:onefunction}.
-\end{proof}
+the `last' function in $\mathcal{E}$ according to some topological ordering. For
+the detailed proof, please refer to the technical appendix.
 
 \subsection{Propagating Domain Size Assumptions}\label{sec:simplifying}
 
@@ -869,22 +767,21 @@ replacing the $m$ variables in $C$ with the $n$ new constants.
 
 \section{Smoothing the Base Cases}\label{sec:smoothing}
 
-\emph{Smoothing} is the process of modifying a circuit to re-introduce atoms
-that might have been eliminated, thus ensuring that the circuit preserves the
-correct (weighted) model
+\emph{Smoothing} modifies a circuit to reintroduce eliminated atoms, ensuring
+the correct model
 count~\cite{darwiche2001tractable,DBLP:conf/ijcai/BroeckTMDR11}. In this
-section, we motivate and describe a similar process performed on
+section, we describe a similar process performed on
 \cref{line:smoothing1,line:smoothing2} of \cref{alg:propagate}.
-\Cref{line:presmoothing} checks whether smoothing is necessary, and
+\Cref{line:presmoothing} checks if smoothing is necessary, and
 \cref{line:smoothing1,line:smoothing2} execute it. If the condition on
-\cref{line:presmoothing} is not satisfied, the clause is not smoothed but rather
-completely omitted.
+\cref{line:presmoothing} is not satisfied, the clause is not smoothed but
+omitted.
 
-Suppose that \Propagate is called with arguments $(\phi, \Delta, 0)$, which
-means we are simplifying the formula $\phi$ by assuming that the domain $\Delta$
-is empty. Informally, if there is a predicate $P$ in $\phi$ unrelated to
-$\Delta$, smoothing preserves all occurrences of $P$ even if all clauses with
-$P$ become vacuously satisfied.
+Suppose \Propagate is called with arguments $(\phi, \Delta, 0)$, i.e., we are
+simplifying the formula $\phi$ by assuming that the domain $\Delta$ is empty.
+Informally, if there is a predicate $P$ in $\phi$ unrelated to $\Delta$,
+smoothing preserves all occurrences of $P$ even if all clauses with $P$ become
+vacuously satisfied.
 
 \begin{example}\label{example:basecasesmoothing}
   Let $\phi$ be:
@@ -899,17 +796,15 @@ $P$ become vacuously satisfied.
   Now, let us reason manually about the model count of $\phi$ when
   $\Delta = \emptyset$. Predicate $Q$ can only take one value, $Q = \emptyset$.
   The value of $P$ is fixed over $\Gamma' \times \Gamma'$ by \cref{eq:example2},
-  but it is allowed to vary freely over
+  but it can vary freely over
   $(\Gamma \times \Gamma) \setminus (\Gamma' \times \Gamma')$ since
   \cref{eq:example1} is vacuously satisfied by all structures. Therefore, the
-  correct FOMC should be $2^{|\Gamma|^2 - |\Gamma'|^2}$.
-
-  However, without \cref{line:smoothing2}, \Propagate would simplify $\phi$ to
+  correct FOMC should be $2^{|\Gamma|^2 - |\Gamma'|^2}$. However, without
+  \cref{line:smoothing2}, \Propagate would simplify $\phi$ to
   $\forall y, z \in \Gamma'\text{. }P(y, z)$. In this case, $P$ is a subset of
   $\Gamma' \times \Gamma'$. This simplified formula has only one model:
-  $\{\, P(y, z) \mid y, z \in \Gamma' \,\}$.
-
-  By including \cref{line:smoothing2}, \Propagate transforms $\phi$ to:
+  $\{\, P(y, z) \mid y, z \in \Gamma' \,\}$. By including
+  \cref{line:smoothing2}, \Propagate transforms $\phi$ to:
   \begin{gather*}
     (\forall y, z \in \Gamma\text{. }P(y, z) \lor \neg P(y, z))\land{}\\
     (\forall y, z \in \Gamma'\text{. }P(y, z)),
@@ -955,29 +850,32 @@ and return it.
 % Baselines: List and describe the baseline methods or systems used for
 % comparison.
 
-In this section, we present experimental results examining the scalability of
-\Cranetwo{} compared to two other notable FOMC algorithms: \textsc{FastWFOMC}
-and \textsc{ForcLift}. Note that it would not make sense to include the original
-\textsc{Crane} algorithm in the experiments or to evaluate \Cranetwo{} without
-the C++ code generation described in \cref{sec:cpp}. Indeed, these algorithms
-can only produce mathematical definitions of functions without evaluating them.
+In this section, we present experimental results that analyse the scalability of
+\Cranetwo{} in comparison to two other notable FOMC algorithms:
+\textsc{FastWFOMC} and \textsc{ForcLift}. Our experiments involve two versions
+of \Cranetwo{}: \Cranegreedy{} and \Cranebfs{}. Like its predecessor,
+\Cranetwo{} has two modes for applying compilation rules to formulas: one that
+uses a greedy search algorithm similar to \textsc{ForcLift} and another that
+combines greedy and breadth-first search.
 
-In our experiments, we include two versions of \Cranetwo{}: \Cranegreedy{} and
-\Cranebfs{}. Like its predecessor, \Cranetwo{} has two modes that decide how
-compilation rules are applied to formulas: one that uses greedy search similarly
-to \textsc{ForcLift} and another that combines greedy and breadth-first search.
-While greedy search is more efficient (in terms of being able to handle larger
-formulas), it is a heuristic that can miss some solutions.
+% It would not make sense to include the original \textsc{Crane} algorithm in
+% the experiments or evaluate \Cranetwo{} without the C++ code generation
+% described in \cref{sec:cpp}. Indeed, these algorithms can only produce
+% mathematical definitions of functions without evaluating them.
+
+% While greedy search is more efficient (in terms of being able to handle larger
+% formulas), it is a heuristic that can miss some solutions.
 
 % Datasets: Provide details about the datasets used in the experiments,
 % including size, source, and any preprocessing steps.
 
-We compare the algorithms on three benchmarks from previous work. The first is
-the function-counting problem from \cref{example:functions}, previously examined
-by \citeauthor{DBLP:conf/kr/DilkasB23}~\shortcite{DBLP:conf/kr/DilkasB23}. The
-second is a variant of the well-known `Friends and Smokers' Markov logic
-network~\cite{DBLP:conf/aaai/SinglaD08,DBLP:conf/uai/BroeckCD12}. In \Ctwo{},
-\FO{}, and \UFO{}, it can be formulated as
+We compare these algorithms using three benchmarks from previous studies. The
+first benchmark is the function-counting problem from \cref{example:functions},
+previously examined by
+\citeauthor{DBLP:conf/kr/DilkasB23}~\shortcite{DBLP:conf/kr/DilkasB23}. The
+second benchmark is a variant of the well-known `Friends and Smokers' Markov
+logic network~\cite{DBLP:conf/aaai/SinglaD08,DBLP:conf/uai/BroeckCD12}. In
+\Ctwo{}, \FO{}, and \UFO{}, this problem can be formulated as
 \begin{gather*}
   (\forall x,y \in \Delta\text{. } S(x) \land F(x, y) \Rightarrow S(y)) \land{}\\
   (\forall x \in \Delta\text{. }S(x) \Rightarrow C(x))
@@ -987,7 +885,7 @@ or, equivalently, in conjunctive normal form as
   (\forall x,y \in \Delta\text{. }S(y) \lor \neg S(x) \lor \neg F(x, y)) \land{}\\
   (\forall x \in \Delta\text{. } C(x) \lor \neg S(x)).
 \end{gather*}
-Finally, we include the bijection-counting problem previously used by
+Finally, we include the bijection-counting problem previously utilised by
 \citeauthor{DBLP:conf/kr/DilkasB23}~\shortcite{DBLP:conf/kr/DilkasB23}. Its
 formulation in \FO{} is described in \cref{example:overall}. The equivalent
 formula in \Ctwo{} is
@@ -1003,44 +901,51 @@ Similarly, in \UFO{} the same formula can be written as
 \end{gather*}
 where $w^{-}(R) = w^{-}(S) = -1$.
 
+\begin{figure*}[t]
+  \centering
+  \includegraphics{plot.pdf}
+  \caption{The runtime of the algorithms as a function of the domain size. Note
+    that both axes are on a logarithmic scale.}\label{fig:plot}
+\end{figure*}
+
 Since \textsc{FastWFOMC} does not support many-sorted logic, our experiments are
-restricted to formulas with a single domain. However, many of the counting
-problems examined in the experimental evaluation of
-\textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23} become equivalent (in the sense
-that they generate the same integer sequences) when restricted to a single
-domain. Moreover, it is challenging to compare \Cranetwo{} and
-\textsc{FastWFOMC} on a larger set of problems because each problem has to be
-represented in two (fairly different) logics: \FO{} and \UFO{}. Nonetheless, the
-three benchmarks cover a diverse range of possibilities. Unlike the other two,
-the `friends' benchmark uses multiple predicates and can be written in \FO{}
-using only two variables and no cardinality constraints or counting quantifiers.
-Next, the `functions' benchmark, while still liftable by all of the algorithms,
-requires either the use of cardinality constraints, counting quantifiers, or
-more than two variables. Finally, the `bijections' benchmark is an example of a
-formula that can be handled by \textsc{FastWFOMC} but not \textsc{ForcLift}.
+limited to formulas with a single domain. However, many of the counting problems
+used in the experimental evaluation of
+\textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23} become equivalent (in terms of
+generating equivalent integer sequences) when restricted to a single domain.
+Additionally, comparing \Cranetwo{} and \textsc{FastWFOMC} on a broader set of
+problems is challenging because each problem needs to be represented in two
+(quite different) logics: \FO{} and \UFO{}. Nevertheless, the three benchmarks
+cover a wide range of possibilities.
+
+Among the three benchmarks, the `friends' benchmark stands out as it uses
+multiple predicates and can be expressed in \FO{} using just two variables
+without cardinality constraints or counting quantifiers. The `functions'
+benchmark, on the other hand, can still be handled by all the algorithms, but it
+requires cardinality constraints, counting quantifiers, or more than two
+variables. Lastly, the `bijections' benchmark is an example of a formula that
+\textsc{FastWFOMC} can handle but \textsc{ForcLift} cannot.
 
 % Metrics: Define the performance metrics used to evaluate the results (e.g.,
 % accuracy, precision, recall, F1-score, runtime).
 
-A major difference between \textsc{ForcLift} and the other two algorithms is
-that \textsc{ForcLift} does not support arbitrary-precision arithmetic whereas
-the other two algorithms both use the GNU Multiple Precision Arithmetic Library.
-Instead, when the numerical value of the count becomes too big to be accurately
-presented using finite precision, \textsc{ForcLift} returns $\infty$. We run
-each algorithm on each benchmark on domains of size $2^{1}, 2^{2}, 2^{3},\dots$
-until the algorithm times out after \SI{1}{\hour}, runs out of memory, or (in
-the case of \textsc{ForcLift}) returns $\infty$. We measure compilation and
-inference time separately, but primarily focus on total runtime (i.e., the sum
-of both), which is dominated by the latter.
+A considerable difference between \textsc{ForcLift} and the other two algorithms
+is that \textsc{ForcLift} does not support arbitrary precision whereas the other
+algorithms use the GNU Multiple Precision Arithmetic Library. Thus, when the
+count exceeds finite precision, \textsc{ForcLift} returns $\infty$. For
+evaluation purposes, we ran each algorithm on each benchmark using domains of
+sizes $2^{1}, 2^{2}, 2^{3}$, and so on, until a timeout occurred after
+\SI{1}{\hour}, the algorithm ran out of memory, or \textsc{ForcLift} returned
+$\infty$. We separately measured compilation and inference time but primarily
+focused on total runtime, dominated by the latter.
 
 % Environment: Describe the hardware and software environment (e.g.,
 % specifications of the computer, operating system, libraries, and tools used).
 
-The experiments were run on an Intel Skylake \SI{2.4}{\giga\hertz} CPU with
-\SI{188}{\gibi\byte} of memory and CentOS~7 operating system. C++ programs were
-compiled using the Intel C++ Compiler 2020u4. \textsc{FastWFOMC} was run on
-Julia~1.10.4, while all other algorithms were run on the Java Virtual Machine
-1.8.0\_201.
+The experiments were conducted using an Intel Skylake \SI{2.4}{\giga\hertz} CPU
+with \SI{188}{\gibi\byte} of memory and CentOS~7. C++ programs were compiled
+using the Intel C++ Compiler 2020u4. \textsc{FastWFOMC} ran on Julia~1.10.4,
+while the other algorithms were executed on the Java Virtual Machine 1.8.0\_201.
 
 % 3. Results and Analysis
 % Presentation of Results: Use tables, graphs, and charts to present the experimental results clearly.
@@ -1050,57 +955,52 @@ Julia~1.10.4, while all other algorithms were run on the Java Virtual Machine
 % Challenges: Discuss any challenges or unexpected outcomes.
 % Acknowledgement: Honestly acknowledge any limitations of your experiments or method.
 
-\begin{figure*}[t]
-  \centering
-  \includegraphics{plot.pdf}
-  \caption{The runtime of the algorithms as a function of the domain size. Note
-    that both axes are on a logarithmic scale.}\label{fig:plot}
-\end{figure*}
+\Cref{fig:plot} presents a summary of the experimental results. Only
+\textsc{FastWFOMC} and \Cranebfs{} could handle the bijection-counting problem.
+For this benchmark, the largest domain sizes these algorithms could accommodate
+were \num{64} and \num{4096}, respectively. On the other two benchmarks,
+\textsc{ForcLift} had the lowest runtime. However, due to its finite precision,
+it only scaled up to domain sizes of \num{16} and \num{128} for `friends' and
+`functions', respectively. \textsc{FastWFOMC} outperformed \textsc{ForcLift} in
+the case of `friends', but not `functions', as it could handle domains of size
+\num{1024} and \num{64}, respectively. Furthermore, both \Cranebfs{} and
+\Cranegreedy{} performed similarly on both benchmarks. Similarly to the
+`bijections' benchmark, \Cranetwo{} significantly outperformed the other two
+algorithms, scaling up to domains of size \num{8192} and \num{67108864},
+respectively.
 
-\Cref{fig:plot} summarises the experimental results. Only \textsc{FastWFOMC} and
-\Cranebfs{} could lift the bijection-counting problem. On this benchmark, the
-largest domain sizes that these algorithms could handle were \num{64} and
-\num{4096}, respectively. On the other two benchmarks, \textsc{ForcLift} has the
-lowest runtime, but, as it is finite-precision, only scales up to domain sizes
-of \num{16} and \num{128} in the case of `friends' and `functions',
-respectively. Next, \textsc{FastWFOMC} outperforms \textsc{ForcLift} in the case
-of `friends' but not `functions': it scales up to domains of size \num{1024} and
-\num{64}, respectively. Finally, both \Cranebfs{} and \Cranegreedy{} perform
-nearly identically on both of these benchmarks. Similarly to the `bijections'
-benchmark, \Cranetwo{} significantly surpasses the other two algorithms, scaling
-up to domains of size \num{8192} and \num{67108864}, respectively.
-
-Another aspect of the experimental results worth discussing separately is that
-of compilation. As both Julia and Scala use just-in-time (JIT) compilation, both
-\textsc{FastWFOMC} and \textsc{ForcLift} take longer when run on the smallest
-domain size, as that is when most JIT compilation happens. As \Cranetwo{} is run
-only once per benchmark, JIT compilation time is incorporated into its runtime
-across all domain sizes. Moreover, while \textsc{ForcLift} compilation is
-generally faster than that of \Cranetwo{}, neither is significant in comparison
-to inference time. Indeed, typically, \textsc{ForcLift} compilation took around
-\SI{0.5}{\second}, while \Cranetwo{} compilation took around \SI{2.3}{\second}.
+Another aspect of the experimental results that deserves separate discussion is
+compilation. Both Julia and Scala use just-in-time (JIT) compilation, which
+means that \textsc{FastWFOMC} and \textsc{ForcLift} take longer to run on the
+smallest domain size, where most JIT compilation occurs. In the case of
+\Cranetwo{}, it is only run once per benchmark, so the JIT compilation time is
+included in its overall runtime across all domain sizes. Additionally, while
+\textsc{ForcLift}'s compilation is generally faster than that of \Cranetwo{},
+neither significantly affects the inference time. Specifically,
+\textsc{ForcLift} compilation typically takes around \SI{0.5}{\second}, while
+\Cranetwo{} compilation takes around \SI{2.3}{\second}.
 
 % 8. Conclusion
 % Summary: Briefly summarize the key findings from the experimental results.
 % Future Work: Suggest directions for future research based on your findings.
 
-So what do our experiments reveal about which algorithm should one use in
-practice? If the formula can be handled by \textsc{ForcLift} and the domain
-sizes are reasonably small, it is likely to be the fastest algorithm. In other
-cases, \Cranetwo{} is likely to be significantly faster than \textsc{FastWFOMC}
-across all domain sizes (but especially with higher domain sizes), assuming the
-formula can be handled by both algorithms.
+Based on our experiments, which algorithm should be used in practice? If the
+formula can be handled by \textsc{ForcLift} and the domain sizes are reasonably
+small, \textsc{ForcLift} is likely the fastest algorithm. In other situations,
+\Cranetwo{} is expected to be significantly more efficient than
+\textsc{FastWFOMC} regardless of domain size, provided both algorithms can
+handle the formula.
 
 \section{Conclusion and Future Work}
 
-In this work, we have presented several contributions. First, we have developed
+In this work, we have made several contributions. First, we have developed
 algorithmic techniques to find the base cases of recursive functions generated
-by the original \textsc{Crane} algorithm. Second, we have extended the smoothing
-procedure of \textsc{ForcLift} and \textsc{Crane} to support base case formulas.
-Third, we have proposed an approach to compile function definitions into C++
-programs with support for arbitrary-precision arithmetic. Lastly, we have
-provided experimental evidence demonstrating that \Cranetwo{} can scale to much
-larger domain sizes than \textsc{FastWFOMC} while handling more formulas than
+by \textsc{Crane}. Second, we have extended the smoothing procedure of
+\textsc{ForcLift} and \textsc{Crane} to support base case formulas. Third, we
+have proposed an approach to compile function definitions into C++ programs with
+support for arbitrary-precision arithmetic. Lastly, we have provided
+experimental evidence demonstrating that \Cranetwo{} can scale to much larger
+domain sizes than \textsc{FastWFOMC} while handling more formulas than
 \textsc{ForcLift}. Having FOMC algorithms that can efficiently handle large
 domain sizes is especially crucial in the weighted setting. For example,
 consider the `friends' instance examined in \cref{sec:experiments}, which models
@@ -1117,11 +1017,10 @@ to domain size. Additionally, further characterisation of the capabilities of
 for a fragment of first-order logic such as \Ctwo{} (using a suitable encoding
 of counting quantifiers). Moreover, the efficiency of a FOMC algorithm in
 handling a particular formula can be assessed using \emph{fine-grained
-  complexity}. In the case of \textsc{Crane} and \Cranetwo{}, this can be done
-by analysing the equations~\cite{DBLP:conf/kr/DilkasB23}. By doing so,
-efficiency can be reasoned about in a more implementation-independent manner by
-making claims about the maximum degree of the polynomial that characterises any
-given solution.
+  complexity}. In the case of \Cranetwo{}, this can be done by analysing the
+equations~\cite{DBLP:conf/kr/DilkasB23}. By doing so, efficiency can be reasoned
+about in a more implementation-independent manner by making claims about the
+maximum degree of the polynomial that characterises any given solution.
 
 \bibliography{paper}
 

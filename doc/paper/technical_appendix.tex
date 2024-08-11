@@ -1,0 +1,172 @@
+%File: anonymous-submission-latex-2025.tex
+\documentclass[letterpaper]{article} % DO NOT CHANGE THIS
+\usepackage[submission]{aaai25}  % DO NOT CHANGE THIS
+\usepackage{times}  % DO NOT CHANGE THIS
+\usepackage{helvet}  % DO NOT CHANGE THIS
+\usepackage{courier}  % DO NOT CHANGE THIS
+\usepackage[hyphens]{url}  % DO NOT CHANGE THIS
+\usepackage{graphicx} % DO NOT CHANGE THIS
+\urlstyle{rm} % DO NOT CHANGE THIS
+\def\UrlFont{\rm}  % DO NOT CHANGE THIS
+\usepackage{natbib}  % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\usepackage{caption} % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\frenchspacing  % DO NOT CHANGE THIS
+\setlength{\pdfpagewidth}{8.5in} % DO NOT CHANGE THIS
+\setlength{\pdfpageheight}{11in} % DO NOT CHANGE THIS
+
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage[capitalize,noabbrev]{cleveref}
+
+% Keep the \pdfinfo as shown here. There's no need
+% for you to add the /Title and /Author tags.
+\pdfinfo{
+/TemplateVersion (2025.1)
+}
+
+\setcounter{secnumdepth}{2} %May be changed to 1 or 2 if section numbers are desired.
+
+\SetKwFunction{CompileWithBaseCases}{CompileWithBaseCases}
+\SetKwFunction{FindBaseCases}{FindBaseCases}
+
+\newcommand{\Cranetwo}{\textsc{Crane2}}
+\newcommand{\expr}{\mathtt{expr}}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{assumption}{Assumption}
+\newtheorem{corollary}{Corollary}
+\newtheorem{fact}{Observation}
+\newtheorem{lemma}{Lemma}
+
+\title{Towards Practical First-Order Model Counting: Technical Appendix}
+\author{Anonymous Submission}
+\affiliations{}
+
+\begin{document}
+
+\maketitle
+
+\section{The Proof of Theorem 1}
+
+To demonstrate that the base cases identified by \FindBaseCases are sufficient,
+we begin with a few observations that stem from
+previous~\cite{DBLP:conf/ijcai/BroeckTMDR11,DBLP:conf/kr/DilkasB23} and this
+work. Let $\mathcal{E}$ represent the equations returned by
+\CompileWithBaseCases.
+
+\begin{fact}\label{assumption1}
+  For each function $f$, there is precisely one equation $e \in \mathcal{E}$
+  with $f(\mathbf{x})$ on the left-hand side where all $x_{i}$'s are variables
+  (i.e., $e$ is not a base case). We refer to $e$ as the \emph{definition} of
+  $f$.
+\end{fact}
+
+\begin{fact}\label{assumption2}
+  There is a \emph{topological ordering} of all functions ${(f_{i})}_{i}$ in
+  $\mathcal{E}$ such that equations in $\mathcal{E}$ with $f_{i}$ on the
+  left-hand side do not contain function calls to $f_{j}$ with $j > i$. This
+  condition prevents mutual recursion and other cyclic scenarios.
+\end{fact}
+
+\begin{fact}\label{assumption3}
+  For every equation $(f(\mathbf{x}) = \expr) \in \mathcal{E}$, the evaluation
+  of $\expr$ terminates when provided with the values of all relevant function
+  calls.
+\end{fact}
+
+\begin{corollary}\label{fact}
+  If $f$ is a non-recursive function with no function calls on the right-hand
+  side of its definition, then the evaluation of any function call
+  $f(\mathbf{x})$ terminates.
+\end{corollary}
+
+\begin{fact}\label{fact2}
+  For any equation $f(\mathbf{x}) = \expr{}$, if $\mathbf{x}$ contains only
+  constants, then $\expr{}$ cannot include any function calls to $f$.
+\end{fact}
+
+Additionally, we introduce an assumption about the structure of recursion.
+
+\begin{assumption}\label{assumption4}
+  For every equation $(f(\mathbf{x}) = \expr) \in \mathcal{E}$, every recursive
+  function call $f(\mathbf{y}) \in \expr$ satisfies the
+  following:
+  \begin{itemize}
+    \item Each $y_{i}$ is either $x_{i} - c_{i}$ or $c_{i}$ for some constant
+          $c_{i}$.
+    \item There exists $i$ such that $y_{i} = x_{i} - c_{i}$ for some
+          $c_{i} > 0$.
+  \end{itemize}
+\end{assumption}
+
+Finally, we assume a particular order of evaluation for function calls using the
+equations in $\mathcal{E}$. Specifically, we assume that base cases are
+considered before the recursive definition. The exact order in which base cases
+are considered is immaterial.
+
+\begin{assumption}
+  When multiple equations in $\mathcal{E}$ match a function call
+  $f(\mathbf{x})$, preference is given to an equation with the most constants on
+  its left-hand side.
+\end{assumption}
+
+With the observations and assumptions mentioned above, we prove the following
+theorem.
+
+\begin{theorem}[Termination]\label{thm:halting}
+  Let $f$ be an $n$-ary function in $\mathcal{E}$ and
+  $\mathbf{x} \in \mathbb{N}_{0}^{n}$. Then the evaluation of $f(\mathbf{x})$
+  terminates.
+\end{theorem}
+
+For readability, we divide the proof into several lemmas of increasing
+generality.
+
+\begin{lemma}\label{lemma:oneunary}
+  Assume that $\mathcal{E}$ consists of just \emph{one unary} function $f$. Then
+  the evaluation of a function call $f(x)$ terminates for any
+  $x \in \mathbb{N}_{0}$.
+\end{lemma}
+\begin{proof}
+  If $f(x)$ is captured by a base case, then its evaluation terminates by
+  \cref{fact,fact2}. If $f$ is not recursive, the evaluation of
+  $f(x)$ terminates by \cref{fact}.
+
+  Otherwise, let $f(y)$ be an arbitrary function call on the right-hand side of
+  the definition of $f(x)$. If $y$ is a constant, then there is a base case for
+  $f(y)$. Otherwise, let $y = x - c$ for some $c > 0$. Then there exists
+  $k \in \mathbb{N}_{0}$ such that $0 \le x - kc \le c-1$. So, after $k$
+  iterations, the sequence of function calls $f(x), f(x-c), f(x-2c),\dots$ will
+  be captured by the base case $f(x \mod c)$.
+\end{proof}
+
+\begin{lemma}\label{lemma:onefunction}
+  Generalising \cref{lemma:oneunary}, let $\mathcal{E}$ be a set of equations
+  for \emph{one} $n$-ary function $f$ for some $n \ge 1$. Then the evaluation of
+  $f(\mathbf{x})$ terminates for any $\mathbf{x} \in \mathbb{N}_{0}^{n}$.
+\end{lemma}
+\begin{proof}
+  If $f$ is non-recursive, the evaluation of $f(\mathbf{x})$ terminates by
+  previous arguments. We proceed by induction on $n$, with the base case of
+  $n=1$ handled by \cref{lemma:oneunary}. Assume that $n > 1$. Any base case of
+  $f$ can be seen as a function of arity $n-1$, since one of the parameters is
+  fixed. Thus, the evaluation of any base case terminates by the inductive
+  hypothesis. It remains to show that the evaluation of the recursive equation
+  for $f$ terminates, but that follows from \cref{assumption3}.
+\end{proof}
+
+\begin{proof}[Proof of \cref{thm:halting}]
+  We proceed by induction on the number of functions $n$. The base case of $n=1$
+  is handled by \cref{lemma:onefunction}. Let ${(f_{i})}_{i=1}^{n}$ be some
+  topological ordering of these $n > 1$ functions. If $f = f_{j}$ for $j < n$,
+  then the evaluation of $f(\mathbf{x})$ terminates by the inductive hypothesis
+  since $f_{j}$ cannot call $f_{n}$ by \cref{assumption2}. Using the inductive
+  hypothesis that all function calls to $f_{j}$ (with $j < n$) terminate, the
+  proof proceeds similarly to the Proof of \cref{lemma:onefunction}.
+\end{proof}
+
+\bibliography{paper}
+
+\end{document}
