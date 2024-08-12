@@ -915,16 +915,16 @@ used in the experimental evaluation of
 generating equivalent integer sequences) when restricted to a single domain.
 Additionally, comparing \Cranetwo{} and \textsc{FastWFOMC} on a broader set of
 problems is challenging because each problem needs to be represented in two
-(quite different) logics: \FO{} and \UFO{}. Nevertheless, the three benchmarks
-cover a wide range of possibilities.
+(quite different) logics: \FO{} and \UFO{}.
 
-Among the three benchmarks, the `friends' benchmark stands out as it uses
-multiple predicates and can be expressed in \FO{} using just two variables
-without cardinality constraints or counting quantifiers. The `functions'
-benchmark, on the other hand, can still be handled by all the algorithms, but it
-requires cardinality constraints, counting quantifiers, or more than two
-variables. Lastly, the `bijections' benchmark is an example of a formula that
-\textsc{FastWFOMC} can handle but \textsc{ForcLift} cannot.
+Nevertheless, the three benchmarks cover a wide range of possibilities. The
+`friends' benchmark stands out as it uses multiple predicates and can be
+expressed in \FO{} using just two variables without cardinality constraints or
+counting quantifiers. The `functions' benchmark, on the other hand, can still be
+handled by all the algorithms, but it requires cardinality constraints, counting
+quantifiers, or more than two variables. Lastly, the `bijections' benchmark is
+an example of a formula that \textsc{FastWFOMC} can handle but \textsc{ForcLift}
+cannot.
 
 % Metrics: Define the performance metrics used to evaluate the results (e.g.,
 % accuracy, precision, recall, F1-score, runtime).
@@ -976,9 +976,9 @@ smallest domain size, where most JIT compilation occurs. In the case of
 \Cranetwo{}, it is only run once per benchmark, so the JIT compilation time is
 included in its overall runtime across all domain sizes. Additionally, while
 \textsc{ForcLift}'s compilation is generally faster than that of \Cranetwo{},
-neither significantly affects the inference time. Specifically,
-\textsc{ForcLift} compilation typically takes around \SI{0.5}{\second}, while
-\Cranetwo{} compilation takes around \SI{2.3}{\second}.
+neither significantly affects overall runtime. Specifically, \textsc{ForcLift}
+compilation typically takes around \SI{0.5}{\second}, while \Cranetwo{}
+compilation takes around \SI{2.3}{\second}.
 
 % 8. Conclusion
 % Summary: Briefly summarize the key findings from the experimental results.
