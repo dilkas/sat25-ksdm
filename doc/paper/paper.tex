@@ -997,13 +997,7 @@ handle the formula.
 
 \section{Conclusion and Future Work}
 
-In this work, we have made several contributions. First, we have developed
-algorithmic techniques to find the base cases of recursive functions generated
-by \textsc{Crane}. Second, we have extended the smoothing procedure of
-\textsc{ForcLift} and \textsc{Crane} to support base case formulas. Third, we
-have proposed an approach to compile function definitions into C++ programs with
-support for arbitrary-precision arithmetic. Lastly, we have provided
-experimental evidence demonstrating that \Cranetwo{} can scale to much larger
+In this work, we present a scalable automated first-order knowledge compilation-based approach to first order model counting. The proposed approach relies on automatically generating the C++ code corresponding to the recursive functions extracted from knowledge compilation. The enusing empirical evaluatino demonstrated  that \Cranetwo{} can scale to much larger
 domain sizes than \textsc{FastWFOMC} while handling more formulas than
 \textsc{ForcLift}. Having FOMC algorithms that can efficiently handle large
 domain sizes is especially crucial in the weighted setting. For example,
