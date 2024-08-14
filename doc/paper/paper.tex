@@ -850,13 +850,18 @@ and return it.
 % Baselines: List and describe the baseline methods or systems used for
 % comparison.
 
-In this section, we present experimental results that analyse the scalability of
-\Cranetwo{} in comparison to two other notable FOMC algorithms:
-\textsc{FastWFOMC} and \textsc{ForcLift}. Our experiments involve two versions
+Our empirical evaluation sought to compare the runtime performance of {\Cranetwo} with the current state of the art, namely 
+\textsc{FastWFOMC} and \textsc{ForcLift}. It is worth remarking that  \textsc{ForcLift} does not support arbitrary precision, and returns error for cases that requires arbitrary precision reasoning. 
+Our experiments involve two versions
 of \Cranetwo{}: \Cranegreedy{} and \Cranebfs{}. Like its predecessor,
 \Cranetwo{} has two modes for applying compilation rules to formulas: one that
 uses a greedy search algorithm similar to \textsc{ForcLift} and another that
 combines greedy and breadth-first search.
+
+The experiments were conducted using an Intel Skylake \SI{2.4}{\giga\hertz} CPU
+with \SI{188}{\gibi\byte} of memory and CentOS~7. C++ programs were compiled
+using the Intel C++ Compiler 2020u4. \textsc{FastWFOMC} ran on Julia~1.10.4,
+while the other algorithms were executed on the Java Virtual Machine 1.8.0\_201.
 
 % It would not make sense to include the original \textsc{Crane} algorithm in
 % the experiments or evaluate \Cranetwo{} without the C++ code generation
@@ -869,6 +874,7 @@ combines greedy and breadth-first search.
 % Datasets: Provide details about the datasets used in the experiments,
 % including size, source, and any preprocessing steps.
 
+\subsection{Benchmarks}
 We compare these algorithms using three benchmarks from previous studies. The
 first benchmark is the function-counting problem from \cref{example:functions},
 previously examined by
@@ -908,16 +914,16 @@ where $w^{-}(R) = w^{-}(S) = -1$.
     that both axes are on a logarithmic scale.}\label{fig:plot}
 \end{figure*}
 
-Since \textsc{FastWFOMC} does not support many-sorted logic, our experiments are
-limited to formulas with a single domain. However, many of the counting problems
-used in the experimental evaluation of
-\textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23} become equivalent (in terms of
-generating equivalent integer sequences) when restricted to a single domain.
-Additionally, comparing \Cranetwo{} and \textsc{FastWFOMC} on a broader set of
-problems is challenging because each problem needs to be represented in two
-(quite different) logics: \FO{} and \UFO{}.
+%Since \textsc{FastWFOMC} does not support many-sorted logic, our experiments are
+%limited to formulas with a single domain. However, many of the counting problems
+%used in the experimental evaluation of
+%\textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23} become equivalent (in terms of
+%generating equivalent integer sequences) when restricted to a single domain.
+%Additionally, comparing \Cranetwo{} and \textsc{FastWFOMC} on a broader set of
+%problems is challenging because each problem needs to be represented in two
+%(quite different) logics: \FO{} and \UFO{}.
 
-Nevertheless, the three benchmarks cover a wide range of possibilities. The
+The three benchmark families cover a wide range of possibilities. The
 `friends' benchmark stands out as it uses multiple predicates and can be
 expressed in \FO{} using just two variables without cardinality constraints or
 counting quantifiers. The `functions' benchmark, on the other hand, can still be
@@ -929,23 +935,20 @@ cannot.
 % Metrics: Define the performance metrics used to evaluate the results (e.g.,
 % accuracy, precision, recall, F1-score, runtime).
 
-A considerable difference between \textsc{ForcLift} and the other two algorithms
-is that \textsc{ForcLift} does not support arbitrary precision whereas the other
-algorithms use the GNU Multiple Precision Arithmetic Library. Thus, when the
-count exceeds finite precision, \textsc{ForcLift} returns $\infty$. For
+%A considerable difference between \textsc{ForcLift} and the other two algorithms
+%is that \textsc{ForcLift} does not support arbitrary precision whereas the other
+%algorithms use the GNU Multiple Precision Arithmetic Library. Thus, when the
+%count exceeds finite precision, \textsc{ForcLift} returns $\infty$. 
+
+For
 evaluation purposes, we ran each algorithm on each benchmark using domains of
-sizes $2^{1}, 2^{2}, 2^{3}$, and so on, until a timeout occurred after
-\SI{1}{\hour}, the algorithm ran out of memory, or \textsc{ForcLift} returned
-$\infty$. We separately measured compilation and inference time but primarily
+sizes $2^{1}, 2^{2}, 2^{3}$, and so on, until an algorithm failed to handle a domain size due to timeout, out of memory error, or out of precision errors. While we separately measured compilation and inference time but primarily
 focused on total runtime, dominated by the latter.
 
 % Environment: Describe the hardware and software environment (e.g.,
 % specifications of the computer, operating system, libraries, and tools used).
 
-The experiments were conducted using an Intel Skylake \SI{2.4}{\giga\hertz} CPU
-with \SI{188}{\gibi\byte} of memory and CentOS~7. C++ programs were compiled
-using the Intel C++ Compiler 2020u4. \textsc{FastWFOMC} ran on Julia~1.10.4,
-while the other algorithms were executed on the Java Virtual Machine 1.8.0\_201.
+
 
 % 3. Results and Analysis
 % Presentation of Results: Use tables, graphs, and charts to present the experimental results clearly.
@@ -955,6 +958,7 @@ while the other algorithms were executed on the Java Virtual Machine 1.8.0\_201.
 % Challenges: Discuss any challenges or unexpected outcomes.
 % Acknowledgement: Honestly acknowledge any limitations of your experiments or method.
 
+\subsection{Results}
 \Cref{fig:plot} presents a summary of the experimental results. Only
 \textsc{FastWFOMC} and \Cranebfs{} could handle the bijection-counting problem.
 For this benchmark, the largest domain sizes these algorithms could accommodate
