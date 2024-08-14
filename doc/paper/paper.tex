@@ -96,14 +96,7 @@
 \maketitle
 
 \begin{abstract}
-  First-order model counting (FOMC) is the problem of counting the number of
-  models of a sentence in first-order logic. Since lifted inference techniques rely on reductions to variants of FOMC, the design of scalable methods for FOMC has attracted attention from theoreticians and practitioners alike over the past decade. Recently, significant advances were achieved with the introduction of first-order knowledge compilation-based approach, called \textsc{crane}, that instead of simply providing the final count, generates
-  definitions of (possibly recursive) functions, which can be evaluated with
-  different arguments to compute the model count for any domain size.  We introduce a
-  compilation algorithm that transforms the function definitions into C++ code,
-  equipped with arbitrary-precision arithmetic. These additions allow the new
-  FOMC algorithm to scale to domain sizes over \num{500000} times larger than
-  the current state of the art, as demonstrated through experimental results.
+	First-order model counting (FOMC) is the problem of counting the number of models of a sentence in first-order logic. Since lifted inference techniques rely on reductions to variants of FOMC, the design of scalable methods for FOMC has attracted attention from both theoreticians and practitioners over the past decade. Recently, a new approach based on first-order knowledge compilation was proposed. This approach, called \textsc{crane}, instead of simply providing the final count, generates definitions of (possibly recursive) functions that can be evaluated with different arguments to compute the model count for any domain size. However, this approach is not fully automated, as it requires manual evaluation of the constructed functions. The primary contribution of this work is a fully automated compilation algorithm, called \textsc{crane2}, which transforms the function definitions into C++ code equipped with arbitrary-precision arithmetic. These additions allow the new FOMC algorithm to scale to domain sizes over \num{500000} times larger than the current state of the art, as demonstrated through experimental results.
   
   
 %While \textsc{crane} was shown to handle formulas beyond the capabilites of prior state of the art approaches, the \textsc{crane} still required manual evaluation of constructed functions to obtain model counts. The primary contribution of our work is a fully automated FOMC algorithm that relies on function construction. 
