@@ -43,15 +43,17 @@
   sn edges/.style={for tree={edge={-Latex}}}
 }
 
+\sisetup{group-separator = {,}}
+
 \newcommand{\cmark}{\ding{51}}
 \newcommand{\xmark}{\ding{55}}
 \newcommand{\expr}{\mathtt{expr}}
 \newcommand{\Ctwo}{$\mathsf{C}^{2}$}
 \newcommand{\FO}{$\mathsf{FO}$}
 \newcommand{\UFO}{$\mathsf{UFO}^{2} + \mathsf{CC}$}
-\newcommand{\Cranetwo}{\textsc{Crane2}}
-\newcommand{\Cranebfs}{\textsc{Crane2-BFS}}
-\newcommand{\Cranegreedy}{\textsc{Crane2-Greedy}}
+\newcommand{\Cranetwo}{\textsc{Gantry}}
+\newcommand{\Cranebfs}{\textsc{Gantry-BFS}}
+\newcommand{\Cranegreedy}{\textsc{Gantry-Greedy}}
 
 \newcommand{\crefrangeconjunction}{--}
 \crefname{line}{line}{lines}
@@ -96,175 +98,108 @@
 \maketitle
 
 \begin{abstract}
-	First-order model counting (FOMC) is the problem of counting the number of models of a sentence in first-order logic. Since lifted inference techniques rely on reductions to variants of FOMC, the design of scalable methods for FOMC has attracted attention from both theoreticians and practitioners over the past decade. Recently, a new approach based on first-order knowledge compilation was proposed. This approach, called \textsc{crane}, instead of simply providing the final count, generates definitions of (possibly recursive) functions that can be evaluated with different arguments to compute the model count for any domain size. However, this approach is not fully automated, as it requires manual evaluation of the constructed functions. The primary contribution of this work is a fully automated compilation algorithm, called \textsc{crane2}, which transforms the function definitions into C++ code equipped with arbitrary-precision arithmetic. These additions allow the new FOMC algorithm to scale to domain sizes over \num{500000} times larger than the current state of the art, as demonstrated through experimental results.
-  
-  
-%While \textsc{crane} was shown to handle formulas beyond the capabilites of prior state of the art approaches, the \textsc{crane} still required manual evaluation of constructed functions to obtain model counts. The primary contribution of our work is a fully automated FOMC algorithm that relies on function construction. 
-%  
-%  the algorithm did not include base cases in the recursive definitions. This
-%  work makes three contributions. First, we demonstrate how to construct
-%  function definitions that include base cases by modifying the logical formulas
-%  used in the FOMC algorithm. Second, we extend the well-known circuit
-%  modification technique in knowledge compilation, known as smoothing, to work
-%  with the formulas corresponding to base cases. Third, we introduce a
-%  compilation algorithm that transforms the function definitions into C++ code,
-%  equipped with arbitrary-precision arithmetic. These additions allow the new
-%  FOMC algorithm to scale to domain sizes over \num{500000} times larger than
-%  the current state of the art, as demonstrated through experimental results.
+  First-order model counting (FOMC) is the problem of counting the number of
+  models of a sentence in first-order logic. Since lifted inference techniques
+  rely on reductions to variants of FOMC, the design of scalable methods for
+  FOMC has attracted attention from both theoreticians and practitioners over
+  the past decade. Recently, a new approach based on first-order knowledge
+  compilation was proposed. This approach, called \textsc{Crane}, instead of
+  simply providing the final count, generates definitions of (possibly
+  recursive) functions that can be evaluated with different arguments to compute
+  the model count for any domain size. However, this approach is not fully
+  automated, as it requires manual evaluation of the constructed functions. The
+  primary contribution of this work is a fully automated compilation algorithm,
+  called \Cranetwo{}, which transforms the function definitions into C++ code
+  equipped with arbitrary-precision arithmetic. These additions allow the new
+  FOMC algorithm to scale to domain sizes over \num{500000} times larger than
+  the current state of the art, as demonstrated through experimental results.
 \end{abstract}
 
 \section{Introduction}
 
 % 1. What is the problem?
-
-\emph{First-order model counting} (FOMC) is the task of counting the number of
-models of a sentence in first-order logic over some given domain(s). The
-weighted variant of this problem, known as WFOMC, seeks to compute the total
-weight of the models~\cite{DBLP:conf/ijcai/BroeckTMDR11}. WFOMC is related to
-its propositional predecessor weighted model
-counting~\cite{DBLP:journals/ai/ChaviraD08} and other attempts to unify logic
-and
-probability~\cite{DBLP:journals/ai/Nilsson86,novak2012mathematical,vsaletic2024graded}.
-It is also a key approach to \emph{lifted inference}, which aims to compute
-probabilities more efficiently by leveraging symmetries in the
-problem~\cite{DBLP:conf/ecai/Kersting12}.
-
 % 2. Why is it interesting and important?
 
-Lifted inference is an active area of research, with recent work in domains such
-as constraint satisfaction problems~\cite{DBLP:journals/jair/TotisDRK23} and
-probabilistic answer set programming~\cite{DBLP:journals/ijar/AzzoliniR23}.
-WFOMC has been used for inference on probabilistic
+\emph{First-order model counting} (FOMC) is the task of determining the number
+of models for a sentence in first-order logic over a specified domain. The
+weighted variant, WFOMC, computes the total weight of these models, linking
+logical reasoning with probabilistic
+frameworks~\cite{DBLP:conf/ijcai/BroeckTMDR11}. It builds upon earlier efforts
+in weighted model counting for propositional
+logic~\cite{DBLP:journals/ai/ChaviraD08} and broader attempts to bridge logic
+and
+probability~\cite{DBLP:journals/ai/Nilsson86,novak2012mathematical,vsaletic2024graded}.
+WFOMC is central to \emph{lifted inference}, which enhances the efficiency of
+probabilistic calculations by exploiting
+symmetries~\cite{DBLP:conf/ecai/Kersting12}. Lifted inference continues to
+advance, with applications extending to constraint satisfaction
+problems~\cite{DBLP:journals/jair/TotisDRK23} and probabilistic answer set
+programming~\cite{DBLP:journals/ijar/AzzoliniR23}. Moreover, WFOMC has proven
+effective at reasoning over probabilistic
 databases~\cite{DBLP:journals/debu/GribkoffSB14} and probabilistic logic
-programs~\cite{DBLP:journals/ijar/RiguzziBZCL17}. FOMC algorithms have been
-utilised for discovering new integer
-sequences~\cite{DBLP:conf/ijcai/SvatosJT0K23}, and for
-conjecturing~\cite{DBLP:conf/ilp/BarvinekB0ZK21} and
-constructing~\cite{DBLP:conf/kr/DilkasB23} recurrence relations and other
-recursive structures that describe these sequences. FOMC algorithms have also
-been extended to perform
-\emph{sampling}~\cite{DBLP:conf/aaai/WangB0K22,DBLP:conf/lics/WangP0K23}.
-
-% By considering domains of increasing sizes, the FOMC of a formula can be seen
-% as an integer sequence.
+programs~\cite{DBLP:journals/ijar/RiguzziBZCL17}. FOMC algorithms have also
+facilitated breakthroughs in discovering integer
+sequences~\cite{DBLP:conf/ijcai/SvatosJT0K23} and developing recurrence
+relations for these sequences~\cite{DBLP:conf/kr/DilkasB23}. Recently, these
+algorithms have been extended to perform sampling
+tasks~\cite{DBLP:journals/ai/WangPWK24}.
 
 % 3. Why is it hard? (E.g., why do naive approaches fail?)
 
-The complexity of FOMC is typically characterised in terms of \emph{data
-  complexity}. If there is an algorithm that can compute the FOMC of a formula
-in polynomial time with respect to the domain size(s), that formula is called
-\emph{liftable}~\cite{DBLP:conf/starai/JaegerB12}.
+The complexity of FOMC is generally measured by \emph{data complexity}, with a
+formula classified as \emph{liftable} if it can be solved in polynomial time
+relative to the domain size~\cite{DBLP:conf/starai/JaegerB12}. While all
+formulas with up to two variables are known to be
+liftable~\cite{DBLP:conf/nips/Broeck11,DBLP:conf/kr/BroeckMD14},
 \citeauthor{DBLP:conf/pods/BeameBGS15}~\shortcite{DBLP:conf/pods/BeameBGS15}
-demonstrated the existence of an unliftable formula with three variables. It is
-also known that formulas with up to two variables are
-liftable~\cite{DBLP:conf/nips/Broeck11,DBLP:conf/kr/BroeckMD14}. The liftable
-fragment of formulas with two variables has been expanded with various
-axioms~\cite{DBLP:conf/aaai/TothK23,DBLP:journals/ai/BremenK23}, counting
-quantifiers~\cite{DBLP:journals/jair/Kuzelka21} and in other
-ways~\cite{DBLP:conf/nips/KazemiKBP16}.
-
-% This involves fixing the formula and determining whether an
-% algorithm exists that can compute the FOMC in time polynomial with respect to
-% the domain size(s).
+demonstrated that liftability does not extend to all formulas, identifying an
+unliftable formula with three variables. Recent work has further extended the
+liftable fragment with additional
+axioms~\cite{DBLP:conf/aaai/TothK23,DBLP:journals/ai/BremenK23} and counting
+quantifiers~\cite{DBLP:journals/jair/Kuzelka21}, expanding our understanding of
+liftability.
 
 % 4. Why hasn't it been solved before? (Or, what's wrong with previous proposed
 % solutions? How does mine differ?)
 
-There are many FOMC algorithms with different underlying principles. Perhaps the
-most prominent class of FOMC algorithms is based on \emph{first-order knowledge
-  compilation} (FOKC). In this approach, the formula is compiled into a
-representation (such as a circuit or graph) by applying \emph{compilation
-  rules}. Algorithms in this class include
-\textsc{ForcLift}~\cite{DBLP:conf/ijcai/BroeckTMDR11} and its extension
-\textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23}. Another FOMC algorithm,
-\textsc{FastWFOMC}~\cite{DBLP:conf/uai/BremenK21}, is based on cell enumeration.
-Other algorithms utilise local search~\cite{DBLP:journals/pvldb/NiuRDS11},
-junction trees~\cite{DBLP:conf/aaai/VenugopalSG15}, Monte Carlo
-sampling~\cite{DBLP:journals/cacm/GogateD16}, and anytime approximation via
-upper/lower bound construction~\cite{DBLP:conf/ijcai/BremenK20}.
-
-% This representation can then be used to compute the FOMC for any combination
-% of domain sizes.
-
-% The former compiles formulas into circuits, while the latter compiles them
-% first to graphs and then to (algebraic) equations.
+FOMC algorithms are diverse, with approaches ranging from \emph{first-order
+  knowledge compilation} (FOKC) to local
+search~\cite{DBLP:journals/pvldb/NiuRDS11}, Monte Carlo
+sampling~\cite{DBLP:journals/cacm/GogateD16}, and anytime
+approximation~\cite{DBLP:conf/ijcai/BremenK20}. Among these, FOKC-based
+algorithms are particularly prominent, transforming formulas into structured
+representations such as circuits or graphs. Notable examples include
+\textsc{ForcLift}~\cite{DBLP:conf/ijcai/BroeckTMDR11} and its successor
+\textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23}. Another important algorithm,
+\textsc{FastWFOMC}~\cite{DBLP:conf/uai/BremenK21}, uses cell enumeration as its
+foundation.
 
 % 5. What are the key components of my approach and results? Also include any
 % specific limitations.
 
-The recently proposed \textsc{Crane} algorithm marked significant progress in
-handling formulas beyond the capabilities of \textsc{FastWFOMC} and
-\textsc{ForcLift}, yet it fell short in critical aspects. \textsc{Crane} was
-incomplete since it could only construct function definitions, requiring users
-to manually evaluate these functions to obtain model counts. This limitation
-prevented \textsc{Crane} from serving as a convenient black box solution for
-FOMC. Furthermore, it introduced recursive functions without defining necessary
-base cases, adding further complexity to the users. In this work, we present
-\Cranetwo{}, addressing these gaps and pushing scalability to unprecedented
-levels. Unlike its predecessor, \Cranetwo{} is a fully automated FOMC algorithm,
-capable of handling domain sizes over \num{500000} times larger than previous
-algorithms.
+The \textsc{Crane} algorithm marked a significant step forward, expanding the
+range of formulas handled by FOMC algorithms. However, it had notable
+limitations:
+\begin{enumerate*}[label=(\roman*)]
+  \item it required manual evaluation of function definitions to compute model
+  counts, and
+  \item it introduced recursive functions without proper base cases, making it
+  more complex to use.
+\end{enumerate*}
+To address these shortcomings, we present \Cranetwo{}, a fully automated FOMC
+algorithm that overcomes the constraints of its predecessor. \Cranetwo{} can
+handle domain sizes over \num{500000} times larger than previous algorithms and
+simplifies the user experience by automatically handling base cases and
+compiling function definitions into efficient C++ programs.
 
-\begin{figure*}[t]
-  \centering
-  \begin{tikzpicture}
-    \node at (-1, 0) (formula) {$\phi$};
-    \node[draw,rounded rectangle] at (3, 0) (compilewithbasecases) {\CompileWithBaseCases};
-    \node[draw,rounded rectangle] at (9, 0) (compilation) {Compile to C++};
+In \cref{sec:preliminaries}, we cover some preliminaries, and in
+\cref{sec:main}, we detail all our technical contributions. Finally, in
+\cref{sec:experiments}, we present our experimental results, demonstrating
+\Cranetwo{}'s performance compared to other FOMC algorithms, and, in
+\cref{sec:conclusion}, we conclude the paper by discussing promising avenues for
+future work.
 
-    \node[draw,rounded rectangle,dashed] at (12, 0) (cpp) {C++ code};
-    \node at (12, -1) (sizes) {Domain sizes};
-
-    \node at (15, 0) (count) {Model count};
-
-    \node[draw,rounded rectangle] at (3, -2) (findbasecases) {\FindBaseCases};
-    \node[draw,rounded rectangle,left = 0.1cm of findbasecases] (crane) {\Compile};
-    \node[draw,rounded rectangle,right = 0.1cm of findbasecases] (propagate) {\Propagate};
-    \node[draw,rounded rectangle,right = 0.1cm of propagate] (simplify) {\Simplify};
-
-    \node[draw,fit={(compilewithbasecases) (compilation) (crane) (findbasecases) (propagate)},inner ysep=7pt,yshift=5pt] {};
-    \node at (0.6, 0.5) {\Cranetwo};
-
-    \draw[-Latex] (formula) -- (compilewithbasecases);
-    \draw[-Latex] (compilewithbasecases) -- node[above] {$\mathcal{E}$} (compilation);
-    \draw[-Latex] (compilation) -- (cpp);
-    \draw[-Latex] (sizes) -- (cpp);
-    \draw[-Latex] (cpp) -- (count);
-
-    \draw[-Latex,dashed] (compilewithbasecases) -- node[midway,left] {uses} (crane);
-    \draw[-Latex,dashed] (compilewithbasecases) -- node[midway,left] {uses} (findbasecases);
-    \draw[-Latex,dashed] (compilewithbasecases) -- node[midway,left] {uses} (propagate);
-    \draw[-Latex,dashed] (compilewithbasecases) -- node[midway,right] {uses} (simplify);
-  \end{tikzpicture}
-  \caption[]{The outline of using \Cranetwo{} to compute the model count of a formula $\phi$. First, the formula is compiled into a set of equations, which are then used to create a C++ program. This program can be executed with different command line arguments to calculate the model count of $\phi$ for different domain sizes. To accomplish this, the \CompileWithBaseCases function employs several components:
-    \begin{enumerate*}[label=(\roman*)]
-      \item the FOKC algorithm of \textsc{Crane},
-      \item a procedure called \FindBaseCases, which identifies a sufficient set of base cases,
-      \item a procedure called \Propagate, which constructs a formula corresponding to a given base case, and
-      \item algebraic simplification techniques (denoted as \Simplify).
-    \end{enumerate*}
-  }\label{fig:overview}
-\end{figure*}
-
-\Cref{fig:overview} outlines the workflow of the new algorithm. In
-\cref{sec:main}, we describe how \CompileWithBaseCases finds base cases for
-recursive functions. \Cref{sec:smoothing} explains post-processing techniques to
-preserve the correct model count. \Cref{sec:cpp} elucidates how function
-definitions are compiled into C++ programs. Note that a solution to FOMC that
-uses compilation to C++ has been considered
-before~\cite{DBLP:conf/kr/KazemiP16}, however, the extent of formulas that could
-be handled was limited. Finally, \cref{sec:experiments} presents experimental
-results comparing \Cranetwo{} with other FOMC algorithms.
-
-% by:
-% \begin{enumerate*}[label=(\roman*)]
-%   \item identifying a sufficient set of base cases for each function,
-%   \item constructing formulas corresponding to these base cases,
-%   and\label[step]{step2}
-%   \item recursing on these new formulas.
-% \end{enumerate*}
-
-\section{Preliminaries}
+\section{Preliminaries}\label{sec:preliminaries}
 
 In \cref{sec:logic}, we summarise the basic principles of first-order logic.
 Then, in \cref{sec:threelogics}, we formally define (W)FOMC and discuss the
@@ -517,7 +452,61 @@ $f(\mathbf{x}) = \expr{}$, with $f(\mathbf{x})$ representing a signature.
   substitution that replaces one or more $x_{i}$ with a constant.
 \end{definition}
 
-\section{Completing the Definitions of Functions}\label{sec:main}
+\section{Technical Contributions}\label{sec:main}
+
+\begin{figure*}[t]
+  \centering
+  \begin{tikzpicture}
+    \node at (-1, 0) (formula) {$\phi$};
+    \node[draw,rounded rectangle] at (3, 0) (compilewithbasecases) {\CompileWithBaseCases};
+    \node[draw,rounded rectangle] at (9, 0) (compilation) {Compile to C++};
+
+    \node[draw,rounded rectangle,dashed] at (12, 0) (cpp) {C++ code};
+    \node at (12, -1) (sizes) {Domain sizes};
+
+    \node at (15, 0) (count) {Model count};
+
+    \node[draw,rounded rectangle] at (3, -2) (findbasecases) {\FindBaseCases};
+    \node[draw,rounded rectangle,left = 0.1cm of findbasecases] (crane) {\Compile};
+    \node[draw,rounded rectangle,right = 0.1cm of findbasecases] (propagate) {\Propagate};
+    \node[draw,rounded rectangle,right = 0.1cm of propagate] (simplify) {\Simplify};
+
+    \node[draw,fit={(compilewithbasecases) (compilation) (crane) (findbasecases) (propagate)},inner ysep=7pt,yshift=5pt] {};
+    \node at (0.6, 0.5) {\Cranetwo};
+
+    \draw[-Latex] (formula) -- (compilewithbasecases);
+    \draw[-Latex] (compilewithbasecases) -- node[above] {$\mathcal{E}$} (compilation);
+    \draw[-Latex] (compilation) -- (cpp);
+    \draw[-Latex] (sizes) -- (cpp);
+    \draw[-Latex] (cpp) -- (count);
+
+    \draw[-Latex,dashed] (compilewithbasecases) -- node[midway,left] {uses} (crane);
+    \draw[-Latex,dashed] (compilewithbasecases) -- node[midway,left] {uses} (findbasecases);
+    \draw[-Latex,dashed] (compilewithbasecases) -- node[midway,left] {uses} (propagate);
+    \draw[-Latex,dashed] (compilewithbasecases) -- node[midway,right] {uses} (simplify);
+  \end{tikzpicture}
+  \caption[]{The outline of using \Cranetwo{} to compute the model count of a formula $\phi$. First, the formula is compiled into a set of equations, which are then used to create a C++ program. This program can be executed with different command line arguments to calculate the model count of $\phi$ for different domain sizes. To accomplish this, the \CompileWithBaseCases function employs several components:
+    \begin{enumerate*}[label=(\roman*)]
+      \item the FOKC algorithm of \textsc{Crane},
+      \item a procedure called \FindBaseCases, which identifies a sufficient set of base cases,
+      \item a procedure called \Propagate, which constructs a formula corresponding to a given base case, and
+      \item algebraic simplification techniques (denoted as \Simplify).
+    \end{enumerate*}
+  }\label{fig:overview}
+\end{figure*}
+
+\Cref{fig:overview} provides an overview of \Cranetwo{}'s workflow.
+\Cref{sec:completing} describes the main algorithm for completing the
+definitions of recursive functions with a sufficient set of base cases.
+\Cref{sec:identifying,sec:propagating} describe subsidiary algorithms for
+constructing a set of base cases and their corresponding logical formulas.
+\Cref{sec:smoothing} explains the post-processing techniques for ensuring
+accurate model counting. Additionally, \cref{sec:cpp} explains the process of
+compiling function definitions into C++ code, greatly expanding upon the range
+of formulas that could previously be handled by similar
+approaches~\cite{DBLP:conf/kr/KazemiP16}.
+
+\subsection{Completing the Definitions of Functions}\label{sec:completing}
 
 Before describing the main contribution of this work, let us review the
 essential aspects of FOKC as realised by \textsc{Crane}. The input formula is
@@ -556,7 +545,7 @@ some algebraic simplification, $\mathcal{E}$ is passed to the \FindBaseCases
 procedure (see \cref{sec:identifying}). For each base case $f(\mathbf{x})$, we
 retrieve the logical formula $\mathcal{F}(f)$ associated with the function name
 $f$ and simplify it using the \Propagate procedure (explained in detail in
-\cref{sec:simplifying}). We do this by iterating over all indices of
+\cref{sec:propagating}). We do this by iterating over all indices of
 $\mathbf{x}$, where $x_{i}$ is a constant, and using \Propagate to simplify
 $\psi$ by assuming that domain $\mathcal{D}(f, i)$ has size $x_{i}$. Finally, on
 \cref{line:final}, \CompileWithBaseCases recurses on these simplified formulas
@@ -692,7 +681,7 @@ the number of functions in $\mathcal{E}$. Then, we use induction on the arity of
 the `last' function in $\mathcal{E}$ according to some topological ordering. For
 the detailed proof, please refer to the technical appendix.
 
-\subsection{Propagating Domain Size Assumptions}\label{sec:simplifying}
+\subsection{Propagating Domain Size Assumptions}\label{sec:propagating}
 
 \begin{algorithm}[t]
   \caption{\protect\Propagate{$\phi$, $\Delta$, $n$}}\label{alg:propagate}
@@ -765,7 +754,7 @@ replacing the $m$ variables in $C$ with the $n$ new constants.
   Here, $c_{1}$, $c_{2}$, and $c_{3}$ are the new constants.
 \end{example}
 
-\section{Smoothing the Base Cases}\label{sec:smoothing}
+\subsection{Smoothing the Base Cases}\label{sec:smoothing}
 
 \emph{Smoothing} modifies a circuit to reintroduce eliminated atoms, ensuring
 the correct model
@@ -816,7 +805,7 @@ It is worth mentioning that the choice of $l$ on \cref{line:smoothing1} of
 \cref{alg:propagate} is inconsequential because any choice achieves the same
 goal: constructing a tautological clause that retains the literals in $C'$.
 
-\section{Generating C++ Code}\label{sec:cpp}
+\subsection{Generating C++ Code}\label{sec:cpp}
 
 In this section, we will describe the final step of \Cranetwo{} as outlined in
 \cref{fig:overview}. This step involves translating the set of equations
@@ -940,10 +929,11 @@ cannot.
 %algorithms use the GNU Multiple Precision Arithmetic Library. Thus, when the
 %count exceeds finite precision, \textsc{ForcLift} returns $\infty$. 
 
-For
-evaluation purposes, we ran each algorithm on each benchmark using domains of
-sizes $2^{1}, 2^{2}, 2^{3}$, and so on, until an algorithm failed to handle a domain size due to timeout, out of memory error, or out of precision errors. While we separately measured compilation and inference time but primarily
-focused on total runtime, dominated by the latter.
+For evaluation purposes, we ran each algorithm on each benchmark using domains
+of sizes $2^{1}, 2^{2}, 2^{3}$, and so on, until an algorithm failed to handle a
+domain size due to timeout, out of memory error, or out of precision errors.
+While we separately measured compilation and inference time, we primarily focus
+on total runtime, dominated by the latter.
 
 % Environment: Describe the hardware and software environment (e.g.,
 % specifications of the computer, operating system, libraries, and tools used).
@@ -995,31 +985,119 @@ small, \textsc{ForcLift} is likely the fastest algorithm. In other situations,
 \textsc{FastWFOMC} regardless of domain size, provided both algorithms can
 handle the formula.
 
-\section{Conclusion and Future Work}
+\section{Conclusion and Future Work}\label{sec:conclusion}
 
-In this work, we present a scalable automated first-order knowledge compilation-based approach to first order model counting. The proposed approach relies on automatically generating the C++ code corresponding to the recursive functions extracted from knowledge compilation. The enusing empirical evaluatino demonstrated  that \Cranetwo{} can scale to much larger
-domain sizes than \textsc{FastWFOMC} while handling more formulas than
-\textsc{ForcLift}. Having FOMC algorithms that can efficiently handle large
-domain sizes is especially crucial in the weighted setting. For example,
-consider the `friends' instance examined in \cref{sec:experiments}, which models
-a social network with friendships, smoking habits, and the probability of having
-cancer. The utility of such a model would be significantly limited if
-probabilities could only be efficiently computed for networks of at most
-\num{1000} people.
+In this work, we have presented a scalable automated FOKC-based approach to
+FOMC. Our algorithm involves completing the definitions of recursive functions
+and subsequently translating all function definitions into C++ code. Empirical
+results demonstrate that \Cranetwo{} can scale to larger domain sizes than
+\textsc{FastWFOMC} while supporting a wider range of formulas than
+\textsc{ForcLift}. The ability to efficiently handle large domain sizes is
+particularly crucial in the weighted setting, as illustrated by the `friends'
+example discussed in \cref{sec:experiments}, where the model captures complex
+social networks with probabilistic relationships. Without this scalability, the
+practical usefulness of these models would be limited.
 
-There are many potential avenues for future work. Specifically, a more thorough
-experimental study is needed to understand how FOMC algorithms compare in terms
-of their ability to handle different formulas and their scalability with respect
-to domain size. Additionally, further characterisation of the capabilities of
-\Cranetwo{} can be explored. For example, \emph{completeness} could be proven
-for a fragment of first-order logic such as \Ctwo{} (using a suitable encoding
-of counting quantifiers). Moreover, the efficiency of a FOMC algorithm in
-handling a particular formula can be assessed using \emph{fine-grained
-  complexity}. In the case of \Cranetwo{}, this can be done by analysing the
-equations~\cite{DBLP:conf/kr/DilkasB23}. By doing so, efficiency can be reasoned
-about in a more implementation-independent manner by making claims about the
-maximum degree of the polynomial that characterises any given solution.
+Future directions for research include conducting a comprehensive experimental
+comparison of FOMC algorithms to better understand their comparative performance
+across various formulas. The capabilities of \Cranetwo{} could also be
+characterised theoretically, e.g.\ by proving completeness for specific logic
+fragments like \Ctwo{}. Additionally, the efficiency of FOMC algorithms can be
+further analysed using fine-grained complexity, which would provide more
+detailed insights into the computational demands of different formulas.
 
 \bibliography{paper}
+
+\section{Reproducibility Checklist}
+
+This paper:
+\begin{itemize}
+  \item Includes a conceptual outline and/or pseudocode description of AI
+        methods introduced (\textbf{yes}/partial/no/NA)
+  \item Clearly delineates statements that are opinions, hypothesis, and
+        speculation from objective facts and results (\textbf{yes}/no)
+  \item Provides well marked pedagogical references for less-familiare readers
+        to gain background necessary to replicate the paper (\textbf{yes}/no)
+\end{itemize}
+
+Does this paper make theoretical contributions? (\textbf{yes}/no) If yes, please
+complete the list below.
+
+\begin{itemize}
+  \item All assumptions and restrictions are stated clearly and formally.
+        (\textbf{yes}/partial/no)
+  \item All novel claims are stated formally (e.g., in theorem statements).
+        (\textbf{yes}/partial/no)
+  \item Proofs of all novel claims are included. (\textbf{yes}/partial/no)
+  \item Proof sketches or intuitions are given for complex and/or novel results.
+        (\textbf{yes}/partial/no)
+  \item Appropriate citations to theoretical tools used are given.
+        (\textbf{yes}/partial/no)
+  \item All theoretical claims are demonstrated empirically to hold.
+        (\textbf{yes}/partial/no/NA)
+  \item All experimental code used to eliminate or disprove claims is included.
+        (yes/no/\textbf{NA})
+\end{itemize}
+
+Does this paper rely on one or more datasets? (\textbf{yes}/no) If yes, please
+complete the list below.
+
+\begin{itemize}
+  \item A motivation is given for why the experiments are conducted on the
+        selected datasets (\textbf{yes}/partial/no/NA)
+  \item All novel datasets introduced in this paper are included in a data
+        appendix. (\textbf{yes}/partial/no/NA)
+  \item All novel datasets introduced in this paper will be made publicly
+        available upon publication of the paper with a license that allows free
+        usage for research purposes. (\textbf{yes}/partial/no/NA)
+  \item All datasets drawn from the existing literature (potentially including
+        authors’ own previously published work) are accompanied by appropriate
+        citations. (\textbf{yes}/no/NA)
+  \item All datasets drawn from the existing literature (potentially including
+        authors’ own previously published work) are publicly available.
+        (\textbf{yes}/partial/no/NA)
+  \item All datasets that are not publicly available are described in detail,
+        with explanation why publicly available alternatives are not
+        scientifically satisficing. (\textbf{yes}/partial/no/NA)
+\end{itemize}
+
+Does this paper include computational experiments? (\textbf{yes}/no) If yes,
+please complete the list below.
+
+\begin{itemize}
+  \item Any code required for pre-processing data is included in the appendix.
+        (\textbf{yes}/partial/no).
+  \item All source code required for conducting and analyzing the experiments is
+        included in a code appendix. (\textbf{yes}/partial/no)
+  \item All source code required for conducting and analyzing the experiments
+        will be made publicly available upon publication of the paper with a
+        license that allows free usage for research purposes.
+        (\textbf{yes}/partial/no)
+  \item All source code implementing new methods have comments detailing the
+        implementation, with references to the paper where each step comes from
+        (yes/\textbf{partial}/no)
+  \item If an algorithm depends on randomness, then the method used for setting
+        seeds is described in a way sufficient to allow replication of results.
+        (yes/partial/no/\textbf{NA})
+  \item This paper specifies the computing infrastructure used for running
+        experiments (hardware and software), including GPU/CPU models; amount of
+        memory; operating system; names and versions of relevant software
+        libraries and frameworks. (\textbf{yes}/partial/no)
+  \item This paper formally describes evaluation metrics used and explains the
+        motivation for choosing these metrics. (\textbf{yes}/partial/no)
+  \item This paper states the number of algorithm runs used to compute each
+        reported result. (\textbf{yes}/no)
+  \item Analysis of experiments goes beyond single-dimensional summaries of
+        performance (e.g., average; median) to include measures of variation,
+        confidence, or other distributional information. (\textbf{yes}/no)
+  \item The significance of any improvement or decrease in performance is judged
+        using appropriate statistical tests (e.g., Wilcoxon signed-rank).
+        (\textbf{yes}/partial/no)
+  \item This paper lists all final (hyper-)parameters used for each
+        model/algorithm in the paper’s experiments. (yes/partial/no/\textbf{NA})
+  \item This paper states the number and range of values tried per (hyper-)
+        parameter during development of the paper, along with the criterion used
+        for selecting the final parameter setting. (yes/partial/no/\textbf{NA})
+\end{itemize}
 
 \end{document}

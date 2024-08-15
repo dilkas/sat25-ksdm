@@ -11,8 +11,8 @@ df <- read.csv("../results/processed/results.csv")
 df$compilation.time <- df$compilation.time / 1000
 df$inference.time <- df$inference.time / 1000
 df$time <- df$compilation.time + df$inference.time
-df$algorithm[df$algorithm == "bfs"] <- "\\textsc{Crane2-BFS}"
-df$algorithm[df$algorithm == "greedy"] <- "\\textsc{Crane2-Greedy}"
+df$algorithm[df$algorithm == "bfs"] <- "\\textsc{Gantry-BFS}"
+df$algorithm[df$algorithm == "greedy"] <- "\\textsc{Gantry-Greedy}"
 df$algorithm[df$algorithm == "fastwfomc"] <- "\\textsc{FastWFOMC}"
 df$algorithm[df$algorithm == "forclift"] <- "\\textsc{ForcLift}"
 df$sequence[df$sequence == "bijections"] <- "Bijections"
