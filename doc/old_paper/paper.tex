@@ -1,73 +1,49 @@
-\documentclass[a4paper,UKenglish,cleveref, autoref, thm-restate]{lipics-v2021}
-%This is a template for producing LIPIcs articles. 
-%See lipics-v2021-authors-guidelines.pdf for further information.
-%for A4 paper format use option "a4paper", for US-letter use option "letterpaper"
-%for british hyphenation rules use option "UKenglish", for american hyphenation rules use option "USenglish"
-%for section-numbered lemmas etc., use "numberwithinsect"
-%for enabling cleveref support, use "cleveref"
-%for enabling autoref support, use "autoref"
-%for anonymousing the authors (e.g. for double-blind review), add "anonymous"
-%for enabling thm-restate support, use "thm-restate"
-%for enabling a two-column layout for the author/affilation part (only applicable for > 6 authors), use "authorcolumns"
-%for producing a PDF according the PDF/A standard, add "pdfa"
-
-\pdfoutput=1 %uncomment to ensure pdflatex processing (mandatatory e.g. to submit to arXiv)
-\hideLIPIcs  %uncomment to remove references to LIPIcs series (logo, DOI, ...), e.g. when preparing a pre-final version to be uploaded to arXiv or another public repository
-
-%\graphicspath{{./graphics/}}%helpful if your graphic files are in another directory
-
-\bibliographystyle{plainurl}% the mandatory bibstyle
-
-\title{Towards Practical First-Order Model Counting}
-
-\author{Jane {Open Access}}{Dummy University Computing Laboratory, [optional: Address], Country \and My second affiliation, Country \and \url{http://www.myhomepage.edu} }{johnqpublic@dummyuni.org}{https://orcid.org/0000-0002-1825-0097}{(Optional) author-specific funding acknowledgements}%TODO mandatory, please use full name; only 1 author per \author macro; first two parameters are mandatory, other parameters can be empty. Please provide at least the name of the affiliation and the country. The full address is optional. Use additional curly braces to indicate the correct name splitting when the last name consists of multiple name parts.
-\author{Joan R. Public}{Department of Informatics, Dummy College, [optional: Address], Country}{joanrpublic@dummycollege.org}{[orcid]}{[funding]}
-
-\authorrunning{J. Open Access and J.\,R. Public} %TODO mandatory. First: Use abbreviated first/middle names. Second (only in severe cases): Use first author plus 'et al.'
-
-\Copyright{Jane Open Access and Joan R. Public} %TODO mandatory, please use full first names. LIPIcs license is "CC-BY";  http://creativecommons.org/licenses/by/3.0/
-
-\ccsdesc[100]{\textcolor{red}{Replace ccsdesc macro with valid one}} %TODO mandatory: Please choose ACM 2012 classifications from https://dl.acm.org/ccs/ccs_flat.cfm 
-
-\keywords{Dummy keyword} %TODO mandatory; please add comma-separated list of keywords
-
-\relatedversion{} %optional, e.g. full version hosted on arXiv, HAL, or other respository/website
-
-%\supplement{}%optional, e.g. related research data, source code, ... hosted on a repository like zenodo, figshare, GitHub, ...
-%\supplementdetails[linktext={opt. text shown instead of the URL}, cite=DBLP:books/mk/GrayR93, subcategory={Description, Subcategory}, swhid={Software Heritage Identifier}]{General Classification (e.g. Software, Dataset, Model, ...)}{URL to related version} %linktext, cite, and subcategory are optional
-
-%\funding{(Optional) general funding statement \dots}%optional, to capture a funding statement, which applies to all authors. Please enter author specific funding statements as fifth argument of the \author macro.
-
-%\acknowledgements{I want to thank \dots}%optional
-
-%\nolinenumbers %uncomment to disable line numbering
-
-
-
-%Editor-only macros:: begin (do not touch as author)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\EventEditors{John Q. Open and Joan R. Access}
-\EventNoEds{2}
-\EventLongTitle{42nd Conference on Very Important Topics (CVIT 2016)}
-\EventShortTitle{CVIT 2016}
-\EventAcronym{CVIT}
-\EventYear{2016}
-\EventDate{December 24--27, 2016}
-\EventLocation{Little Whinging, United Kingdom}
-\EventLogo{}
-\SeriesVolume{42}
-\ArticleNo{23}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[letterpaper]{article} % DO NOT CHANGE THIS
+\usepackage[submission]{aaai25}  % DO NOT CHANGE THIS
+\usepackage{times}  % DO NOT CHANGE THIS
+\usepackage{helvet}  % DO NOT CHANGE THIS
+\usepackage{courier}  % DO NOT CHANGE THIS
+\usepackage[hyphens]{url}  % DO NOT CHANGE THIS
+\usepackage{graphicx} % DO NOT CHANGE THIS
+\urlstyle{rm} % DO NOT CHANGE THIS
+\def\UrlFont{\rm}  % DO NOT CHANGE THIS
+\usepackage{natbib}  % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\usepackage{caption} % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\frenchspacing  % DO NOT CHANGE THIS
+\setlength{\pdfpagewidth}{8.5in} % DO NOT CHANGE THIS
+\setlength{\pdfpageheight}{11in} % DO NOT CHANGE THIS
 
 \usepackage[linesnumbered,ruled,vlined]{algorithm2e}
-\usepackage{booktabs}
-\usepackage{pifont}
+\usepackage{microtype}
+\usepackage{mathtools}
+\usepackage{forest}
 \usepackage{siunitx}
-\usepackage{tikz}
+\usepackage{amsfonts}
+\usepackage{pifont}
+\usepackage[inline]{enumitem}
+\usepackage[capitalize,noabbrev]{cleveref}
+\usepackage{booktabs}
+\usepackage{amsthm}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{assumption}{Assumption}
+\newtheorem{corollary}{Corollary}
+\newtheorem{fact}{Observation}
+\newtheorem{lemma}{Lemma}
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
 
 \usetikzlibrary{arrows.meta}
-\usetikzlibrary{fit}
 \usetikzlibrary{positioning}
-\usetikzlibrary{shapes.misc}
+
+\forestset{
+  sn edges/.style={for tree={edge={-Latex}}}
+}
+
+\sisetup{group-separator = {,}}
 
 \newcommand{\cmark}{\ding{51}}
 \newcommand{\xmark}{\ding{55}}
@@ -79,33 +55,42 @@
 \newcommand{\Cranebfs}{\textsc{Gantry-BFS}}
 \newcommand{\Cranegreedy}{\textsc{Gantry-Greedy}}
 
-\SetKwFunction{CompileWithBaseCases}{CompileWithBaseCases}
-\SetKwFunction{Compile}{{\normalfont \textsc{Crane}}}
-\SetKwFunction{Propagate}{Propagate}
-\SetKwFunction{FindBaseCases}{FindBaseCases}
-\SetKwFunction{Simplify}{Simplify}
-
-\DeclareMathOperator{\CR}{CR}
-\DeclareMathOperator{\DR}{DR}
-\DeclareMathOperator{\Reff}{Ref}
-\DeclareMathOperator{\Doms}{Doms}
-
-\sisetup{group-separator = {,}}
-
-% \crefname{line}{line}{lines}
-% \crefname{assumption}{Assumption}{Assumptions}
+\newcommand{\crefrangeconjunction}{--}
+\crefname{line}{line}{lines}
+\crefname{assumption}{Assumption}{Assumptions}
 \crefalias{enumi}{type}
 \crefname{type}{Type}{Types}
 \creflabelformat{type}{#2\textup{#1}#3}
-% \crefalias{enumi}{step}
-% \crefname{step}{Step}{Steps}
-% \creflabelformat{step}{#2\textup{#1}#3}
+\crefalias{enumi}{step}
+\crefname{step}{Step}{Steps}
+\creflabelformat{step}{#2\textup{#1}#3}
 \crefalias{clause}{equation}
 \crefname{clause}{Clause}{Clauses}
 \creflabelformat{clause}{#2\textup{(#1)}#3}
 \crefalias{formula}{equation}
 \crefname{formula}{Formula}{Formulas}
 \creflabelformat{formula}{#2\textup{(#1)}#3}
+
+\DeclareMathOperator{\CR}{CR}
+\DeclareMathOperator{\DR}{DR}
+\DeclareMathOperator{\Reff}{Ref}
+\DeclareMathOperator{\Doms}{Doms}
+
+\SetKwFunction{CompileWithBaseCases}{CompileWithBaseCases}
+\SetKwFunction{Compile}{{\normalfont \textsc{Crane}}}
+\SetKwFunction{Propagate}{Propagate}
+\SetKwFunction{FindBaseCases}{FindBaseCases}
+\SetKwFunction{Simplify}{Simplify}
+
+\pdfinfo{
+/TemplateVersion (2025.1)
+}
+
+\setcounter{secnumdepth}{2} %May be changed to 1 or 2 if section numbers are desired.
+
+\title{Towards Practical First-Order Model Counting}
+\author{Anonymous Submission}
+\affiliations{}
 
 \begin{document}
 
@@ -164,10 +149,11 @@ The complexity of FOMC is generally measured by \emph{data complexity}, with a
 formula classified as \emph{liftable} if it can be solved in polynomial time
 relative to the domain size~\cite{DBLP:conf/starai/JaegerB12}. While all
 formulas with up to two variables are known to be
-liftable~\cite{DBLP:conf/nips/Broeck11,DBLP:conf/kr/BroeckMD14}, Beame et
-al.~\cite{DBLP:conf/pods/BeameBGS15} demonstrated that liftability does not
-extend to all formulas, identifying an unliftable formula with three variables.
-Recent work has further extended the liftable fragment with additional
+liftable~\cite{DBLP:conf/nips/Broeck11,DBLP:conf/kr/BroeckMD14},
+\citeauthor{DBLP:conf/pods/BeameBGS15}~\shortcite{DBLP:conf/pods/BeameBGS15}
+demonstrated that liftability does not extend to all formulas, identifying an
+unliftable formula with three variables. Recent work has further extended the
+liftable fragment with additional
 axioms~\cite{DBLP:conf/aaai/TothK23,DBLP:journals/ai/BremenK23} and counting
 quantifiers~\cite{DBLP:journals/jair/Kuzelka21}, expanding our understanding of
 liftability.
@@ -193,12 +179,12 @@ foundation.
 The \textsc{Crane} algorithm marked a significant step forward, expanding the
 range of formulas handled by FOMC algorithms. However, it had notable
 limitations:
-\begin{enumerate}
+\begin{enumerate*}[label=(\roman*)]
   \item it required manual evaluation of function definitions to compute model
   counts, and
   \item it introduced recursive functions without proper base cases, making it
   more complex to use.
-\end{enumerate}
+\end{enumerate*}
 To address these shortcomings, we present \Cranetwo{}, a fully automated FOMC
 algorithm that overcomes the constraints of its predecessor. \Cranetwo{} can
 handle domain sizes over \num{500000} times larger than previous algorithms and
@@ -242,11 +228,11 @@ as a conjunction of clauses, each in \emph{prenex normal
 
 A \emph{term} can be either a variable or a constant. An \emph{atom} can be
 either
-\begin{enumerate}
+\begin{enumerate*}[label=(\roman*)]
   \item $P(t_{1}, \dots, t_{m})$ for some predicate $P$ and terms
   $t_{1}, \dots, t_{m}$ (written as $P(\mathbf{t})$ for short) or
   \item $x=y$ for some terms $x$ and $y$.
-\end{enumerate}
+\end{enumerate*}
 The \emph{arity} of a predicate is the number of arguments it takes, i.e., $m$
 in the case of the predicate $P$ mentioned above. We write $P/m$ to denote a
 predicate along with its arity. A \emph{literal} can be either an atom (i.e., a
@@ -257,10 +243,10 @@ atom is \emph{ground} if it contains no variables, i.e., only constants. A
 }\phi(x_{1}, x_{2}, \dots, x_{n})$, where $\phi$ is a disjunction of literals
 that only contain variables $x_{1}, \dots, x_{n}$ (and any constants). We say
 that a clause is a \emph{(positive) unit clause} if
-\begin{enumerate}
+\begin{enumerate*}[label=(\roman*)]
   \item there is only one literal with a predicate, and
   \item it is a positive literal.
-\end{enumerate}
+\end{enumerate*}
 Finally, a \emph{formula} is a conjunction of clauses. Throughout the paper, we
 will use set-theoretic notation, interpreting a formula as a set of clauses and
 a clause as a set of literals.
@@ -279,19 +265,19 @@ a clause as a set of literals.
     \bottomrule
   \end{tabular}
   \caption[]{A comparison of the three logics used in FOMC based on the following aspects:
-    \begin{enumerate}
+    \begin{enumerate*}[label=(\roman*)]
       \item the number of sorts,
       \item support for constants,
       \item the maximum number of variables,
       \item supported quantifiers, and
       \item supported atoms in addition to those of the form $P(\mathbf{t})$ for a predicate $P/n$ and an $n$-tuple of terms $\mathbf{t}$.
-    \end{enumerate}
+    \end{enumerate*}
     Here:
-    \begin{enumerate}
+    \begin{enumerate*}[label=(\roman*)]
       \item $k$ and $m$ are non-negative integers, with the latter depending on the domain size,
       \item $P$ represents a predicate, and
       \item $x$ and $y$ are terms.
-    \end{enumerate}
+    \end{enumerate*}
   }\label{tbl:logics}
 \end{table*}
 
@@ -299,7 +285,7 @@ a clause as a set of literals.
 
 In \cref{tbl:logics}, we outline the differences among three first-order logics
 commonly used in FOMC:
-\begin{enumerate}
+\begin{enumerate*}[label=(\roman*)]
   \item \FO{} is the input format for
   \textsc{ForcLift}\footnote{\url{https://github.com/UCLA-StarAI/Forclift}} and
   its extensions
@@ -311,7 +297,7 @@ commonly used in FOMC:
   \item \UFO{} is the input format supported by the most recent implementation
   of
   \textsc{FastWFOMC}\footnote{\url{https://github.com/jan-toth/FastWFOMC.jl}}.
-\end{enumerate}
+\end{enumerate*}
 The notation we use to refer to each logic is standard in the case of \Ctwo{}
 and \UFO{}~\cite{tóth2024complexityweightedfirstordermodel} and redefined to be
 more specific in the case of \FO{}. All three logics are function-free, and
@@ -344,12 +330,12 @@ many-sorted nature of \FO{} is paramount to the algorithms presented therein.
 \end{remark}
 
 Compared to \FO{}, \Ctwo{} and \UFO{} lack support for
-\begin{enumerate}
+\begin{enumerate*}[label=(\roman*)]
   \item constants,
   \item the equality predicate,
   \item multiple domains, and
   \item formulas with more than two variables.
-\end{enumerate}
+\end{enumerate*}
 The advantage that \Ctwo{} brings over \FO{} is the inclusion of \emph{counting
   quantifiers}. That is, alongside $\forall$ and $\exists$, \Ctwo{} supports
 $\exists^{=k}$, $\exists^{\le k}$, and $\exists^{\ge k}$ for any positive
@@ -366,10 +352,10 @@ constrains all models to have \emph{precisely three positive literals with the
   ${(\Delta_{i}^{P})}_{i=1}^{n}$ be a list of the corresponding domains. Let
   $\sigma$ be a map from the domains of $\phi$ to their interpretations as sets,
   satisfying the following conditions:
-  \begin{enumerate}
+  \begin{enumerate*}[label=(\roman*)]
     \item the sets are pairwise disjoint, and
     \item the constants in $\phi$ are included in the corresponding domains.
-  \end{enumerate}
+  \end{enumerate*}
   A \emph{structure} of $\phi$ is a set $M$ of ground literals defined by adding
   to $M$ either $P(\mathbf{t})$ or $\neg P(\mathbf{t})$ for every predicate
   $P/n$ in $\phi$ and $n$-tuple
@@ -394,12 +380,12 @@ problem as Skolemization relies on weights even for unweighted FOMC.
 
 \begin{definition}[WFOMC instance]\label{def:instance}
   A \emph{WFOMC instance} comprises:
-  \begin{enumerate}
+  \begin{enumerate*}[label=(\roman*)]
     \item a formula $\phi$ in \FO{},
     \item two (rational) \emph{weights} $w^{+}(P)$ and $w^{-}(P)$ assigned to
     each predicate $P$ in $\phi$, and
     \item $\sigma$ as described in \cref{def:model}.
-  \end{enumerate}
+  \end{enumerate*}
   Unless specified otherwise, we assume all weights to be equal to 1.
 \end{definition}
 
@@ -440,9 +426,9 @@ problem as Skolemization relies on weights even for unweighted FOMC.
   both $y$ and $z$, then $y$ must equal $z$. It is important to note that
   \cref{eq:fo} is written with two domains instead of just one. However, we can
   still determine the correct number of functions by assuming that the sizes of
-  $\Gamma$ and $\Delta$ are equal. This formulation, as observed by Dilkas and
-  Belle~\cite{DBLP:conf/kr/DilkasB23}, can prove beneficial in enabling FOKC
-  algorithms to find efficient solutions.
+  $\Gamma$ and $\Delta$ are equal. This formulation, as observed by
+  \citeauthor{DBLP:conf/kr/DilkasB23}~\shortcite{DBLP:conf/kr/DilkasB23}, can
+  prove beneficial in enabling FOKC algorithms to find efficient solutions.
 \end{example}
 
 \subsection{Algebra}\label{sec:algebra}
@@ -499,12 +485,12 @@ $f(\mathbf{x}) = \expr{}$, with $f(\mathbf{x})$ representing a signature.
     \draw[-Latex,dashed] (compilewithbasecases) -- node[midway,right] {uses} (simplify);
   \end{tikzpicture}
   \caption[]{The outline of using \Cranetwo{} to compute the model count of a formula $\phi$. First, the formula is compiled into a set of equations, which are then used to create a C++ program. This program can be executed with different command line arguments to calculate the model count of $\phi$ for different domain sizes. To accomplish this, the \CompileWithBaseCases function employs several components:
-    \begin{enumerate}
+    \begin{enumerate*}[label=(\roman*)]
       \item the FOKC algorithm of \textsc{Crane},
       \item a procedure called \FindBaseCases, which identifies a sufficient set of base cases,
       \item a procedure called \Propagate, which constructs a formula corresponding to a given base case, and
       \item algebraic simplification techniques (denoted as \Simplify).
-    \end{enumerate}
+    \end{enumerate*}
   }\label{fig:overview}
 \end{figure*}
 
@@ -524,11 +510,11 @@ approaches~\cite{DBLP:conf/kr/KazemiP16}.
 Before describing the main contribution of this work, let us review the
 essential aspects of FOKC as realised by \textsc{Crane}. The input formula is
 compiled into:
-\begin{enumerate}
+\begin{enumerate*}[label=(\roman*)]
   \item set $\mathcal{E}$ of equations,
   \item map $\mathcal{F}$ from function names to formulas, and
   \item map $\mathcal{D}$ from function names and argument indices to domains.
-\end{enumerate}
+\end{enumerate*}
 $\mathcal{E}$ can contain any number of functions, one of which (denoted by $f$)
 represents the solution to the FOMC problem. To compute the FOMC for particular
 domain sizes, $f$ must be evaluated with those domain sizes as arguments.
@@ -573,9 +559,9 @@ and adds the resulting base case equations to $\mathcal{E}$.
 \end{remark}
 
 \begin{example}[Counting bijections]\label{example:overall}
-  Consider the following formula (previously examined by Dilkas and
-  Belle~\cite{DBLP:conf/kr/DilkasB23}) that defines predicate $P$ as a bijection
-  between two sets $\Gamma$ and $\Delta$:
+  Consider the following formula (previously examined by
+  \citeauthor{DBLP:conf/kr/DilkasB23}~\shortcite{DBLP:conf/kr/DilkasB23}) that
+  defines predicate $P$ as a bijection between two sets $\Gamma$ and $\Delta$:
   \[
     \begin{gathered}
       (\forall x \in \Gamma\text{. }\exists y \in \Delta\text{. }P(x, y))\land{}\\
@@ -612,7 +598,7 @@ FOMC of \Propagate{$\phi$, $\Gamma$, $m$} assuming $|\Delta| = n$.
 
 Finally, the main responsibility of the \Simplify procedure is to handle the
 algebraic pattern $\sum_{m=0}^{n}[a \le m \le b] f(m)$. Here:
-\begin{enumerate}
+\begin{enumerate*}[label=(\roman*)]
   \item $n$ is a variable,
   \item $a, b \in \mathbb{N}_{0}$ are constants,
   \item $f$ is an expression that may depend on $m$, and
@@ -621,7 +607,7 @@ algebraic pattern $\sum_{m=0}^{n}[a \le m \le b] f(m)$. Here:
     1 & \text{if $a \le m \le b$} \\
     0 & \text{otherwise}
   \end{cases}$.
-\end{enumerate}
+\end{enumerate*}
 \Simplify transforms this pattern into
 $f(a) + f(a+1) + \cdots + f(\min\{\, n, b \,\})$. For instance, in the case of
 \cref{example:overall}, \Simplify transforms
@@ -658,11 +644,11 @@ $g(l, m) = g(l-1, m) + mg(l-1, m-1)$.
 \Cref{alg:findbasecases} summarises the implementation of \FindBaseCases.
 \FindBaseCases considers two types of arguments when a function $f$ calls itself
 recursively:
-\begin{enumerate}
+\begin{enumerate*}[label=(\roman*)]
   \item constants and
   \item arguments of the form $x_{i} - c_{i}$, where $c_{i}$ is a constant and
   $x_{i}$ is the $i$-th argument of the signature of $f$.
-\end{enumerate}
+\end{enumerate*}
 When the argument is a constant $c_{i}$, a base case with $c_{i}$ is added. In
 the second case, a base case is added for each constant from $0$ up to (but not
 including) $c_{i}$.
@@ -734,13 +720,13 @@ two cases separately. For a literal or a clause $C$, the set of corresponding
 domains is denoted as $\Doms(C)$.
 
 In the case of $n = 0$, there are three types of clauses to consider:
-\begin{enumerate}
+\begin{enumerate*}[label=(\roman*)]
   \item those that do not mention $\Delta$,\label[type]{type1}
   \item those in which every literal contains variables quantified over
   $\Delta$, and\label[type]{type2}
   \item those that have some literals with variables quantified over $\Delta$
   and some without.\label[type]{type3}
-\end{enumerate}
+\end{enumerate*}
 Clauses of \cref{type1} are transferred to the new formula $\phi'$ without any
 changes. For clauses of \cref{type2}, $C'$ is empty, so these clauses are
 filtered out. As for clauses of \cref{type3}, a new kind of smoothing is
@@ -852,8 +838,8 @@ and return it.
 % Baselines: List and describe the baseline methods or systems used for
 % comparison.
 
-Our empirical evaluation sought to compare the runtime performance of {\Cranetwo} with the current state of the art, namely
-\textsc{FastWFOMC} and \textsc{ForcLift}. It is worth remarking that  \textsc{ForcLift} does not support arbitrary precision, and returns error for cases that requires arbitrary precision reasoning.
+Our empirical evaluation sought to compare the runtime performance of {\Cranetwo} with the current state of the art, namely 
+\textsc{FastWFOMC} and \textsc{ForcLift}. It is worth remarking that  \textsc{ForcLift} does not support arbitrary precision, and returns error for cases that requires arbitrary precision reasoning. 
 Our experiments involve two versions
 of \Cranetwo{}: \Cranegreedy{} and \Cranebfs{}. Like its predecessor,
 \Cranetwo{} has two modes for applying compilation rules to formulas: one that
@@ -879,7 +865,8 @@ while the other algorithms were executed on the Java Virtual Machine 1.8.0\_201.
 \subsection{Benchmarks}
 We compare these algorithms using three benchmarks from previous studies. The
 first benchmark is the function-counting problem from \cref{example:functions},
-previously examined by Dilkas and Belle~\cite{DBLP:conf/kr/DilkasB23}. The
+previously examined by
+\citeauthor{DBLP:conf/kr/DilkasB23}~\shortcite{DBLP:conf/kr/DilkasB23}. The
 second benchmark is a variant of the well-known `Friends and Smokers' Markov
 logic network~\cite{DBLP:conf/aaai/SinglaD08,DBLP:conf/uai/BroeckCD12}. In
 \Ctwo{}, \FO{}, and \UFO{}, this problem can be formulated as
@@ -892,9 +879,10 @@ or, equivalently, in conjunctive normal form as
   (\forall x,y \in \Delta\text{. }S(y) \lor \neg S(x) \lor \neg F(x, y)) \land{}\\
   (\forall x \in \Delta\text{. } C(x) \lor \neg S(x)).
 \end{gather*}
-Finally, we include the bijection-counting problem previously utilised by Dilkas
-and Belle~\cite{DBLP:conf/kr/DilkasB23}. Its formulation in \FO{} is described
-in \cref{example:overall}. The equivalent formula in \Ctwo{} is
+Finally, we include the bijection-counting problem previously utilised by
+\citeauthor{DBLP:conf/kr/DilkasB23}~\shortcite{DBLP:conf/kr/DilkasB23}. Its
+formulation in \FO{} is described in \cref{example:overall}. The equivalent
+formula in \Ctwo{} is
 \begin{align*}
   (\forall x \in \Delta\text{. }\exists^{=1} y \in \Delta&\text{. }P(x, y))\land{}\\
   (\forall y \in \Delta\text{. }\exists^{=1} x \in \Delta&\text{. }P(x, y)).
@@ -938,7 +926,7 @@ cannot.
 %A considerable difference between \textsc{ForcLift} and the other two algorithms
 %is that \textsc{ForcLift} does not support arbitrary precision whereas the other
 %algorithms use the GNU Multiple Precision Arithmetic Library. Thus, when the
-%count exceeds finite precision, \textsc{ForcLift} returns $\infty$.
+%count exceeds finite precision, \textsc{ForcLift} returns $\infty$. 
 
 For evaluation purposes, we ran each algorithm on each benchmark using domains
 of sizes $2^{1}, 2^{2}, 2^{3}$, and so on, until an algorithm failed to handle a
@@ -1018,5 +1006,97 @@ further analysed using fine-grained complexity, which would provide more
 detailed insights into the computational demands of different formulas.
 
 \bibliography{paper}
+
+\section{Reproducibility Checklist}
+
+This paper:
+\begin{itemize}
+  \item Includes a conceptual outline and/or pseudocode description of AI
+        methods introduced (\textbf{yes}/partial/no/NA)
+  \item Clearly delineates statements that are opinions, hypothesis, and
+        speculation from objective facts and results (\textbf{yes}/no)
+  \item Provides well marked pedagogical references for less-familiare readers
+        to gain background necessary to replicate the paper (\textbf{yes}/no)
+\end{itemize}
+
+Does this paper make theoretical contributions? (\textbf{yes}/no) If yes, please
+complete the list below.
+
+\begin{itemize}
+  \item All assumptions and restrictions are stated clearly and formally.
+        (\textbf{yes}/partial/no)
+  \item All novel claims are stated formally (e.g., in theorem statements).
+        (\textbf{yes}/partial/no)
+  \item Proofs of all novel claims are included. (\textbf{yes}/partial/no)
+  \item Proof sketches or intuitions are given for complex and/or novel results.
+        (\textbf{yes}/partial/no)
+  \item Appropriate citations to theoretical tools used are given.
+        (\textbf{yes}/partial/no)
+  \item All theoretical claims are demonstrated empirically to hold.
+        (\textbf{yes}/partial/no/NA)
+  \item All experimental code used to eliminate or disprove claims is included.
+        (yes/no/\textbf{NA})
+\end{itemize}
+
+Does this paper rely on one or more datasets? (\textbf{yes}/no) If yes, please
+complete the list below.
+
+\begin{itemize}
+  \item A motivation is given for why the experiments are conducted on the
+        selected datasets (\textbf{yes}/partial/no/NA)
+  \item All novel datasets introduced in this paper are included in a data
+        appendix. (\textbf{yes}/partial/no/NA)
+  \item All novel datasets introduced in this paper will be made publicly
+        available upon publication of the paper with a license that allows free
+        usage for research purposes. (\textbf{yes}/partial/no/NA)
+  \item All datasets drawn from the existing literature (potentially including
+        authors’ own previously published work) are accompanied by appropriate
+        citations. (\textbf{yes}/no/NA)
+  \item All datasets drawn from the existing literature (potentially including
+        authors’ own previously published work) are publicly available.
+        (\textbf{yes}/partial/no/NA)
+  \item All datasets that are not publicly available are described in detail,
+        with explanation why publicly available alternatives are not
+        scientifically satisficing. (\textbf{yes}/partial/no/NA)
+\end{itemize}
+
+Does this paper include computational experiments? (\textbf{yes}/no) If yes,
+please complete the list below.
+
+\begin{itemize}
+  \item Any code required for pre-processing data is included in the appendix.
+        (\textbf{yes}/partial/no).
+  \item All source code required for conducting and analyzing the experiments is
+        included in a code appendix. (\textbf{yes}/partial/no)
+  \item All source code required for conducting and analyzing the experiments
+        will be made publicly available upon publication of the paper with a
+        license that allows free usage for research purposes.
+        (\textbf{yes}/partial/no)
+  \item All source code implementing new methods have comments detailing the
+        implementation, with references to the paper where each step comes from
+        (yes/\textbf{partial}/no)
+  \item If an algorithm depends on randomness, then the method used for setting
+        seeds is described in a way sufficient to allow replication of results.
+        (yes/partial/no/\textbf{NA})
+  \item This paper specifies the computing infrastructure used for running
+        experiments (hardware and software), including GPU/CPU models; amount of
+        memory; operating system; names and versions of relevant software
+        libraries and frameworks. (\textbf{yes}/partial/no)
+  \item This paper formally describes evaluation metrics used and explains the
+        motivation for choosing these metrics. (\textbf{yes}/partial/no)
+  \item This paper states the number of algorithm runs used to compute each
+        reported result. (\textbf{yes}/no)
+  \item Analysis of experiments goes beyond single-dimensional summaries of
+        performance (e.g., average; median) to include measures of variation,
+        confidence, or other distributional information. (\textbf{yes}/no)
+  \item The significance of any improvement or decrease in performance is judged
+        using appropriate statistical tests (e.g., Wilcoxon signed-rank).
+        (\textbf{yes}/partial/no)
+  \item This paper lists all final (hyper-)parameters used for each
+        model/algorithm in the paper’s experiments. (yes/partial/no/\textbf{NA})
+  \item This paper states the number and range of values tried per (hyper-)
+        parameter during development of the paper, along with the criterion used
+        for selecting the final parameter setting. (yes/partial/no/\textbf{NA})
+\end{itemize}
 
 \end{document}
