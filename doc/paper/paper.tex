@@ -20,16 +20,18 @@
 
 \title{Towards Practical First-Order Model Counting}
 
-\author{Jane {Open Access}}{Dummy University Computing Laboratory, [optional: Address], Country \and My second affiliation, Country \and \url{http://www.myhomepage.edu} }{johnqpublic@dummyuni.org}{https://orcid.org/0000-0002-1825-0097}{(Optional) author-specific funding acknowledgements}%TODO mandatory, please use full name; only 1 author per \author macro; first two parameters are mandatory, other parameters can be empty. Please provide at least the name of the affiliation and the country. The full address is optional. Use additional curly braces to indicate the correct name splitting when the last name consists of multiple name parts.
-\author{Joan R. Public}{Department of Informatics, Dummy College, [optional: Address], Country}{joanrpublic@dummycollege.org}{[orcid]}{[funding]}
+\author{Ananth K. Kidambi}{Indian Institute of Technology Bombay, Mumbai, India}{}{}{TODO: funding}
+\author{Guramrit Singh}{Indian Institute of Technology Bombay, Mumbai, India}{}{}{TODO: funding}
+\author{Paulius Dilkas}{University of Toronto, Toronto, Canada \and Vector Institute, Toronto, Canada}{}{}{TODO: funding}
+\author{Kuldeep S. Meel}{University of Toronto, Toronto, Canada}{}{}{TODO: funding}
 
-\authorrunning{J. Open Access and J.\,R. Public} %TODO mandatory. First: Use abbreviated first/middle names. Second (only in severe cases): Use first author plus 'et al.'
+\authorrunning{A.\,K. Kidambi, G. Singh, P. Dilkas, and K.\,S. Meel}
 
-\Copyright{Jane Open Access and Joan R. Public} %TODO mandatory, please use full first names. LIPIcs license is "CC-BY";  http://creativecommons.org/licenses/by/3.0/
+\Copyright{Ananth K. Kidambi, Guramrit Singh, Paulius Dilkas, and Kuldeep S. Meel}
 
-\ccsdesc[100]{\textcolor{red}{Replace ccsdesc macro with valid one}} %TODO mandatory: Please choose ACM 2012 classifications from https://dl.acm.org/ccs/ccs_flat.cfm 
+\ccsdesc{Computing methodologies~Knowledge representation and reasoning}
 
-\keywords{Dummy keyword} %TODO mandatory; please add comma-separated list of keywords
+\keywords{first-order model counting, knowledge compilation, lifted inference}
 
 \relatedversion{} %optional, e.g. full version hosted on arXiv, HAL, or other respository/website
 
@@ -63,6 +65,7 @@
 \usepackage{pifont}
 \usepackage{siunitx}
 \usepackage{tikz}
+\usepackage{microtype}
 
 \usetikzlibrary{arrows.meta}
 \usetikzlibrary{fit}
@@ -92,14 +95,9 @@
 
 \sisetup{group-separator = {,}}
 
-% \crefname{line}{line}{lines}
-% \crefname{assumption}{Assumption}{Assumptions}
 \crefalias{enumi}{type}
 \crefname{type}{Type}{Types}
 \creflabelformat{type}{#2\textup{#1}#3}
-% \crefalias{enumi}{step}
-% \crefname{step}{Step}{Steps}
-% \creflabelformat{step}{#2\textup{#1}#3}
 \crefalias{clause}{equation}
 \crefname{clause}{Clause}{Clauses}
 \creflabelformat{clause}{#2\textup{(#1)}#3}
@@ -561,8 +559,8 @@ $f$ and simplify it using the \Propagate procedure (explained in detail in
 \cref{sec:propagating}). We do this by iterating over all indices of
 $\mathbf{x}$, where $x_{i}$ is a constant, and using \Propagate to simplify
 $\psi$ by assuming that domain $\mathcal{D}(f, i)$ has size $x_{i}$. Finally, on
-\cref{line:final}, \CompileWithBaseCases recurses on these simplified formulas
-and adds the resulting base case equations to $\mathcal{E}$.
+\autoref{line:final}, \CompileWithBaseCases recurses on these simplified
+formulas and adds the resulting base case equations to $\mathcal{E}$.
 \Cref{example:overall} below provides more detail.
 
 \begin{remark}
@@ -587,7 +585,7 @@ and adds the resulting base case equations to $\mathcal{E}$.
   We specifically examine the first solution returned by \Cranetwo{} for this
   formula.
 
-  After \cref{line:first,line:second}, we have
+  After \autoref{line:second}, we have
   \begin{align*}
     \mathcal{E} &= \left\{\,\begin{aligned}f(m, n) &= \sum_{l=0}^{n} \binom{n}{l}{(-1)}^{n-l}g(l, m),\\ g(l, m) &= g(l-1, m) + mg(l-1, m-1)\end{aligned}\,\right\};\\
     \mathcal{D} &= \{\, (f, 1) \mapsto \Gamma, (f, 2) \mapsto \Delta, (g, 1) \mapsto \Delta^{\top}, (g, 2) \mapsto \Gamma \,\},
@@ -773,11 +771,11 @@ replacing the $m$ variables in $C$ with the $n$ new constants.
 the correct model
 count~\cite{darwiche2001tractable,DBLP:conf/ijcai/BroeckTMDR11}. In this
 section, we describe a similar process performed on
-\cref{line:smoothing1,line:smoothing2} of \cref{alg:propagate}.
-\Cref{line:presmoothing} checks if smoothing is necessary, and
-\cref{line:smoothing1,line:smoothing2} execute it. If the condition on
-\cref{line:presmoothing} is not satisfied, the clause is not smoothed but
-omitted.
+lines~\ref{line:presmoothing}--\ref{line:smoothing2} of \cref{alg:propagate}.
+Line~\ref{line:presmoothing} checks if smoothing is necessary, and
+lines~\ref{line:smoothing1} and~\ref{line:smoothing2} execute it. If the
+condition on \autoref{line:presmoothing} is not satisfied, the clause is not
+smoothed but omitted.
 
 Suppose \Propagate is called with arguments $(\phi, \Delta, 0)$, i.e., we are
 simplifying the formula $\phi$ by assuming that the domain $\Delta$ is empty.
@@ -802,11 +800,11 @@ vacuously satisfied.
   $(\Gamma \times \Gamma) \setminus (\Gamma' \times \Gamma')$ since
   \cref{eq:example1} is vacuously satisfied by all structures. Therefore, the
   correct FOMC should be $2^{|\Gamma|^2 - |\Gamma'|^2}$. However, without
-  \cref{line:smoothing2}, \Propagate would simplify $\phi$ to
+  \autoref{line:smoothing2}, \Propagate would simplify $\phi$ to
   $\forall y, z \in \Gamma'\text{. }P(y, z)$. In this case, $P$ is a subset of
   $\Gamma' \times \Gamma'$. This simplified formula has only one model:
   $\{\, P(y, z) \mid y, z \in \Gamma' \,\}$. By including
-  \cref{line:smoothing2}, \Propagate transforms $\phi$ to:
+  \autoref{line:smoothing2}, \Propagate transforms $\phi$ to:
   \begin{gather*}
     (\forall y, z \in \Gamma\text{. }P(y, z) \lor \neg P(y, z))\land{}\\
     (\forall y, z \in \Gamma'\text{. }P(y, z)),
@@ -814,7 +812,7 @@ vacuously satisfied.
   which retains the correct model count.
 \end{example}
 
-It is worth mentioning that the choice of $l$ on \cref{line:smoothing1} of
+It is worth mentioning that the choice of $l$ on \autoref{line:smoothing1} of
 \cref{alg:propagate} is inconsequential because any choice achieves the same
 goal: constructing a tautological clause that retains the literals in $C'$.
 

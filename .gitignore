@@ -352,3 +352,4 @@ rsconnect/
 
 results/raw/
 results/processed/results_with_counts.csv
+*.vtc
