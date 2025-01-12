@@ -417,10 +417,7 @@ problem as Skolemization relies on weights even for unweighted FOMC.
   }\exists^{=1} y \in \Delta\text{. }P(x, y)$. In \UFO{}, the same could be
   written as
   \begin{equation}\label[formula]{eq:functions1}
-    \begin{gathered}
-      (\forall x, y \in \Delta\text{. }S(x) \lor \neg P(x, y)) \land{}\\
-      (|P| = |\Delta|),
-    \end{gathered}
+    (\forall x, y \in \Delta\text{. }S(x) \lor \neg P(x, y)) \land (|P| = |\Delta|),
   \end{equation}
   where $w^{-}(S) = -1$. Although \cref{eq:functions1} has more models compared
   to its counterpart in \Ctwo{}, the negative weight $w^{-}(S) = -1$ makes some
@@ -429,8 +426,7 @@ problem as Skolemization relies on weights even for unweighted FOMC.
   Equivalently, in \FO{} we would write
   \begin{equation}\label[formula]{eq:fo}
     \begin{gathered}
-      (\forall x \in \Gamma\text{. }\exists y \in \Delta\text{. }P(x, y)) \land{}\\
-      (\forall x \in \Gamma\text{. }\forall y, z \in \Delta\text{. }P(x, y) \land P(x, z) \Rightarrow y = z).
+      (\forall x \in \Gamma\text{. }\exists y \in \Delta\text{. }P(x, y)) \land (\forall x \in \Gamma\text{. }\forall y, z \in \Delta\text{. }P(x, y) \land P(x, z) \Rightarrow y = z).
     \end{gathered}
   \end{equation}
   The first clause asserts that each $x$ must have at least one corresponding
@@ -468,14 +464,13 @@ $f(\mathbf{x}) = \expr{}$, with $f(\mathbf{x})$ representing a signature.
 \begin{figure*}[t]
   \centering
   \begin{tikzpicture}
-    \node at (-1, 0) (formula) {$\phi$};
+    \node[anchor=west] at (-1, 0) (formula) {$\phi$};
     \node[draw,rounded rectangle] at (3, 0) (compilewithbasecases) {\CompileWithBaseCases};
     \node[draw,rounded rectangle] at (9, 0) (compilation) {Compile to C++};
 
-    \node[draw,rounded rectangle,dashed] at (12, 0) (cpp) {C++ code};
-    \node at (12, -1) (sizes) {Domain sizes};
-
-    \node at (15, 0) (count) {Model count};
+    \node[draw,rounded rectangle,dashed] at (9, -3) (cpp) {C++ code};
+    \node[anchor=west] at (-1, -3) (sizes) {Domain sizes};
+    \node at (12, -3) (count) {Answer};
 
     \node[draw,rounded rectangle] at (3, -2) (findbasecases) {\FindBaseCases};
     \node[draw,rounded rectangle,left = 0.1cm of findbasecases] (crane) {\Compile};
@@ -483,7 +478,7 @@ $f(\mathbf{x}) = \expr{}$, with $f(\mathbf{x})$ representing a signature.
     \node[draw,rounded rectangle,right = 0.1cm of propagate] (simplify) {\Simplify};
 
     \node[draw,fit={(compilewithbasecases) (compilation) (crane) (findbasecases) (propagate)},inner ysep=7pt,yshift=5pt] {};
-    \node at (0.6, 0.5) {\Cranetwo};
+    \node at (0.7, 0.5) {\Cranetwo};
 
     \draw[-Latex] (formula) -- (compilewithbasecases);
     \draw[-Latex] (compilewithbasecases) -- node[above] {$\mathcal{E}$} (compilation);
@@ -537,13 +532,11 @@ domains.
   \caption{\protect\CompileWithBaseCases{$\phi$}}\label{alg:compilewithbasecases}
   \KwIn{formula $\phi$}
   \KwOut{set $\mathcal{E}$ of equations}
-  $(\mathcal{E}, \mathcal{F}, \mathcal{D}) \gets \Compile{$\phi$}$\;\label{line:first}
+  $(\mathcal{E}, \mathcal{F}, \mathcal{D}) \gets \Compile{$\phi$}$\;
   $\mathcal{E} \gets \Simplify{$\mathcal{E}$}$\;\label{line:second}
   \ForEach{base case $f(\mathbf{x}) \in \FindBaseCases{$\mathcal{E}$}$}{
     $\psi \gets \mathcal{F}(f)$\;
-    \ForEach{index $i$ such that $x_{i} \in \mathbb{N}_{0}$}{\label{line:loop}
-      $\psi \gets \Propagate{$\psi$, $\mathcal{D}(f, i)$, $x_i$}$\;
-    }
+    \lForEach{index $i$ such that $x_{i} \in \mathbb{N}_{0}$}{$\psi \gets \Propagate{$\psi$, $\mathcal{D}(f, i)$, $x_i$}$}
     $\mathcal{E} \gets \mathcal{E} \cup \CompileWithBaseCases{$\psi$}$\;\label{line:final}
   }
 \end{algorithm}
@@ -634,16 +627,12 @@ $g(l, m) = g(l-1, m) + mg(l-1, m-1)$.
   \KwOut{set $\mathcal{B}$ of base cases}
 
   $\mathcal{B} \gets \emptyset$\;
-  \ForEach{function call $f(\mathbf{y})$ on the right-hand side of an equation in $\mathcal{E}$}{\label{line:functioncall}
+  \ForEach{function call $f(\mathbf{y})$ on the right-hand side of an equation in $\mathcal{E}$}{
     $\mathbf{x} \gets \text{the parameters of $f$ in its definition}$\;
     \ForEach{$y_{i} \in \mathbf{y}$} {
-      \uIf{$y_{i} \in \mathbb{N}_{0}$}{
-        $\mathcal{B} \gets \mathcal{B} \cup \{\, f(\mathbf{x})[x_{i} \mapsto y_{i}] \,\}$\;
-      }
+      \lIf{$y_{i} \in \mathbb{N}_{0}$}{$\mathcal{B} \gets \mathcal{B} \cup \{\, f(\mathbf{x})[x_{i} \mapsto y_{i}] \,\}$}
       \ElseIf{$y_{i} = x_{i} - c_{i}$ for some $c_{i} \in \mathbb{N}_{0}$}{
-        \For{$j \gets 0$ \KwTo $c_{i} - 1$}{\label{line:lim}
-          $\mathcal{B} \gets \mathcal{B} \cup \{\, f(\mathbf{x})[x_{i} \mapsto j] \,\}$\;\label{line:insert}
-        }
+        \lFor{$j \gets 0$ \KwTo $c_{i} - 1$}{$\mathcal{B} \gets \mathcal{B} \cup \{\, f(\mathbf{x})[x_{i} \mapsto j] \,\}$}
       }
     }
   }
@@ -716,9 +705,7 @@ the detailed proof, please refer to the technical appendix.
     \ForEach{clause $C \in \phi$}{
       ${(x_{i})}_{i=1}^{m} \gets \text{the variables in $C$ with domain $\Delta$}$\;
       \lIf{$m = 0$}{$\phi' \gets \phi' \cup \{\, C \,\}$}
-      \Else{
-        $\phi' \gets \phi' \cup \{\, C[x_{1} \mapsto c_{1}, \dots, x_{m} \mapsto c_{m}] \mid {(c_{i})}_{i=1}^{m} \in D^{m} \,\}$\;
-      }
+      \lElse{$\phi' \gets \phi' \cup \{\, C[x_{1} \mapsto c_{1}, \dots, x_{m} \mapsto c_{m}] \mid {(c_{i})}_{i=1}^{m} \in D^{m} \,\}$}
     }
   }
 \end{algorithm}
@@ -760,7 +747,7 @@ replacing the $m$ variables in $C$ with the $n$ new constants.
     (\forall x \in \Gamma\text{. }\neg P(x, c_{1}) \lor& \neg P(x, c_{1}) \lor c_{1}=c_{1})\land{}\\
     (\forall x \in \Gamma\text{. }\neg P(x, c_{1}) \lor& \neg P(x, c_{2}) \lor c_{1}=c_{2})\land{}\\
     \vdots&\\
-    (\forall x \in \Gamma\text{. }\neg P(x, c_{3}) \lor& \neg P(x, c_{3}) \lor c_{3}=c_{3}).\\
+    (\forall x \in \Gamma\text{. }\neg P(x, c_{3}) \lor& \neg P(x, c_{3}) \lor c_{3}=c_{3}).
   \end{align*}
   Here, $c_{1}$, $c_{2}$, and $c_{3}$ are the new constants.
 \end{example}
@@ -784,7 +771,7 @@ smoothing preserves all occurrences of $P$ even if all clauses with $P$ become
 vacuously satisfied.
 
 \begin{example}\label{example:basecasesmoothing}
-  Let $\phi$ be:
+  Let $\phi$ be
   \begin{align}
     (\forall x \in \Delta\text{. }\forall y, z \in \Gamma&\text{. }Q(x) \lor P(y, z))\land{}\label[clause]{eq:example1}\\
     (\forall y, z \in \Gamma'&\text{. }P(y, z))\label[clause]{eq:example2},
@@ -804,11 +791,10 @@ vacuously satisfied.
   $\forall y, z \in \Gamma'\text{. }P(y, z)$. In this case, $P$ is a subset of
   $\Gamma' \times \Gamma'$. This simplified formula has only one model:
   $\{\, P(y, z) \mid y, z \in \Gamma' \,\}$. By including
-  \autoref{line:smoothing2}, \Propagate transforms $\phi$ to:
-  \begin{gather*}
-    (\forall y, z \in \Gamma\text{. }P(y, z) \lor \neg P(y, z))\land{}\\
-    (\forall y, z \in \Gamma'\text{. }P(y, z)),
-  \end{gather*}
+  \autoref{line:smoothing2}, \Propagate transforms $\phi$ to
+  \[
+    (\forall y, z \in \Gamma\text{. }P(y, z) \lor \neg P(y, z)) \land (\forall y, z \in \Gamma'\text{. }P(y, z)),
+  \]
   which retains the correct model count.
 \end{example}
 
@@ -850,13 +836,15 @@ and return it.
 % Baselines: List and describe the baseline methods or systems used for
 % comparison.
 
-Our empirical evaluation sought to compare the runtime performance of {\Cranetwo} with the current state of the art, namely
-\textsc{FastWFOMC} and \textsc{ForcLift}. It is worth remarking that  \textsc{ForcLift} does not support arbitrary precision, and returns error for cases that requires arbitrary precision reasoning.
-Our experiments involve two versions
-of \Cranetwo{}: \Cranegreedy{} and \Cranebfs{}. Like its predecessor,
-\Cranetwo{} has two modes for applying compilation rules to formulas: one that
-uses a greedy search algorithm similar to \textsc{ForcLift} and another that
-combines greedy and breadth-first search.
+Our empirical evaluation sought to compare the runtime performance of
+{\Cranetwo} with the current state of the art, namely \textsc{FastWFOMC} and
+\textsc{ForcLift}. It is worth remarking that \textsc{ForcLift} does not support
+arbitrary precision, and returns error for cases that requires arbitrary
+precision reasoning. Our experiments involve two versions of \Cranetwo{}:
+\Cranegreedy{} and \Cranebfs{}. Like its predecessor, \Cranetwo{} has two modes
+for applying compilation rules to formulas: one that uses a greedy search
+algorithm similar to \textsc{ForcLift} and another that combines greedy and
+breadth-first search.
 
 The experiments were conducted using an Intel Skylake \SI{2.4}{\giga\hertz} CPU
 with \SI{188}{\gibi\byte} of memory and CentOS~7. C++ programs were compiled
@@ -881,28 +869,23 @@ previously examined by Dilkas and Belle~\cite{DBLP:conf/kr/DilkasB23}. The
 second benchmark is a variant of the well-known `Friends and Smokers' Markov
 logic network~\cite{DBLP:conf/aaai/SinglaD08,DBLP:conf/uai/BroeckCD12}. In
 \Ctwo{}, \FO{}, and \UFO{}, this problem can be formulated as
-\begin{gather*}
-  (\forall x,y \in \Delta\text{. } S(x) \land F(x, y) \Rightarrow S(y)) \land{}\\
-  (\forall x \in \Delta\text{. }S(x) \Rightarrow C(x))
-\end{gather*}
+\[
+  (\forall x,y \in \Delta\text{. } S(x) \land F(x, y) \Rightarrow S(y)) \land (\forall x \in \Delta\text{. }S(x) \Rightarrow C(x))
+\]
 or, equivalently, in conjunctive normal form as
-\begin{gather*}
-  (\forall x,y \in \Delta\text{. }S(y) \lor \neg S(x) \lor \neg F(x, y)) \land{}\\
-  (\forall x \in \Delta\text{. } C(x) \lor \neg S(x)).
-\end{gather*}
+\[
+  (\forall x,y \in \Delta\text{. }S(y) \lor \neg S(x) \lor \neg F(x, y)) \land (\forall x \in \Delta\text{. } C(x) \lor \neg S(x)).
+\]
 Finally, we include the bijection-counting problem previously utilised by Dilkas
 and Belle~\cite{DBLP:conf/kr/DilkasB23}. Its formulation in \FO{} is described
 in \cref{example:overall}. The equivalent formula in \Ctwo{} is
-\begin{align*}
-  (\forall x \in \Delta\text{. }\exists^{=1} y \in \Delta&\text{. }P(x, y))\land{}\\
-  (\forall y \in \Delta\text{. }\exists^{=1} x \in \Delta&\text{. }P(x, y)).
-\end{align*}
+\[
+  (\forall x \in \Delta\text{. }\exists^{=1} y \in \Delta\text{. }P(x, y)) \land (\forall y \in \Delta\text{. }\exists^{=1} x \in \Delta\text{. }P(x, y)).
+\]
 Similarly, in \UFO{} the same formula can be written as
-\begin{gather*}
-  (\forall x, y \in \Delta\text{. }R(x) \lor \neg P(x, y))\land{}\\
-  (\forall x, y \in \Delta\text{. }S(x) \lor \neg P(y, x))\land{}\\
-  (|P| = |\Delta|),
-\end{gather*}
+\[
+  (\forall x, y \in \Delta\text{. }R(x) \lor \neg P(x, y)) \land (\forall x, y \in \Delta\text{. }S(x) \lor \neg P(y, x)) \land (|P| = |\Delta|),
+\]
 where $w^{-}(R) = w^{-}(S) = -1$.
 
 \begin{figure*}[t]
@@ -911,6 +894,7 @@ where $w^{-}(R) = w^{-}(S) = -1$.
   \caption{The runtime of the algorithms as a function of the domain size. Note
     that both axes are on a logarithmic scale.}\label{fig:plot}
 \end{figure*}
+% TODO: shrink to fit into the margins
 
 %Since \textsc{FastWFOMC} does not support many-sorted logic, our experiments are
 %limited to formulas with a single domain. However, many of the counting problems
