@@ -41,7 +41,7 @@
 
 %\funding{(Optional) general funding statement \dots}%optional, to capture a funding statement, which applies to all authors. Please enter author specific funding statements as fifth argument of the \author macro.
 
-%\acknowledgements{I want to thank \dots}%optional
+\acknowledgements{Part of the research was conducted while all authors were at the National University of Singapore.}
 
 %\nolinenumbers %uncomment to disable line numbering
 
@@ -105,6 +105,48 @@
 \crefalias{formula}{equation}
 \crefname{formula}{Formula}{Formulas}
 \creflabelformat{formula}{#2\textup{(#1)}#3}
+
+% TODO: the technical appendix should follow the same template (probably just
+% integrate it into the main paper)
+
+% TODO: clarify the contributions/novelty (which parts are standard and which parts are clever)
+% We would like to clarify that the main contribution of this work consists of everything needed to complement recursive function definitions with the necessary base cases. This process includes identifying the base cases and their corresponding formulas, transforming them (including applying a new smoothing procedure), and recursively reusing Crane. C++ code generation, although relatively straightforward, is crucial for the usability of the algorithm
+% TODO: elaborate more on compilation to C++ code
+% TODO: draw a clear line between prior work and new developments
+% TODO: introduction and preliminaries should focus more on current work
+% * shorten the part about the three logics
+% * Section 2 until 2.3 could be drastically shortened
+% * 2.3 could be expanded a little
+% * Sections 3 and 4 would benefit from cleaner reasoning
+% * Section 3 should be expanded by 1 page ("a clear discussion of the innovation aspect and technical parts")
+% * Section 3.5 could use more details
+% * Experiments could be expanded by 1 page ("a more thorough and independent practical assessment")
+% TODO: why is KC a promising approach?
+% The principal motivation of a knowledge compilation-based approach to FOMC comes from its ability to find polynomial-time solutions, where the polynomial has a lower degree compared to, e.g., FastWFOMC (Dilkas and Belle, 2023). The ability of the algorithm to mathematically describe recursive solutions is also noteworthy as the only other available alternative is to guess them (Barvı́nek, van Bremen, Wang, Zelezný, Kuzelka, ILP 2021).
+% TODO: more benchmarks from NOT my work
+% TODO: explain skolemization
+% Skolemization is a procedure that transforms a formula with existential quantifiers into an ’equivalent’ formula without existential quantifiers with the same WFOMC.
+% TODO: Section 3: you seem to use "equation" and "function" interchangeably
+% TODO: don't assume that the reader knows FOMC and FOMC algorithms
+% TODO: the examples should be given earlier
+% TODO: example 2 right after definition 3 (or near definition 1)
+% TODO: clarify the difference between greedy and bfs
+%  The difference between Gantry-Greedy and Gantry-BFS is in how the algorithm chooses which compi- lation rule to apply to a formula. The former uses greedy search: there is a list of rules, and the first applicable rule is the one that gets used, disregarding all the others. The latter uses a combination of greedy and breadth-first search (BFS). That is, each compilation rule is identified as either greedy or non-greedy. Greedy rules are applied as soon as possible at any stage of the compilation process. BFS is executed over all applicable non-greedy rules, identifying the solution that can be constructed using the smallest number of such rules.
+% TODO: Page 2, Section 2.1, paragraph 2, line 10 - ”A clause is of the form ...” - are the quantifiers really part of the clause? Shouldn’t it be possible to quantify a conjunction of several clauses?
+% Conforming with previous work, the definition of a clause includes universal quantifiers for all variables within. While it is possible to rewrite the entire formula in prenex normal form, the format we describe has proven itself convenient to work with.
+% TODO: Page 2, Definition 1 - ”A structure is a model if it satisfies ϕ” - do you mean that it makes ϕ valid?
+% TODO: make sure it's clear what the 'raw' instances are
+% TODO: regarding wfomc, only say that it's straightforward to extend to WFOMC
+% Even though we are evaluating the algorithms on FOMC benchmarks, for sentences with existential quan- tifiers, computing FOMC using Gantry requires the use of WFOMC. For such sentences, Skolemization introduces predicates with non-unary weights that must be accounted for to compute the correct model count
+% TODO: prove correctness?
+% TODO: clarify the benefits of the C++ code generation
+% The purpose of C++ code generation is to turn mathematical equations into executable code.
+% TODO: We are not aware of any formulas on which Gantry scales worse compared to either ForcLift or Fast- WFOMC. The one advantage that FastWFOMC has over Gantry is its support for counting quantifiers.
+% TODO: On the ’friends’ and ’functions’ benchmarks, ForcLift runs until the model count exceeds 231 − 1.
+% TODO: It would be nice to give the necessary introduction to FOKC, or CRANE (an intuitive explanation early in the paper)
+% TODO: more emphasis on the motivation for each part of GANTRY (e.g., how FindBaseCases addresses key issues in CRANE) would add depth to the contribution.
+% TODO: The algorithm’s recursive nature and its interaction with CRANE could be explained more clearly
+% TODO: Regarding programming languages and accuracy, we verified that the answers match for smaller domain sizes. Also, although written in different languages, both Gantry and FastWFOMC use the GNU Multiple Precision Arithmetic Library.
 
 \begin{document}
 
@@ -895,7 +937,7 @@ where $w^{-}(R) = w^{-}(S) = -1$.
   \caption{The runtime of the algorithms as a function of the domain size. Note
     that both axes are on a logarithmic scale.}\label{fig:plot}
 \end{figure*}
-% TODO: shrink to fit into the margins
+% TODO: shrink/restructure to fit into the margins
 
 %Since \textsc{FastWFOMC} does not support many-sorted logic, our experiments are
 %limited to formulas with a single domain. However, many of the counting problems
