@@ -109,44 +109,10 @@
 % TODO: the technical appendix should follow the same template (probably just
 % integrate it into the main paper)
 
-% TODO: clarify the contributions/novelty (which parts are standard and which parts are clever)
-% We would like to clarify that the main contribution of this work consists of everything needed to complement recursive function definitions with the necessary base cases. This process includes identifying the base cases and their corresponding formulas, transforming them (including applying a new smoothing procedure), and recursively reusing Crane. C++ code generation, although relatively straightforward, is crucial for the usability of the algorithm
-% TODO: elaborate more on compilation to C++ code
-% TODO: draw a clear line between prior work and new developments
-% TODO: introduction and preliminaries should focus more on current work
-% * shorten the part about the three logics
-% * Section 2 until 2.3 could be drastically shortened
-% * 2.3 could be expanded a little
-% * Sections 3 and 4 would benefit from cleaner reasoning
-% * Section 3 should be expanded by 1 page ("a clear discussion of the innovation aspect and technical parts")
-% * Section 3.5 could use more details
-% * Experiments could be expanded by 1 page ("a more thorough and independent practical assessment")
-% TODO: why is KC a promising approach?
-% The principal motivation of a knowledge compilation-based approach to FOMC comes from its ability to find polynomial-time solutions, where the polynomial has a lower degree compared to, e.g., FastWFOMC (Dilkas and Belle, 2023). The ability of the algorithm to mathematically describe recursive solutions is also noteworthy as the only other available alternative is to guess them (Barvı́nek, van Bremen, Wang, Zelezný, Kuzelka, ILP 2021).
-% TODO: more benchmarks from NOT my work
-% TODO: explain skolemization
-% Skolemization is a procedure that transforms a formula with existential quantifiers into an ’equivalent’ formula without existential quantifiers with the same WFOMC.
-% TODO: Section 3: you seem to use "equation" and "function" interchangeably
-% TODO: don't assume that the reader knows FOMC and FOMC algorithms
-% TODO: the examples should be given earlier
-% TODO: example 2 right after definition 3 (or near definition 1)
-% TODO: clarify the difference between greedy and bfs
-%  The difference between Gantry-Greedy and Gantry-BFS is in how the algorithm chooses which compi- lation rule to apply to a formula. The former uses greedy search: there is a list of rules, and the first applicable rule is the one that gets used, disregarding all the others. The latter uses a combination of greedy and breadth-first search (BFS). That is, each compilation rule is identified as either greedy or non-greedy. Greedy rules are applied as soon as possible at any stage of the compilation process. BFS is executed over all applicable non-greedy rules, identifying the solution that can be constructed using the smallest number of such rules.
-% TODO: Page 2, Section 2.1, paragraph 2, line 10 - ”A clause is of the form ...” - are the quantifiers really part of the clause? Shouldn’t it be possible to quantify a conjunction of several clauses?
-% Conforming with previous work, the definition of a clause includes universal quantifiers for all variables within. While it is possible to rewrite the entire formula in prenex normal form, the format we describe has proven itself convenient to work with.
-% TODO: Page 2, Definition 1 - ”A structure is a model if it satisfies ϕ” - do you mean that it makes ϕ valid?
-% TODO: make sure it's clear what the 'raw' instances are
-% TODO: regarding wfomc, only say that it's straightforward to extend to WFOMC
-% Even though we are evaluating the algorithms on FOMC benchmarks, for sentences with existential quan- tifiers, computing FOMC using Gantry requires the use of WFOMC. For such sentences, Skolemization introduces predicates with non-unary weights that must be accounted for to compute the correct model count
-% TODO: prove correctness?
-% TODO: clarify the benefits of the C++ code generation
-% The purpose of C++ code generation is to turn mathematical equations into executable code.
-% TODO: We are not aware of any formulas on which Gantry scales worse compared to either ForcLift or Fast- WFOMC. The one advantage that FastWFOMC has over Gantry is its support for counting quantifiers.
-% TODO: On the ’friends’ and ’functions’ benchmarks, ForcLift runs until the model count exceeds 231 − 1.
-% TODO: It would be nice to give the necessary introduction to FOKC, or CRANE (an intuitive explanation early in the paper)
-% TODO: more emphasis on the motivation for each part of GANTRY (e.g., how FindBaseCases addresses key issues in CRANE) would add depth to the contribution.
-% TODO: The algorithm’s recursive nature and its interaction with CRANE could be explained more clearly
-% TODO: Regarding programming languages and accuracy, we verified that the answers match for smaller domain sizes. Also, although written in different languages, both Gantry and FastWFOMC use the GNU Multiple Precision Arithmetic Library.
+% TODO (for the entire paper):
+% * 15 pages excluding references
+% * draw a clear line between prior work and new developments
+% * minimize use of enumerate
 
 \begin{document}
 
@@ -171,6 +137,15 @@
 \end{abstract}
 
 \section{Introduction}
+% TODO: We would like to clarify that the main contribution of this work
+% consists of everything needed to complement recursive function definitions
+% with the necessary base cases. This process includes identifying the base
+% cases and their corresponding formulas, transforming them (including applying
+% a new smoothing procedure), and recursively reusing Crane. C++ code
+% generation, although relatively straightforward, is crucial for the usability
+% of the algorithm
+
+% TODO: focus more on current work
 
 % 1. What is the problem?
 % 2. Why is it interesting and important?
@@ -216,6 +191,17 @@ liftability.
 % 4. Why hasn't it been solved before? (Or, what's wrong with previous proposed
 % solutions? How does mine differ?)
 
+% TODO: don't assume that the reader knows FOMC and FOMC algorithms
+
+% TODO: It would be nice to give the necessary introduction to FOKC, or CRANE
+% (an intuitive explanation early in the paper)
+
+% TODO: The principal motivation of a knowledge compilation-based approach to
+% FOMC comes from its ability to find polynomial-time solutions, where the
+% polynomial has a lower degree compared to, e.g., FastWFOMC (Dilkas and Belle,
+% 2023). The ability of the algorithm to mathematically describe recursive
+% solutions is also noteworthy as the only other available alternative is to
+% guess them (Barvı́nek, van Bremen, Wang, Zelezný, Kuzelka, ILP 2021).
 FOMC algorithms are diverse, with approaches ranging from \emph{first-order
   knowledge compilation} (FOKC) to local
 search~\cite{DBLP:journals/pvldb/NiuRDS11}, Monte Carlo
@@ -255,6 +241,10 @@ future work.
 
 \section{Preliminaries}\label{sec:preliminaries}
 
+% TODO: focus more on current work
+
+% TODO: Section 2 until 2.3 (Algebra) could be drastically shortened
+
 In \cref{sec:logic}, we summarise the basic principles of first-order logic.
 Then, in \cref{sec:threelogics}, we formally define (W)FOMC and discuss the
 distinctions between three variations of first-order logic used for FOMC.\@
@@ -271,6 +261,9 @@ $i = 1, \dots, n$.
 
 \subsection{First-Order Logic}\label{sec:logic}
 
+% TODO: Skolemization is a procedure that transforms a formula with existential
+% quantifiers into an ’equivalent’ formula without existential quantifiers with
+% the same WFOMC.
 In this section, we will review the basic concepts of first-order logic as they
 are used in FOKC algorithms. There are two key differences between the logic
 used by these algorithms and the logic supported as input. First,
@@ -306,7 +299,12 @@ Finally, a \emph{formula} is a conjunction of clauses. Throughout the paper, we
 will use set-theoretic notation, interpreting a formula as a set of clauses and
 a clause as a set of literals.
 
+% TODO: Page 2, Section 2.1, paragraph 2, line 10 - ”A clause is of the form ...” - are the quantifiers really part of the clause? Shouldn’t it be possible to quantify a conjunction of several clauses?
+% Conforming with previous work, the definition of a clause includes universal quantifiers for all variables within. While it is possible to rewrite the entire formula in prenex normal form, the format we describe has proven itself convenient to work with.
+
 \subsection{FOMC Algorithms and Their Logics}\label{sec:threelogics}
+
+% TODO: shorten the part about the three logics
 
 \begin{table*}[t]
   \centering
@@ -417,6 +415,7 @@ constrains all models to have \emph{precisely three positive literals with the
   $\mathbf{t} \in \prod_{i=1}^{n} \sigma(\Delta_{i}^{P})$. A structure is a
   \emph{model} if it satisfies $\phi$.
 \end{definition}
+% TODO: Page 2, Definition 1 - ”A structure is a model if it satisfies ϕ” - do you mean that it makes ϕ valid?
 
 % (In practice, we typically only specify the size of each domain.)
 
@@ -432,6 +431,11 @@ constrains all models to have \emph{precisely three positive literals with the
 
 While this work focuses on FOMC, we still define the weighted variant of the
 problem as Skolemization relies on weights even for unweighted FOMC.
+% TODO: Even though we are evaluating the algorithms on FOMC benchmarks, for
+% sentences with existential quantifiers, computing FOMC using Gantry requires
+% the use of WFOMC. For such sentences, Skolemization introduces predicates with
+% non-unary weights that must be accounted for to compute the correct model
+% count.
 
 \begin{definition}[WFOMC instance]\label{def:instance}
   A \emph{WFOMC instance} comprises:
@@ -484,6 +488,8 @@ problem as Skolemization relies on weights even for unweighted FOMC.
 
 \subsection{Algebra}\label{sec:algebra}
 
+% TODO: this subsection could be expanded a little
+
 We write $\expr{}$ to represent an arbitrary algebraic expression. It is
 important to note that some terms have different meanings in algebra and
 logic. In algebra, a \emph{constant} refers to a non-negative integer. Likewise,
@@ -503,6 +509,20 @@ $f(\mathbf{x}) = \expr{}$, with $f(\mathbf{x})$ representing a signature.
 \end{definition}
 
 \section{Technical Contributions}\label{sec:main}
+
+% TODO: The algorithm’s recursive nature and its interaction with CRANE could be
+% explained more clearly
+
+% TODO: more emphasis on the motivation for each part of GANTRY (e.g., how
+% FindBaseCases addresses key issues in CRANE) would add depth to the
+% contribution.
+
+% TODO: Section 3: you seem to use "equation" and "function" interchangeably
+
+% TODO: this section "would benefit from cleaner reasoning"
+
+% TODO: this section should be expanded by 1 page ("a clear discussion of the
+% innovation aspect and technical parts")
 
 \begin{figure*}[t]
   \centering
@@ -606,6 +626,8 @@ formulas and adds the resulting base case equations to $\mathcal{E}$.
   \textsc{Crane} on various derived formulas.
 \end{remark}
 
+% TODO: move this example right after the definition of WFOMC (or near the
+% definition of a model)
 \begin{example}[Counting bijections]\label{example:overall}
   Consider the following formula (previously examined by Dilkas and
   Belle~\cite{DBLP:conf/kr/DilkasB23}) that defines predicate $P$ as a bijection
@@ -663,6 +685,7 @@ $g(l, m) = \sum_{k=0}^{m}[0 \le k \le 1]\binom{m}{k}g(l-1, m-k)$ into
 $g(l, m) = g(l-1, m) + mg(l-1, m-1)$.
 
 \subsection{Identifying a Sufficient Set of Base Cases}\label{sec:identifying}
+% TODO: prove correctness?
 
 \begin{algorithm}[t]
   \caption{\protect\FindBaseCases{$\mathcal{E}$}}\label{alg:findbasecases}
@@ -846,6 +869,8 @@ It is worth mentioning that the choice of $l$ on \autoref{line:smoothing1} of
 goal: constructing a tautological clause that retains the literals in $C'$.
 
 \subsection{Generating C++ Code}\label{sec:cpp}
+% TODO (must): expand this section
+% TODO: The purpose of C++ code generation is to turn mathematical equations into executable code.
 
 In this section, we will describe the final step of \Cranetwo{} as outlined in
 \cref{fig:overview}. This step involves translating the set of equations
@@ -879,6 +904,21 @@ and return it.
 % Baselines: List and describe the baseline methods or systems used for
 % comparison.
 
+% TODO Experiments could be expanded by 1 page ("a more thorough and independent
+% practical assessment")
+
+% TODO: this section "would benefit from cleaner reasoning"
+
+% TODO: The difference between Gantry-Greedy and Gantry-BFS is in how the
+% algorithm chooses which compilation rule to apply to a formula. The former
+% uses greedy search: there is a list of rules, and the first applicable rule is
+% the one that gets used, disregarding all the others. The latter uses a
+% combination of greedy and breadth-first search (BFS). That is, each
+% compilation rule is identified as either greedy or non-greedy. Greedy rules
+% are applied as soon as possible at any stage of the compilation process. BFS
+% is executed over all applicable non-greedy rules, identifying the solution
+% that can be constructed using the smallest number of such rules.
+
 Our empirical evaluation sought to compare the runtime performance of
 {\Cranetwo} with the current state of the art, namely \textsc{FastWFOMC} and
 \textsc{ForcLift}. It is worth remarking that \textsc{ForcLift} does not support
@@ -906,6 +946,10 @@ while the other algorithms were executed on the Java Virtual Machine 1.8.0\_201.
 % including size, source, and any preprocessing steps.
 
 \subsection{Benchmarks}
+% TODO: more benchmarks from NOT my work
+% TODO: make sure it's clear what the 'raw' instances are
+% TODO: don't emphasise that the benchmarks come from my previous work
+
 We compare these algorithms using three benchmarks from previous studies. The
 first benchmark is the function-counting problem from \cref{example:functions},
 previously examined by Dilkas and Belle~\cite{DBLP:conf/kr/DilkasB23}. The
@@ -985,6 +1029,19 @@ on total runtime, dominated by the latter.
 % Acknowledgement: Honestly acknowledge any limitations of your experiments or method.
 
 \subsection{Results}
+
+% TODO: On the ’friends’ and ’functions’ benchmarks, ForcLift runs until the
+% model count exceeds 231 − 1.
+
+% TODO: We are not aware of any formulas on which Gantry scales worse compared
+% to either ForcLift or FastWFOMC. The one advantage that FastWFOMC has over
+% Gantry is its support for counting quantifiers.
+
+% TODO: Regarding programming languages and accuracy, we verified that the
+% answers match for smaller domain sizes. Also, although written in different
+% languages, both Gantry and FastWFOMC use the GNU Multiple Precision Arithmetic
+% Library.
+
 \Cref{fig:plot} presents a summary of the experimental results. Only
 \textsc{FastWFOMC} and \Cranebfs{} could handle the bijection-counting problem.
 For this benchmark, the largest domain sizes these algorithms could accommodate
