@@ -233,8 +233,6 @@ In \cref{sec:preliminaries}, we cover some preliminaries, and in
 future work.
 
 \section{Preliminaries}\label{sec:preliminaries}
-% TODO: focus more on current work
-% TODO: Section 2 until 2.3 (Algebra) could be drastically shortened
 
 In \cref{sec:logic}, we summarise the basic principles of first-order logic.
 Then, in \cref{sec:threelogics}, we formally define (W)FOMC and discuss the
@@ -475,25 +473,31 @@ problem as Skolemization relies on weights even for unweighted FOMC.
 
 \subsection{Algebra}\label{sec:algebra}
 
-% TODO: this subsection could be expanded a little
-
-We write $\expr{}$ to represent an arbitrary algebraic expression. It is
-important to note that some terms have different meanings in algebra and
-logic. In algebra, a \emph{constant} refers to a non-negative integer. Likewise,
-a \emph{variable} can either be a parameter of a function or a variable
-introduced through summation, such as $i$ in the expression
-$\sum_{i=1}^{n} \expr$. A (function) \emph{signature} is
-$f(x_{1}, \dots, x_{n})$ (or $f(\mathbf{x})$ for short), where $f$ represents an
-$n$-ary function, and each $x_{i}$ represents a variable. An \emph{equation} is
-$f(\mathbf{x}) = \expr{}$, with $f(\mathbf{x})$ representing a signature.
+We write $\expr{}$ for an arbitrary algebraic expression. In the context of
+algebra, a \emph{constant} is a non-negative integer. Likewise, a
+\emph{variable} can either be a parameter of a function or a variable introduced
+through summation, such as $i$ in the expression $\sum_{i=1}^{n} \expr$. A
+\emph{function call} is $f(x_{1}, \dots, x_{n})$ (or $f(\mathbf{x})$ for short),
+where $f$ is an $n$-ary function, and each $x_{i}$ is an algebraic expression
+consisting of variables and constants. A (function) \emph{signature} is function
+call that contains only variables. An \emph{equation} is
+$f(\mathbf{x}) = \expr{}$, where $f(\mathbf{x})$ is a signature.
 
 \begin{definition}[Base case]\label{def:basecase}
   Let $f(\mathbf{x})$ be a function call where each $x_{i}$ is either a constant
-  or a variable (note that signatures are included in this definition). Then
-  function call $f(\mathbf{y})$ is considered a \emph{base case} of
+  or a variable. Then function call $f(\mathbf{y})$ is a \emph{base case} of
   $f(\mathbf{x})$ if $f(\mathbf{y}) = f(\mathbf{x})\sigma$, where $\sigma$ is a
   substitution that replaces one or more $x_{i}$ with a constant.
 \end{definition}
+
+\begin{example}
+  In equation $f(m, n) = f(m-1, n) + nf(m-1, n-1)$, the only constant is $1$,
+  and the variables are $m$ and $n$. The equation contains three function calls:
+  one on the left-hand side, and two on the right-hand side. The function call
+  on the left-hand side is a signature. Function calls such as $f(4, n)$,
+  $f(m, 0)$, and $f(8, 1)$ are all considered base cases of $f(m, n)$ (only some
+  of which are useful).
+\end{example}
 
 \section{Technical Contributions}\label{sec:main}
 
