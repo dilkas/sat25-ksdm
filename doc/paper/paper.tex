@@ -108,6 +108,7 @@
 \creflabelformat{formula}{#2\textup{(#1)}#3}
 
 % TODO (for the entire paper):
+% * sentence vs formula: be consistent and not confusing
 % * 15 pages excluding references
 
 \begin{document}
@@ -232,9 +233,7 @@ In \cref{sec:preliminaries}, we cover some preliminaries, and in
 future work.
 
 \section{Preliminaries}\label{sec:preliminaries}
-
 % TODO: focus more on current work
-
 % TODO: Section 2 until 2.3 (Algebra) could be drastically shortened
 
 In \cref{sec:logic}, we summarise the basic principles of first-order logic.
@@ -253,22 +252,15 @@ $i = 1, \dots, n$.
 
 \subsection{First-Order Logic}\label{sec:logic}
 
-% TODO: Skolemization is a procedure that transforms a formula with existential
-% quantifiers into an ’equivalent’ formula without existential quantifiers with
-% the same WFOMC.
 In this section, we will review the basic concepts of first-order logic as they
-are used in FOKC algorithms. There are two key differences between the logic
-used by these algorithms and the logic supported as input. First,
-Skolemization~\cite{DBLP:conf/kr/BroeckMD14} eliminates existential quantifiers
-by introducing additional predicates. Please note that Skolemization here
-differs from the standard Skolemization procedure that introduces function
-symbols~\cite{DBLP:books/daglib/0030198}. Second, the input formula is rewritten
-as a conjunction of clauses, each in \emph{prenex normal
-  form}~\cite{hinman2018fundamentals}.
+are used in FOKC algorithms. We begin by introducing the format used internally
+by \textsc{ForcLift} and its descendants. Afterwards, we provide a high-level
+description of how an arbitrary sentence in first-order logic is transformed
+into this internal format.
 
 A \emph{term} can be either a variable or a constant. An \emph{atom} can be
-either $P(t_{1}, \dots, t_{m})$ (or $P(\mathbf{t})$) for some predicate $P$ and
-terms $t_{1}, \dots, t_{m}$ or $x=y$ for some terms $x$ and $y$. The
+either $P(t_{1}, \dots, t_{m})$ (i.e., $P(\mathbf{t})$) for some predicate $P$
+and terms $t_{1}, \dots, t_{m}$ or $x=y$ for some terms $x$ and $y$. The
 \emph{arity} of a predicate is the number of arguments it takes, i.e., $m$ in
 the case of the predicate $P$ mentioned above. We write $P/m$ to denote a
 predicate along with its arity. A \emph{literal} can be either an atom (i.e., a
@@ -284,8 +276,42 @@ conjunction of clauses. Throughout the paper, we will use set-theoretic
 notation, interpreting a formula as a set of clauses and a clause as a set of
 literals.
 
-% TODO: Page 2, Section 2.1, paragraph 2, line 10 - ”A clause is of the form ...” - are the quantifiers really part of the clause? Shouldn’t it be possible to quantify a conjunction of several clauses?
-% Conforming with previous work, the definition of a clause includes universal quantifiers for all variables within. While it is possible to rewrite the entire formula in prenex normal form, the format we describe has proven itself convenient to work with.
+\begin{remark*}
+  Conforming with previous work~\cite{DBLP:conf/ijcai/BroeckTMDR11}, the
+  definition of a clause includes universal quantifiers for all variables
+  within. While it is possible to rewrite the entire formula with all
+  quantifiers at the front~\cite{hinman2018fundamentals}, the format we describe
+  has proven itself convenient to work with.
+\end{remark*}
+
+There are two crucial preprocessing steps that transform an arbitrary sentence
+in first-order logic into the form used internally: Skolemization and rewriting
+the sentence as a conjunction of clauses. We describe the former in more detail.
+\emph{Skolemization}~\cite{DBLP:conf/kr/BroeckMD14} is a procedure that
+transforms a formula with existential quantifiers into a formula without
+existential quantifiers \emph{with the same WFOMC}. (Note that it is different
+from the standard Skolemization that introduces function
+symbols~\cite{DBLP:books/daglib/0030198}.)
+
+\begin{example}
+  Skolemization transforms
+  \begin{equation}\label[formula]{eq:skolemizationinitial}
+    \forall x \in \Gamma\text{. }\exists y \in \Delta\text{. } P(x, y)
+  \end{equation}
+  into
+  \begin{equation}\label[formula]{eq:skolemization}
+    \begin{aligned}
+      (\forall x \in \Gamma\text{. } &Z(x))\land{}\\
+      (\forall x \in \Gamma\text{. } \forall y \in \Delta\text{. } &Z(x) \lor \neg P(x, y))\land{}\\
+      (\forall x \in \Gamma\text{. } &S(x) \lor Z(x))\land{}\\
+      (\forall x \in \Gamma\text{. } \forall y \in \Delta\text{. } &S(x) \lor \neg P(x, y)).
+    \end{aligned}
+  \end{equation}
+  We will see how, with suitable weights on the new predicates $S/1$ and $Z/1$,
+  the WFOMC of \cref{eq:skolemization} is equal to the FOMC of
+  \cref{eq:skolemizationinitial}.
+\end{example}
+% TODO: make sure to revisit this in the future
 
 \subsection{FOMC Algorithms and Their Logics}\label{sec:threelogics}
 
@@ -347,14 +373,14 @@ formulas with more than two variables, and the equality predicate. While we do
 not explicitly refer to sorts in subsequent sections of this paper, the
 many-sorted nature of \FO{} is paramount to the algorithms presented therein.
 
-\begin{remark}
+\begin{remark*}
   In the case of \textsc{ForcLift} and its extensions, support for a formula as
   valid input does not imply that the algorithm can compile the formula into a
   circuit or graph suitable for lifted model counting. However, it is known that
   \textsc{ForcLift} compilation is guaranteed to succeed on any \FO{} formula
   without constants and with at most two
   variables~\cite{DBLP:conf/nips/Broeck11,DBLP:conf/kr/BroeckMD14}.
-\end{remark}
+\end{remark*}
 
 Compared to \FO{}, \Ctwo{} and \UFO{} lack support for constants, the equality
 predicate, multiple domains, and formulas with more than two variables. The
@@ -384,7 +410,7 @@ constrains all models to have \emph{precisely three positive literals with the
 
 % (In practice, we typically only specify the size of each domain.)
 
-\begin{remark}
+\begin{remark*}
   The distinctness of domains is important in two ways. First, in terms of
   expressiveness, a clause such as $\forall x \in \Delta\text{. }P(x, x)$ is
   valid if predicate $P$ is defined over two copies of the same domain and
@@ -392,7 +418,7 @@ constrains all models to have \emph{precisely three positive literals with the
   decomposable for the FOKC algorithm. With distinct domains, the algorithm can
   make assumptions or deductions about, e.g., the first domain of predicate $P$
   without worrying how (or if) they apply to the second domain.
-\end{remark}
+\end{remark*}
 
 While this work focuses on FOMC, we still define the weighted variant of the
 problem as Skolemization relies on weights even for unweighted FOMC.
@@ -576,12 +602,12 @@ $\psi$ by assuming that domain $\mathcal{D}(f, i)$ has size $x_{i}$. Finally, on
 formulas and adds the resulting base case equations to $\mathcal{E}$.
 \Cref{example:overall} below provides more detail.
 
-\begin{remark}
+\begin{remark*}
   Although \CompileWithBaseCases starts with a call to \textsc{Crane}, the
   proposed algorithm is not just a post-processing step for FOKC because
   \cref{alg:compilewithbasecases} is recursive and can issue more calls to
   \textsc{Crane} on various derived formulas.
-\end{remark}
+\end{remark*}
 
 % TODO: move this example right after the definition of WFOMC (or near the
 % definition of a model)
