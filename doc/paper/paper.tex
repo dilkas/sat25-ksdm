@@ -112,7 +112,6 @@
 % TODO (for the entire paper):
 % * 15 pages excluding references
 % * draw a clear line between prior work and new developments
-% * minimize use of enumerate
 
 \begin{document}
 
@@ -219,18 +218,14 @@ foundation.
 
 The \textsc{Crane} algorithm marked a significant step forward, expanding the
 range of formulas handled by FOMC algorithms. However, it had notable
-limitations:
-\begin{enumerate}
-  \item it required manual evaluation of function definitions to compute model
-  counts, and
-  \item it introduced recursive functions without proper base cases, making it
-  more complex to use.
-\end{enumerate}
-To address these shortcomings, we present \Cranetwo{}, a fully automated FOMC
-algorithm that overcomes the constraints of its predecessor. \Cranetwo{} can
-handle domain sizes over \num{500000} times larger than previous algorithms and
-simplifies the user experience by automatically handling base cases and
-compiling function definitions into efficient C++ programs.
+limitations: it required manual evaluation of function definitions to compute
+model counts and introduced recursive functions without proper base cases,
+making it more complex to use. To address these shortcomings, we present
+\Cranetwo{}, a fully automated FOMC algorithm that overcomes the constraints of
+its predecessor. \Cranetwo{} can handle domain sizes over \num{500000} times
+larger than previous algorithms and simplifies the user experience by
+automatically handling base cases and compiling function definitions into
+efficient C++ programs.
 
 In \cref{sec:preliminaries}, we cover some preliminaries, and in
 \cref{sec:main}, we detail all our technical contributions. Finally, in
@@ -275,14 +270,10 @@ as a conjunction of clauses, each in \emph{prenex normal
   form}~\cite{hinman2018fundamentals}.
 
 A \emph{term} can be either a variable or a constant. An \emph{atom} can be
-either
-\begin{enumerate}
-  \item $P(t_{1}, \dots, t_{m})$ for some predicate $P$ and terms
-  $t_{1}, \dots, t_{m}$ (written as $P(\mathbf{t})$ for short) or
-  \item $x=y$ for some terms $x$ and $y$.
-\end{enumerate}
-The \emph{arity} of a predicate is the number of arguments it takes, i.e., $m$
-in the case of the predicate $P$ mentioned above. We write $P/m$ to denote a
+either $P(t_{1}, \dots, t_{m})$ (or $P(\mathbf{t})$) for some predicate $P$ and
+terms $t_{1}, \dots, t_{m}$ or $x=y$ for some terms $x$ and $y$. The
+\emph{arity} of a predicate is the number of arguments it takes, i.e., $m$ in
+the case of the predicate $P$ mentioned above. We write $P/m$ to denote a
 predicate along with its arity. A \emph{literal} can be either an atom (i.e., a
 \emph{positive} literal) or its negation (i.e., a \emph{negative} literal). An
 atom is \emph{ground} if it contains no variables, i.e., only constants. A
@@ -290,14 +281,11 @@ atom is \emph{ground} if it contains no variables, i.e., only constants. A
 }\forall x_{2} \in \Delta_{2}\dots\text{ }\forall x_{n} \in \Delta_{n}\text{.
 }\phi(x_{1}, x_{2}, \dots, x_{n})$, where $\phi$ is a disjunction of literals
 that only contain variables $x_{1}, \dots, x_{n}$ (and any constants). We say
-that a clause is a \emph{(positive) unit clause} if
-\begin{enumerate}
-  \item there is only one literal with a predicate, and
-  \item it is a positive literal.
-\end{enumerate}
-Finally, a \emph{formula} is a conjunction of clauses. Throughout the paper, we
-will use set-theoretic notation, interpreting a formula as a set of clauses and
-a clause as a set of literals.
+that a clause is a \emph{(positive) unit clause} if there is only one literal
+with a predicate, and it is a positive literal. Finally, a \emph{formula} is a
+conjunction of clauses. Throughout the paper, we will use set-theoretic
+notation, interpreting a formula as a set of clauses and a clause as a set of
+literals.
 
 % TODO: Page 2, Section 2.1, paragraph 2, line 10 - ”A clause is of the form ...” - are the quantifiers really part of the clause? Shouldn’t it be possible to quantify a conjunction of several clauses?
 % Conforming with previous work, the definition of a clause includes universal quantifiers for all variables within. While it is possible to rewrite the entire formula in prenex normal form, the format we describe has proven itself convenient to work with.
@@ -317,46 +305,35 @@ a clause as a set of literals.
     \UFO & one & \xmark & two & $\forall$ & $|P| = m$\\
     \bottomrule
   \end{tabular}
-  \caption[]{A comparison of the three logics used in FOMC based on the following aspects:
-    \begin{enumerate}
-      \item the number of sorts,
-      \item support for constants,
-      \item the maximum number of variables,
-      \item supported quantifiers, and
-      \item supported atoms in addition to those of the form $P(\mathbf{t})$ for a predicate $P/n$ and an $n$-tuple of terms $\mathbf{t}$.
-    \end{enumerate}
-    Here:
-    \begin{enumerate}
-      \item $k$ and $m$ are non-negative integers, with the latter depending on the domain size,
-      \item $P$ represents a predicate, and
-      \item $x$ and $y$ are terms.
-    \end{enumerate}
-  }\label{tbl:logics}
+  \caption{A comparison of the three logics used in FOMC\@. The
+    2\textsuperscript{nd}--5\textsuperscript{th} columns refer to: the number of
+    sorts, support for constants, the maximum number of variables, and supported
+    quantifiers, respectively. The last column lists supported atoms in addition
+    to those of the form $P(\mathbf{t})$ for a predicate $P/n$ and an $n$-tuple
+    of terms $\mathbf{t}$. Here: $k$ and $m$ are non-negative integers, with the
+    latter depending on the domain size, $P$ represents a predicate, and $x$ and
+    $y$ are terms. }\label{tbl:logics}
 \end{table*}
 
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}
 
 In \cref{tbl:logics}, we outline the differences among three first-order logics
-commonly used in FOMC:
-\begin{enumerate}
-  \item \FO{} is the input format for
-  \textsc{ForcLift}\footnote{\url{https://github.com/UCLA-StarAI/Forclift}} and
-  its extensions
-  \textsc{Crane}\footnote{\url{https://doi.org/10.5281/zenodo.8004077}} and
-  \Cranetwo{};
-  \item \Ctwo{} is often used in the literature on \textsc{FastWFOMC} and
-  related
-  methods~\cite{DBLP:journals/jair/Kuzelka21,DBLP:conf/aaai/MalhotraS22};
-  \item \UFO{} is the input format supported by the most recent implementation
-  of
-  \textsc{FastWFOMC}\footnote{\url{https://github.com/jan-toth/FastWFOMC.jl}}.
-\end{enumerate}
-The notation we use to refer to each logic is standard in the case of \Ctwo{}
-and \UFO{}~\cite{tóth2024complexityweightedfirstordermodel} and redefined to be
-more specific in the case of \FO{}. All three logics are function-free, and
-domains are always assumed to be finite. As usual, we presuppose the
-\emph{unique name assumption}, which states that two constants are equal if and
-only if they are the same constant~\cite{DBLP:books/aw/RN2020}.
+commonly used in FOMC: \FO{}, \Ctwo{}, and \UFO{}. First, \FO{} is the input
+format for
+\textsc{ForcLift}\footnote{\url{https://github.com/UCLA-StarAI/Forclift}} and
+its extensions
+\textsc{Crane}\footnote{\url{https://doi.org/10.5281/zenodo.8004077}} and
+\Cranetwo{}. Second, \Ctwo{} is often used in the literature on
+\textsc{FastWFOMC} and related
+methods~\cite{DBLP:journals/jair/Kuzelka21,DBLP:conf/aaai/MalhotraS22}. Finally,
+\UFO{} is the input format supported by the most recent implementation of
+\textsc{FastWFOMC}\footnote{\url{https://github.com/jan-toth/FastWFOMC.jl}}. The
+notation we use to refer to each logic is standard in the case of \Ctwo{} and
+\UFO{}~\cite{tóth2024complexityweightedfirstordermodel} and redefined to be more
+specific in the case of \FO{}. All three logics are function-free, and domains
+are always assumed to be finite. As usual, we presuppose the \emph{unique name
+  assumption}, which states that two constants are equal if and only if they are
+the same constant~\cite{DBLP:books/aw/RN2020}.
 
 \renewcommand*{\thefootnote}{\arabic{footnote}}
 
@@ -382,14 +359,9 @@ many-sorted nature of \FO{} is paramount to the algorithms presented therein.
   variables~\cite{DBLP:conf/nips/Broeck11,DBLP:conf/kr/BroeckMD14}.
 \end{remark}
 
-Compared to \FO{}, \Ctwo{} and \UFO{} lack support for
-\begin{enumerate}
-  \item constants,
-  \item the equality predicate,
-  \item multiple domains, and
-  \item formulas with more than two variables.
-\end{enumerate}
-The advantage that \Ctwo{} brings over \FO{} is the inclusion of \emph{counting
+Compared to \FO{}, \Ctwo{} and \UFO{} lack support for constants, the equality
+predicate, multiple domains, and formulas with more than two variables. The
+advantage that \Ctwo{} brings over \FO{} is the inclusion of \emph{counting
   quantifiers}. That is, alongside $\forall$ and $\exists$, \Ctwo{} supports
 $\exists^{=k}$, $\exists^{\le k}$, and $\exists^{\ge k}$ for any positive
 integer $k$. For example, $\exists^{=1} x\text{. }\phi(x)$ means that there
@@ -403,15 +375,11 @@ constrains all models to have \emph{precisely three positive literals with the
 \begin{definition}[Model]\label{def:model}
   Let $\phi$ be a formula in \FO{}. For each predicate $P/n$ in $\phi$, let
   ${(\Delta_{i}^{P})}_{i=1}^{n}$ be a list of the corresponding domains. Let
-  $\sigma$ be a map from the domains of $\phi$ to their interpretations as sets,
-  satisfying the following conditions:
-  \begin{enumerate}
-    \item the sets are pairwise disjoint, and
-    \item the constants in $\phi$ are included in the corresponding domains.
-  \end{enumerate}
-  A \emph{structure} of $\phi$ is a set $M$ of ground literals defined by adding
-  to $M$ either $P(\mathbf{t})$ or $\neg P(\mathbf{t})$ for every predicate
-  $P/n$ in $\phi$ and $n$-tuple
+  $\sigma$ be a map from the domains of $\phi$ to their interpretations as sets
+  such that the sets are pairwise disjoint, and the constants in $\phi$ are
+  included in the corresponding domains. A \emph{structure} of $\phi$ is a set
+  $M$ of ground literals defined by adding to $M$ either $P(\mathbf{t})$ or
+  $\neg P(\mathbf{t})$ for every predicate $P/n$ in $\phi$ and $n$-tuple
   $\mathbf{t} \in \prod_{i=1}^{n} \sigma(\Delta_{i}^{P})$. A structure is a
   \emph{model} if it satisfies $\phi$.
 \end{definition}
@@ -438,14 +406,10 @@ problem as Skolemization relies on weights even for unweighted FOMC.
 % count.
 
 \begin{definition}[WFOMC instance]\label{def:instance}
-  A \emph{WFOMC instance} comprises:
-  \begin{enumerate}
-    \item a formula $\phi$ in \FO{},
-    \item two (rational) \emph{weights} $w^{+}(P)$ and $w^{-}(P)$ assigned to
-    each predicate $P$ in $\phi$, and
-    \item $\sigma$ as described in \cref{def:model}.
-  \end{enumerate}
-  Unless specified otherwise, we assume all weights to be equal to 1.
+  A \emph{WFOMC instance} comprises: a formula $\phi$ in \FO{}, two (rational)
+  \emph{weights} $w^{+}(P)$ and $w^{-}(P)$ assigned to each predicate $P$ in
+  $\phi$, and $\sigma$ as described in \cref{def:model}. Unless specified
+  otherwise, we assume all weights to be equal to 1.
 \end{definition}
 
 \begin{definition}[WFOMC~\cite{DBLP:conf/ijcai/BroeckTMDR11}]
@@ -554,14 +518,14 @@ $f(\mathbf{x}) = \expr{}$, with $f(\mathbf{x})$ representing a signature.
     \draw[-Latex,dashed] (compilewithbasecases) -- node[midway,left] {uses} (propagate);
     \draw[-Latex,dashed] (compilewithbasecases) -- node[midway,right] {uses} (simplify);
   \end{tikzpicture}
-  \caption[]{The outline of using \Cranetwo{} to compute the model count of a formula $\phi$. First, the formula is compiled into a set of equations, which are then used to create a C++ program. This program can be executed with different command line arguments to calculate the model count of $\phi$ for different domain sizes. To accomplish this, the \CompileWithBaseCases function employs several components:
-    \begin{enumerate}
-      \item the FOKC algorithm of \textsc{Crane},
-      \item a procedure called \FindBaseCases, which identifies a sufficient set of base cases,
-      \item a procedure called \Propagate, which constructs a formula corresponding to a given base case, and
-      \item algebraic simplification techniques (denoted as \Simplify).
-    \end{enumerate}
-  }\label{fig:overview}
+  \caption[]{The outline of using \Cranetwo{} to compute the model count of a
+    formula $\phi$. First, the formula is compiled into a set of equations,
+    which are then used to create a C++ program. This program can be executed
+    with different command line arguments to calculate the model count of $\phi$
+    for different domain sizes. To accomplish this, the \CompileWithBaseCases
+    function makes use of the FOKC algorithm of \textsc{Crane}, algebraic
+    simplification techniques (denoted as \Simplify), and two other auxiliary
+    procedures. }\label{fig:overview}
 \end{figure*}
 
 \Cref{fig:overview} provides an overview of \Cranetwo{}'s workflow.
@@ -579,17 +543,13 @@ approaches~\cite{DBLP:conf/kr/KazemiP16}.
 
 Before describing the main contribution of this work, let us review the
 essential aspects of FOKC as realised by \textsc{Crane}. The input formula is
-compiled into:
-\begin{enumerate}
-  \item set $\mathcal{E}$ of equations,
-  \item map $\mathcal{F}$ from function names to formulas, and
-  \item map $\mathcal{D}$ from function names and argument indices to domains.
-\end{enumerate}
-$\mathcal{E}$ can contain any number of functions, one of which (denoted by $f$)
-represents the solution to the FOMC problem. To compute the FOMC for particular
-domain sizes, $f$ must be evaluated with those domain sizes as arguments.
-$\mathcal{D}$ records this correspondence between function arguments and
-domains.
+compiled into: set $\mathcal{E}$ of equations, map $\mathcal{F}$ from function
+names to formulas, and map $\mathcal{D}$ from function names and argument
+indices to domains. $\mathcal{E}$ can contain any number of functions, one of
+which (denoted by $f$) represents the solution to the FOMC problem. To compute
+the FOMC for particular domain sizes, $f$ must be evaluated with those domain
+sizes as arguments. $\mathcal{D}$ records this correspondence between function
+arguments and domains.
 
 \begin{algorithm}[t]
   \caption{\protect\CompileWithBaseCases{$\phi$}}\label{alg:compilewithbasecases}
@@ -667,17 +627,12 @@ of \Propagate{$\phi$, $\Delta$, $n$} assuming $|\Gamma| = m$ is the same as the
 FOMC of \Propagate{$\phi$, $\Gamma$, $m$} assuming $|\Delta| = n$.
 
 Finally, the main responsibility of the \Simplify procedure is to handle the
-algebraic pattern $\sum_{m=0}^{n}[a \le m \le b] f(m)$. Here:
-\begin{enumerate}
-  \item $n$ is a variable,
-  \item $a, b \in \mathbb{N}_{0}$ are constants,
-  \item $f$ is an expression that may depend on $m$, and
-  \item $[a \le m \le b] =
-  \begin{cases}
-    1 & \text{if $a \le m \le b$} \\
-    0 & \text{otherwise}
-  \end{cases}$.
-\end{enumerate}
+algebraic pattern $\sum_{m=0}^{n}[a \le m \le b] f(m)$. Here: $n$ is a variable,
+$a, b \in \mathbb{N}_{0}$ are constants, and $f$ is an expression that may
+depend on $m$. Additionally, $[a \le m \le b] = \begin{cases}
+  1 & \text{if $a \le m \le b$} \\
+  0 & \text{otherwise}
+\end{cases}$.
 \Simplify transforms this pattern into
 $f(a) + f(a+1) + \cdots + f(\min\{\, n, b \,\})$. For instance, in the case of
 \cref{example:overall}, \Simplify transforms
@@ -708,17 +663,13 @@ $g(l, m) = g(l-1, m) + mg(l-1, m-1)$.
 % sizes (propagating this change to the rest of the paper, particularly
 % Assumption 1, the proof of Lemma 1)
 
-\Cref{alg:findbasecases} summarises the implementation of \FindBaseCases.
-\FindBaseCases considers two types of arguments when a function $f$ calls itself
-recursively:
-\begin{enumerate}
-  \item constants and
-  \item arguments of the form $x_{i} - c_{i}$, where $c_{i}$ is a constant and
-  $x_{i}$ is the $i$-th argument of the signature of $f$.
-\end{enumerate}
-When the argument is a constant $c_{i}$, a base case with $c_{i}$ is added. In
-the second case, a base case is added for each constant from $0$ up to (but not
-including) $c_{i}$.
+\Cref{alg:findbasecases} summarises the implementation of \FindBaseCases. It
+considers two types of arguments when a function $f$ calls itself recursively:
+constants and arguments of the form $x_{i} - c_{i}$. Here, $c_{i}$ is a
+constant, and $x_{i}$ is the $i$-th argument of the signature of $f$. When the
+argument is a constant $c_{i}$, a base case with $c_{i}$ is added. In the second
+case, a base case is added for each constant from $0$ up to (but not including)
+$c_{i}$.
 
 \begin{example}
   Consider the recursive function $g$ from \cref{example:overall}.
@@ -784,6 +735,7 @@ formulas examined in this work had $n > 1$.) \Cref{alg:propagate} handles these
 two cases separately. For a literal or a clause $C$, the set of corresponding
 domains is denoted as $\Doms(C)$.
 
+% NOTE: keep this enumerate
 In the case of $n = 0$, there are three types of clauses to consider:
 \begin{enumerate}
   \item those that do not mention $\Delta$,\label[type]{type1}
