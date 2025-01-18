@@ -204,32 +204,22 @@ liftability.
 % 4. Why hasn't it been solved before? (Or, what's wrong with previous proposed
 % solutions? How does mine differ?)
 
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item Don't assume that the reader knows FOMC and FOMC algorithms
-    \item It would be nice to give the necessary introduction to FOKC, or
-          \textsc{Crane} (an intuitive explanation early in the paper)
-    \item The principal motivation of a knowledge compilation-based approach to
-          FOMC comes from its ability to find polynomial-time solutions, where
-          the polynomial has a lower degree compared to, e.g.,
-          \textsc{FastWFOMC}~\cite{DBLP:conf/kr/DilkasB23}. The ability of the
-          algorithm to mathematically describe recursive solutions is also
-          noteworthy as the only other available alternative is to guess
-          them~\cite{DBLP:conf/ilp/BarvinekB0ZK21}.
-  \end{itemize}
-}
-
 FOMC algorithms are diverse, with approaches ranging from \emph{first-order
-  knowledge compilation} (FOKC) to local
-search~\cite{DBLP:journals/pvldb/NiuRDS11}, Monte Carlo
-sampling~\cite{DBLP:journals/cacm/GogateD16}, and anytime
-approximation~\cite{DBLP:conf/ijcai/BremenK20}. Among these, FOKC-based
-algorithms are particularly prominent, transforming formulas into structured
-representations such as circuits or graphs. Notable examples include
-\textsc{ForcLift}~\cite{DBLP:conf/ijcai/BroeckTMDR11} and its successor
-\textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23}. Another important algorithm,
-\textsc{FastWFOMC}~\cite{DBLP:conf/uai/BremenK21}, uses cell enumeration as its
-foundation.
+  knowledge compilation} (FOKC) to cell
+enumeration~\cite{DBLP:conf/uai/BremenK21}, local
+search~\cite{DBLP:journals/pvldb/NiuRDS11}, and Monte Carlo
+sampling~\cite{DBLP:journals/cacm/GogateD16}. Among these, FOKC-based algorithms
+are particularly prominent, transforming formulas into structured
+representations such as circuits or graphs. Even when multiple algorithms are
+able to solve the same instance, FOKC algorithms are known to find
+polynomial-time solutions, where the polynomial has a lower degree compared to
+other approaches~\cite{DBLP:conf/kr/DilkasB23}. The recently developed ability
+of a FOKC algorithm to formulate solutions in terms of recursive
+functions~\cite{DBLP:conf/kr/DilkasB23} is also noteworthy as the only other
+proposed alternative is to guess recursive
+relations~\cite{DBLP:conf/ilp/BarvinekB0ZK21}. Notable examples of FOKC
+algorithms include \textsc{ForcLift}~\cite{DBLP:conf/ijcai/BroeckTMDR11} and its
+successor \textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23}.
 
 % 5. What are the key components of my approach and results? Also include any
 % specific limitations.
@@ -253,6 +243,9 @@ In \cref{sec:preliminaries}, we cover some preliminaries, and in
 future work.
 
 \section{Preliminaries}\label{sec:preliminaries}
+
+\todo[inline]{Adjust the introduction to the new structure (with more
+  subsections)}
 
 In \cref{sec:logic}, we summarise the basic principles of first-order logic.
 Then, in \cref{sec:threelogics}, we formally define (W)FOMC and discuss the
@@ -302,80 +295,45 @@ literals.
   has proven itself convenient to work with.
 \end{remark*}
 
-There are two crucial preprocessing steps that transform an arbitrary sentence
-in first-order logic into the form used internally: Skolemization and rewriting
-the sentence as a conjunction of clauses. We describe the former in more detail.
-\emph{Skolemization}~\cite{DBLP:conf/kr/BroeckMD14} is a procedure that
-transforms a formula with existential quantifiers into a formula without
-existential quantifiers \emph{with the same WFOMC}. (Note that it is different
-from the standard Skolemization that introduces function
-symbols~\cite{DBLP:books/daglib/0030198}.)
+\subsection{The Three Logics of FOMC}\label{sec:threelogics}
 
-\begin{example}
-  Skolemization transforms
-  \begin{equation}\label[formula]{eq:skolemizationinitial}
-    \forall x \in \Gamma\text{. }\exists y \in \Delta\text{. } P(x, y)
-  \end{equation}
-  into
-  \begin{equation}\label[formula]{eq:skolemization}
-    \begin{aligned}
-      (\forall x \in \Gamma\text{. } &Z(x))\land{}\\
-      (\forall x \in \Gamma\text{. } \forall y \in \Delta\text{. } &Z(x) \lor \neg P(x, y))\land{}\\
-      (\forall x \in \Gamma\text{. } &S(x) \lor Z(x))\land{}\\
-      (\forall x \in \Gamma\text{. } \forall y \in \Delta\text{. } &S(x) \lor \neg P(x, y)).
-    \end{aligned}
-  \end{equation}
-  We will see how, with suitable weights on the new predicates $S/1$ and $Z/1$,
-  the WFOMC of \cref{eq:skolemization} is equal to the FOMC of
-  \cref{eq:skolemizationinitial}.
-\end{example}
-
-\todo[inline]{Make sure to revisit this in the future}
-
-\subsection{FOMC Algorithms and Their Logics}\label{sec:threelogics}
-
-\todo[inline]{Shorten the part about the three logics}
-
-\begin{table*}[t]
-  \centering
-  \begin{tabular}{llclll}
-    \toprule
-    Logic & Sorts & Constants & Variables & Quantifiers & Additional atoms\\
-    \midrule
-    \FO & one or more & \cmark & unlimited & $\forall$, $\exists$ & $x = y$\\
-    \Ctwo & one & \xmark & two & $\forall$, $\exists$, $\exists^{= k}$, $\exists^{\le k}$, $\exists^{\ge k}$ & ---\\
-    \UFO & one & \xmark & two & $\forall$ & $|P| = m$\\
-    \bottomrule
-  \end{tabular}
-  \caption{A comparison of the three logics used in FOMC\@. The
-    2\textsuperscript{nd}--5\textsuperscript{th} columns refer to: the number of
-    sorts, support for constants, the maximum number of variables, and supported
-    quantifiers, respectively. The last column lists supported atoms in addition
-    to those of the form $P(\mathbf{t})$ for a predicate $P/n$ and an $n$-tuple
-    of terms $\mathbf{t}$. Here: $k$ and $m$ are non-negative integers, with the
-    latter depending on the domain size, $P$ represents a predicate, and $x$ and
-    $y$ are terms. }\label{tbl:logics}
-\end{table*}
+% \begin{table*}[t]
+%   \centering
+%   \begin{tabular}{llclll}
+%     \toprule
+%     Logic & Sorts & Constants & Variables & Quantifiers & Additional atoms\\
+%     \midrule
+%     \FO & one or more & \cmark & unlimited & $\forall$, $\exists$ & $x = y$\\
+%     \Ctwo & one & \xmark & two & $\forall$, $\exists$, $\exists^{= k}$, $\exists^{\le k}$, $\exists^{\ge k}$ & ---\\
+%     \UFO & one & \xmark & two & $\forall$ & $|P| = m$\\
+%     \bottomrule
+%   \end{tabular}
+%   \caption{A comparison of the three logics used in FOMC\@. The
+%     2\textsuperscript{nd}--5\textsuperscript{th} columns refer to: the number of
+%     sorts, support for constants, the maximum number of variables, and supported
+%     quantifiers, respectively. The last column lists supported atoms in addition
+%     to those of the form $P(\mathbf{t})$ for a predicate $P/n$ and an $n$-tuple
+%     of terms $\mathbf{t}$. Here: $k$ and $m$ are non-negative integers, with the
+%     latter depending on the domain size, $P$ represents a predicate, and $x$ and
+%     $y$ are terms. }\label{tbl:logics}
+% \end{table*}
 
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}
 
-In \cref{tbl:logics}, we outline the differences among three first-order logics
-commonly used in FOMC: \FO{}, \Ctwo{}, and \UFO{}. First, \FO{} is the input
-format for
+There are three first-order logics commonly used in FOMC: \FO{}, \Ctwo{}, and
+\UFO{}. First, \FO{} is the input format for
 \textsc{ForcLift}\footnote{\url{https://github.com/UCLA-StarAI/Forclift}} and
 its extensions
 \textsc{Crane}\footnote{\url{https://doi.org/10.5281/zenodo.8004077}} and
 \Cranetwo{}. Second, \Ctwo{} is often used in the literature on
-\textsc{FastWFOMC} and related
-methods~\cite{DBLP:journals/jair/Kuzelka21,DBLP:conf/aaai/MalhotraS22}. Finally,
-\UFO{} is the input format supported by the most recent implementation of
-\textsc{FastWFOMC}\footnote{\url{https://github.com/jan-toth/FastWFOMC.jl}}. The
-notation we use to refer to each logic is standard in the case of \Ctwo{} and
-\UFO{}~\cite{tóth2024complexityweightedfirstordermodel} and redefined to be more
-specific in the case of \FO{}. All three logics are function-free, and domains
-are always assumed to be finite. As usual, we presuppose the \emph{unique name
-  assumption}, which states that two constants are equal if and only if they are
-the same constant~\cite{DBLP:books/aw/RN2020}.
+\textsc{FastWFOMC}\footnote{\url{https://github.com/jan-toth/FastWFOMC.jl}} and
+related methods~\cite{DBLP:journals/jair/Kuzelka21,DBLP:conf/aaai/MalhotraS22}.
+Finally, \UFO{} is the input format supported by the most recent implementation
+of \textsc{FastWFOMC}~\cite{tóth2024complexityweightedfirstordermodel}. All
+three logics are function-free, and domains are always assumed to be finite. As
+usual, we presuppose the \emph{unique name assumption}, which states that two
+constants are equal if and only if they are the same
+constant~\cite{DBLP:books/aw/RN2020}.
 
 \renewcommand*{\thefootnote}{\arabic{footnote}}
 
@@ -414,6 +372,15 @@ incorporates \emph{(equality) cardinality constraints}. For example, $|P| = 3$
 constrains all models to have \emph{precisely three positive literals with the
   predicate $P$}.
 
+\subsection{First-Order Model Counting}
+
+\todo[inline,caption={}]{
+  \begin{itemize}
+    \item Write a proper introductory paragraph
+    \item Maybe a bit more (easy-to-understand) detail about FOMC?
+  \end{itemize}
+}
+
 \begin{definition}[Model]\label{def:model}
   Let $\phi$ be a formula in \FO{}. For each predicate $P/n$ in $\phi$, let
   ${(\Delta_{i}^{P})}_{i=1}^{n}$ be a list of the corresponding domains. Let
@@ -426,8 +393,6 @@ constrains all models to have \emph{precisely three positive literals with the
   \emph{model} if it makes $\phi$ valid.
 \end{definition}
 
-% (In practice, we typically only specify the size of each domain.)
-
 \begin{remark*}
   The distinctness of domains is important in two ways. First, in terms of
   expressiveness, a clause such as $\forall x \in \Delta\text{. }P(x, x)$ is
@@ -438,14 +403,13 @@ constrains all models to have \emph{precisely three positive literals with the
   without worrying how (or if) they apply to the second domain.
 \end{remark*}
 
-While this work focuses on FOMC, we still define the weighted variant of the
-problem as Skolemization relies on weights even for unweighted FOMC.
-
-\todo[inline]{Even though we are evaluating the algorithms on FOMC benchmarks,
-  for sentences with existential quantifiers, computing FOMC using \Cranetwo{}
-  requires the use of WFOMC. For such sentences, Skolemization introduces
+\begin{remark*}
+  Even though this work focuses on FOMC, for sentences with existential
+  quantifiers, computing FOMC using \Cranetwo{} requires the use of WFOMC. For
+  such sentences, Skolemization (described in \cref{sec:crane}) introduces
   predicates with non-unary weights that must be accounted for to compute the
-  correct model count.}
+  correct model count.
+\end{remark*}
 
 \begin{definition}[WFOMC instance]\label{def:instance}
   A \emph{WFOMC instance} comprises: a formula $\phi$ in \FO{}, two (rational)
@@ -492,10 +456,45 @@ problem as Skolemization relies on weights even for unweighted FOMC.
   algorithms to find efficient solutions.
 \end{example}
 
+\subsection{First-Order Knowledge Compilation}\label{sec:crane}
+
+\todo[inline]{It would be nice to give the necessary introduction to FOKC, or
+  \textsc{Crane} (an intuitive explanation early in the paper)}
+
+There are two crucial preprocessing steps that transform an arbitrary sentence
+in first-order logic into the form used internally: Skolemization and rewriting
+the sentence as a conjunction of clauses. We describe the former in more detail.
+\emph{Skolemization}~\cite{DBLP:conf/kr/BroeckMD14} is a procedure that
+transforms a formula with existential quantifiers into a formula without
+existential quantifiers \emph{with the same WFOMC}. (Note that it is different
+from the standard Skolemization that introduces function
+symbols~\cite{DBLP:books/daglib/0030198}.)
+
+\begin{example}
+  Skolemization transforms
+  \begin{equation}\label[formula]{eq:skolemizationinitial}
+    \forall x \in \Gamma\text{. }\exists y \in \Delta\text{. } P(x, y)
+  \end{equation}
+  into
+  \begin{equation}\label[formula]{eq:skolemization}
+    \begin{aligned}
+      (\forall x \in \Gamma\text{. } &Z(x))\land{}\\
+      (\forall x \in \Gamma\text{. } \forall y \in \Delta\text{. } &Z(x) \lor \neg P(x, y))\land{}\\
+      (\forall x \in \Gamma\text{. } &S(x) \lor Z(x))\land{}\\
+      (\forall x \in \Gamma\text{. } \forall y \in \Delta\text{. } &S(x) \lor \neg P(x, y)).
+    \end{aligned}
+  \end{equation}
+  With suitable weights on the new predicates $S/1$ and $Z/1$, the WFOMC of
+  \cref{eq:skolemization} is equal to the FOMC of
+  \cref{eq:skolemizationinitial}.
+\end{example}
+
 \subsection{Algebra}\label{sec:algebra}
 
-We write $\expr{}$ for an arbitrary algebraic expression. In the context of
-algebra, a \emph{constant} is a non-negative integer. Likewise, a
+In this paper, we use both logical and algebraic constructs. While the rest of
+\cref{sec:preliminaries} focused on the former, this section describes the
+latter. We write $\expr{}$ for an arbitrary algebraic expression. In the context
+of algebra, a \emph{constant} is a non-negative integer. Likewise, a
 \emph{variable} can either be a parameter of a function or a variable introduced
 through summation, such as $i$ in the expression $\sum_{i=1}^{n} \expr$. A
 \emph{function call} is $f(x_{1}, \dots, x_{n})$ (or $f(\mathbf{x})$ for short),
