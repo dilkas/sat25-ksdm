@@ -113,6 +113,7 @@
 \creflabelformat{formula}{#2\textup{(#1)}#3}
 
 % TODO (for the entire paper):
+% * finish add DOIs or URLs to (non-book) references (and reformatting indentation) (and check reference formatting)
 % * sentence vs formula: be consistent and not confusing
 % * 15 pages excluding references
 
@@ -407,9 +408,8 @@ constrains all models to have \emph{precisely three positive literals with the
   $M$ of ground literals defined by adding to $M$ either $P(\mathbf{t})$ or
   $\neg P(\mathbf{t})$ for every predicate $P/n$ in $\phi$ and $n$-tuple
   $\mathbf{t} \in \prod_{i=1}^{n} \sigma(\Delta_{i}^{P})$. A structure is a
-  \emph{model} if it satisfies $\phi$.
+  \emph{model} if it makes $\phi$ valid.
 \end{definition}
-% TODO: Page 2, Definition 1 - ”A structure is a model if it satisfies ϕ” - do you mean that it makes ϕ valid?
 
 % (In practice, we typically only specify the size of each domain.)
 
@@ -485,8 +485,10 @@ through summation, such as $i$ in the expression $\sum_{i=1}^{n} \expr$. A
 \emph{function call} is $f(x_{1}, \dots, x_{n})$ (or $f(\mathbf{x})$ for short),
 where $f$ is an $n$-ary function, and each $x_{i}$ is an algebraic expression
 consisting of variables and constants. A (function) \emph{signature} is function
-call that contains only variables. An \emph{equation} is
-$f(\mathbf{x}) = \expr{}$, where $f(\mathbf{x})$ is a signature.
+call that contains only variables. Given two function calls $f(\mathbf{x})$ and
+$f(\mathbf{y})$, we say that $f(\mathbf{y})$ \emph{matches} $f(\mathbf{x})$ if
+$x_{i} = y_{i}$ whenever $x_{i}, y_{i} \in \mathbb{N}_{0}$. An \emph{equation}
+is $f(\mathbf{x}) = \expr{}$, where $f(\mathbf{x})$ is a signature.
 
 \begin{definition}[Base case]\label{def:basecase}
   Let $f(\mathbf{x})$ be a function call where each $x_{i}$ is either a constant
@@ -498,8 +500,8 @@ $f(\mathbf{x}) = \expr{}$, where $f(\mathbf{x})$ is a signature.
 \begin{example}
   In equation $f(m, n) = f(m-1, n) + nf(m-1, n-1)$, the only constant is $1$,
   and the variables are $m$ and $n$. The equation contains three function calls:
-  one on the left-hand side, and two on the right-hand side. The function call
-  on the left-hand side is a signature. Function calls such as $f(4, n)$,
+  one on the left-hand side (LHS), and two on the right-hand side (RHS). The
+  function call on the LHS is a signature. Function calls such as $f(4, n)$,
   $f(m, 0)$, and $f(8, 1)$ are all considered base cases of $f(m, n)$ (only some
   of which are useful).
 \end{example}
@@ -512,8 +514,6 @@ $f(\mathbf{x}) = \expr{}$, where $f(\mathbf{x})$ is a signature.
 % TODO: more emphasis on the motivation for each part of GANTRY (e.g., how
 % FindBaseCases addresses key issues in CRANE) would add depth to the
 % contribution.
-
-% TODO: Section 3: you seem to use "equation" and "function" interchangeably
 
 % TODO: this section should be expanded by 1 page ("a clear discussion of the
 % innovation aspect and technical parts")
@@ -553,7 +553,7 @@ $f(\mathbf{x}) = \expr{}$, where $f(\mathbf{x})$ is a signature.
     which are then used to create a C++ program. This program can be executed
     with different command line arguments to calculate the model count of $\phi$
     for different domain sizes. To accomplish this, the \CompileWithBaseCases
-    function makes use of the FOKC algorithm of \textsc{Crane}, algebraic
+    procedure makes use of the FOKC algorithm of \textsc{Crane}, algebraic
     simplification techniques (denoted as \Simplify), and two other auxiliary
     procedures. }\label{fig:overview}
 \end{figure*}
@@ -565,9 +565,14 @@ definitions of recursive functions with a sufficient set of base cases.
 constructing a set of base cases and their corresponding logical formulas.
 \Cref{sec:smoothing} explains the post-processing techniques for ensuring
 accurate model counting. Additionally, \cref{sec:cpp} explains the process of
-compiling function definitions into C++ code, greatly expanding upon the range
-of formulas that could previously be handled by similar
+compiling equations into C++ code, greatly expanding upon the range of formulas
+that could previously be handled by similar
 approaches~\cite{DBLP:conf/kr/KazemiP16}.
+
+% TODO (somewhere): Recall that each equation is either the definition (did I
+% define what a definition is?) of a function or the definition of a base case
+% of a function. (I could put this in the preliminaries as definitions and then
+% reference them below)
 
 \subsection{Completing the Definitions of Functions}\label{sec:completing}
 
@@ -678,7 +683,7 @@ $g(l, m) = g(l-1, m) + mg(l-1, m-1)$.
   \KwOut{set $\mathcal{B}$ of base cases}
 
   $\mathcal{B} \gets \emptyset$\;
-  \ForEach{function call $f(\mathbf{y})$ on the right-hand side of an equation in $\mathcal{E}$}{
+  \ForEach{function call $f(\mathbf{y})$ on the RHS of an equation in $\mathcal{E}$}{
     $\mathbf{x} \gets \text{the parameters of $f$ in its definition}$\;
     \ForEach{$y_{i} \in \mathbf{y}$} {
       \lIf{$y_{i} \in \mathbb{N}_{0}$}{$\mathcal{B} \gets \mathcal{B} \cup \{\, f(\mathbf{x})[x_{i} \mapsto y_{i}] \,\}$}
@@ -729,46 +734,44 @@ the number of functions in $\mathcal{E}$. Then, we use induction on the arity of
 the `last' function in $\mathcal{E}$ according to some topological ordering. We
 begin with a few observations that stem from
 previous~\cite{DBLP:conf/kr/DilkasB23,DBLP:conf/ijcai/BroeckTMDR11} and this
-work. Let $\mathcal{E}$ represent the equations returned by
-\CompileWithBaseCases.
+work.
 
 \begin{observation}\label{assumption1}
   For each function $f$, there is precisely one equation $e \in \mathcal{E}$
-  with $f(\mathbf{x})$ on the left-hand side where all $x_{i}$'s are variables
-  (i.e., $e$ is not a base case). We refer to $e$ as the \emph{definition} of
-  $f$.
+  with $f(\mathbf{x})$ on the LHS where all $x_{i}$'s are variables (i.e., $e$
+  is not a base case). We refer to $e$ as the \emph{definition} of $f$.
 \end{observation}
 
 \begin{observation}\label{assumption2}
   There is a \emph{topological ordering} of all functions ${(f_{i})}_{i}$ in
-  $\mathcal{E}$ such that equations in $\mathcal{E}$ with $f_{i}$ on the
-  left-hand side do not contain function calls to $f_{j}$ with $j > i$. This
-  condition prevents mutual recursion and other cyclic scenarios.
+  $\mathcal{E}$ such that equations in $\mathcal{E}$ with $f_{i}$ on the LHS do
+  not contain function calls to $f_{j}$ with $j > i$. This condition prevents
+  mutual recursion and other cyclic scenarios.
 \end{observation}
 
 \begin{observation}\label{assumption3}
-  For every equation $(f(\mathbf{x}) = \expr) \in \mathcal{E}$, the evaluation
+  For each equation $(f(\mathbf{x}) = \expr) \in \mathcal{E}$, the evaluation
   of $\expr$ terminates when provided with the values of all relevant function
   calls.
 \end{observation}
 
 \begin{corollary}\label{fact}
-  If $f$ is a non-recursive function with no function calls on the right-hand
-  side of its definition, then the evaluation of any function call
-  $f(\mathbf{x})$ terminates.
+  If $f$ is a non-recursive function with no function calls on the RHS of its
+  definition, then the evaluation of any function call $f(\mathbf{x})$
+  terminates.
 \end{corollary}
 
 \begin{observation}\label{fact2}
-  For any equation $f(\mathbf{x}) = \expr{}$, if $\mathbf{x}$ contains only
-  constants, then $\expr{}$ cannot include any function calls to $f$.
+  For each equation $(f(\mathbf{x}) = \expr{}) \in \mathcal{E}$, if $\mathbf{x}$
+  contains only constants, then $\expr{}$ cannot include any function calls to
+  $f$.
 \end{observation}
 
 Additionally, we introduce an assumption about the structure of recursion.
 
 \begin{assumption}\label{assumption4}
-  For every equation $(f(\mathbf{x}) = \expr) \in \mathcal{E}$, every recursive
-  function call $f(\mathbf{y}) \in \expr$ satisfies the
-  following:
+  For each equation $(f(\mathbf{x}) = \expr) \in \mathcal{E}$, every recursive
+  function call $f(\mathbf{y}) \in \expr$ satisfies the following:
   \begin{itemize}
     \item Each $y_{i}$ is either $x_{i} - c_{i}$ or $c_{i}$ for some constant
           $c_{i}$.
@@ -785,7 +788,7 @@ are considered is immaterial.
 \begin{assumption}
   When multiple equations in $\mathcal{E}$ match a function call
   $f(\mathbf{x})$, preference is given to an equation with the most constants on
-  its left-hand side.
+  its LHS.
 \end{assumption}
 
 With the observations and assumptions mentioned above, we are ready to prove
@@ -802,8 +805,8 @@ increasing generality.
   \cref{fact,fact2}. If $f$ is not recursive, the evaluation of
   $f(x)$ terminates by \cref{fact}.
 
-  Otherwise, let $f(y)$ be an arbitrary function call on the right-hand side of
-  the definition of $f(x)$. If $y$ is a constant, then there is a base case for
+  Otherwise, let $f(y)$ be an arbitrary function call on the RHS of the
+  definition of $f(x)$. If $y$ is a constant, then there is a base case for
   $f(y)$. Otherwise, let $y = x - c$ for some $c > 0$. Then there exists
   $k \in \mathbb{N}_{0}$ such that $0 \le x - kc \le c-1$. So, after $k$
   iterations, the sequence of function calls $f(x), f(x-c), f(x-2c),\dots$ will
@@ -958,21 +961,26 @@ It is worth mentioning that the choice of $l$ on \autoref{line:smoothing1} of
 goal: constructing a tautological clause that retains the literals in $C'$.
 
 \subsection{Generating C++ Code}\label{sec:cpp}
-% TODO (must): expand this section
-% TODO: The purpose of C++ code generation is to turn mathematical equations into executable code.
 
-% TODO: integrate into the text below
+In this section, we will describe the final step of \Cranetwo{} as outlined in
+\cref{fig:overview}, i.e., translating the set of equations $\mathcal{E}$ into
+C++ code. Recall that this step is crucial for the usability of the algorithm,
+otherwise function definitions would remain purely mathematical, with no
+convenient way to compute the model count for particular domain sizes. Once a
+C++ program is produced, it can be executed with different command-line
+arguments to compute the model count of the formula for various domain sizes.
+
 \begin{algorithm}[t]
-  \caption{TODO: A sketch of the C++ program from...}
+  \caption{A sketch of the C++ program for the bijection-counting problem in \cref{example:overall}, particularly highlighting the recursive definition of function $g$.}\label{alg:cpp}
   initialise $\Cache_{g(0, m)}$, $\Cache_{g(l, 0)}$, $\Cache_{g}$, and $\Cache_{f}$\;
   \DontPrintSemicolon
   \textbf{Function} $g_{0,m}(m)$\textbf{:} \dots\;
   \textbf{Function} $g_{l,0}(l)$\textbf{:} \dots\;
   \PrintSemicolon
   \Fn{$g(l, m)$}{
-    \lIf{$(l, m) \in \Cache_{g}$}{\Return{$\Cache_{g}(l, m)$}}
-    \lIf{$l = 0$}{\Return{$g_{0,m}(m)$}}
-    \lIf{$m = 0$}{\Return{$g_{l,0}(l)$}}
+    \lIf{$(l, m) \in \Cache_{g}$}{\Return{$\Cache_{g}(l, m)$}}\label{line:cache}
+    \lIf{$l = 0$}{\Return{$g_{0,m}(m)$}}\label{line:basecaseone}
+    \lIf{$m = 0$}{\Return{$g_{l,0}(l)$}}\label{line:basecasetwo}
     $r \gets g(l-1, m) + mg(l-1,m-1)$\;
     $\Cache_{g}(l, m) \gets r$\;
     \Return{$r$}\;
@@ -986,26 +994,19 @@ goal: constructing a tautological clause that retains the literals in $C'$.
   }
 \end{algorithm}
 
-In this section, we will describe the final step of \Cranetwo{} as outlined in
-\cref{fig:overview}. This step involves translating the set of equations
-$\mathcal{E}$ into C++ code. The resulting C++ program can then be compiled and
-executed with different command-line arguments to compute the model count of the
-formula for various domain sizes.
-
-Each equation in $\mathcal{E}$ is compiled into a C++ function, along with a
-separate cache for memoisation. Let us consider an arbitrary equation
-$e = (f(\mathbf{x}) = \expr{}) \in \mathcal{E}$, and let
-$\mathbf{c} \in \mathbb{N}_{0}^{n}$ represent the arguments of the corresponding
-C++ function. The implementation of $e$ consists of three parts. First, we check
-if $\mathbf{c}$ is already present in the cache of $e$. If it is, we simply
-return the cached value. Second, for each base case $f(\mathbf{y})$ of
-$f(\mathbf{x})$ (as defined in \cref{def:basecase}), we check if $\mathbf{c}$
-\emph{matches} $\mathbf{y}$, i.e., $c_{i} = y_{i}$ whenever
-$y_{i} \in \mathbb{N}_{0}$. If this condition is satisfied, $\mathbf{c}$ is
-redirected to the C++ function that corresponds to the definition of the base
-case $f(\mathbf{y})$. Finally, if none of the above cases apply, we evaluate
-$\mathbf{c}$ based on the expression $\expr{}$, store the result in the cache,
-and return it.
+See \cref{alg:cpp} for the typical structure of a generated C++ program. Each
+equation in $\mathcal{E}$ is compiled into a C++ function, along with a separate
+cache for memoisation. Hence, \cref{alg:cpp} has a function and a cache for
+$f(\cdot, \cdot)$, $g(\cdot, \cdot)$, $g(\cdot, 0)$, and $g(0, \cdot)$. The
+implementation of an equation consists of three parts. First (on
+\autoref{line:cache}), we check if the arguments are already present in the
+corresponding cache. If so, we simply return the cached value. Second (on
+lines~\ref{line:basecaseone} and~\ref{line:basecasetwo}), for each base case, we
+check if the arguments match the base case (as defined in \cref{sec:algebra}).
+If so, the arguments are redirected to the C++ function for that base case.
+Finally, if none of the above cases apply, we evaluate the arguments based on
+the expression on the RHS of the equation, store the result in the cache, and
+return it.
 
 \section{Experimental Evaluation}\label{sec:experiments}
 
