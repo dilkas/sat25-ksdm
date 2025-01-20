@@ -412,7 +412,7 @@ correct model count.
   structure is a \emph{model} if it makes $\phi$ valid.
 \end{definition}
 
-\begin{example}[Counting bijections]\label{example:overall}
+\begin{example}[Counting bijections]\label{example:bijections}
   Let us consider the following formula (previously examined by Dilkas and
   Belle~\cite{DBLP:conf/kr/DilkasB23}) that defines predicate $P$ as a bijection
   between two domains $\Gamma$ and $\Delta$:
@@ -487,7 +487,7 @@ is transformed into
 where $Z/1$ and $S/1$ are two new predicates with $w^{-}(S) = -1$. One can check
 that the WFOMC of \cref{eq:skolemizationinitial,eq:skolemization} is the same.
 
-\subsubsection{Compilation}
+\subsubsection{Compilation}\label{sec:compilation}
 
 At this stage, the preprocessed formula is compiled into the set $\mathcal{E}$
 of equations and two auxiliary maps $\mathcal{F}$ and $\mathcal{D}$.
@@ -561,8 +561,6 @@ is $f(\mathbf{x}) = \expr{}$, where $f(\mathbf{x})$ is a function call.
 
 \todo[inline,caption={}]{
   \begin{itemize}
-    \item The algorithm’s recursive nature and its interaction with
-          \textsc{Crane} could be explained more clearly
     \item More emphasis on the motivation for each part of \Cranetwo{} (e.g.,
           how \FindBaseCases addresses key issues in \textsc{Crane}) would add
           depth to the contribution
@@ -637,12 +635,19 @@ approaches~\cite{DBLP:conf/kr/KazemiP16}.
   }
 \end{algorithm}
 
-\todo[inline]{Connect this with the preliminaries?}
+\todo[inline,caption={}]{
+  \begin{itemize}
+    \item Reorganise this section (e.g., where do I put the description of
+          Simplify?), bringing some TODOs from above.
+    \item The algorithm’s recursive nature and its interaction with
+          \textsc{Crane} could be explained more clearly
+  \end{itemize}
+}
 
 \Cref{alg:compilewithbasecases} presents our overall approach for compiling a
 formula into equations that include the necessary base cases. To begin, we use
-the FOKC algorithm of the original \textsc{Crane} to compile the formula into
-the three components: $\mathcal{E}$, $\mathcal{F}$, and $\mathcal{D}$. After
+\textsc{Crane} to compile the formula into the three components: $\mathcal{E}$,
+$\mathcal{F}$, and $\mathcal{D}$ (as described in \cref{sec:compilation}). After
 some algebraic simplification, $\mathcal{E}$ is passed to the \FindBaseCases
 procedure (see \cref{sec:identifying}). For each base case $f(\mathbf{x})$, we
 retrieve the logical formula $\mathcal{F}(f)$ associated with the function name
@@ -652,7 +657,7 @@ $\mathbf{x}$, where $x_{i}$ is a constant, and using \Propagate to simplify
 $\psi$ by assuming that domain $\mathcal{D}(f, i)$ has size $x_{i}$. Finally, on
 \autoref{line:final}, \CompileWithBaseCases recurses on these simplified
 formulas and adds the resulting base case equations to $\mathcal{E}$.
-\Cref{example:overall} below provides more detail.
+\Cref{example:bijections} below provides more detail.
 
 \begin{remark*}
   Although \CompileWithBaseCases starts with a call to \textsc{Crane}, the
@@ -661,48 +666,37 @@ formulas and adds the resulting base case equations to $\mathcal{E}$.
   \textsc{Crane} on various derived formulas.
 \end{remark*}
 
-\todo[inline]{The example below builds on \cref{sec:crane}. Shorten it.}
 
-\begin{example}\label{example:overalltwo}
-  Let us examine the first solution returned by \Cranetwo{} for the
-  bijection-counting problem in \cref{example:overall}. After
-  \autoref{line:second}, we have
-  \begin{align*}
-    \mathcal{E} &= \left\{\,\begin{aligned}f(m, n) &= \sum_{l=0}^{n} \binom{n}{l}{(-1)}^{n-l}g(l, m),\\ g(l, m) &= g(l-1, m) + mg(l-1, m-1)\end{aligned}\,\right\};\\
-    \mathcal{D} &= \{\, (f, 1) \mapsto \Gamma, (f, 2) \mapsto \Delta, (g, 1) \mapsto \Delta^{\top}, (g, 2) \mapsto \Gamma \,\},
-  \end{align*}
-  where $\Delta^{\top}$ is a new domain. (We omit the definition of
-  $\mathcal{F}$ as the formulas can get a bit verbose.) Then \FindBaseCases
-  identifies two base cases: $g(0, m)$ and $g(l, 0)$. In both cases,
-  \CompileWithBaseCases recurses on the formula $\mathcal{F}(g)$ simplified by
-  assuming that one of the domains is empty. In the first case, we recurse on
-  the formula $\forall x \in \Gamma\text{. }S(x) \lor \neg S(x)$, where $S$ is a
-  predicate introduced by preprocessing with weights $w^{+}(S) = 1$ and
-  $w^{-}(S) = -1$. Hence, we obtain the base case $g(0, m) = 0^{m}$. In the case
-  of $g(l, 0)$, \Propagate{$\psi$, $\Gamma$, $0$} returns an empty formula,
-  resulting in $g(l, 0) = 1$.
-\end{example}
-
-It is worth noting that these base cases overlap when $l = m = 0$ but remain
-consistent since $0^{0} = 1$. Generally, let $\phi$ be a formula with two
-domains $\Gamma$ and $\Delta$, and let $n, m \in \mathbb{N}_{0}$. Then the FOMC
-of \Propagate{$\phi$, $\Delta$, $n$} assuming $|\Gamma| = m$ is the same as the
-FOMC of \Propagate{$\phi$, $\Gamma$, $m$} assuming $|\Delta| = n$.
-
-Finally, the main responsibility of the \Simplify procedure is to handle the
-algebraic pattern $\sum_{m=0}^{n}[a \le m \le b] f(m)$. Here: $n$ is a variable,
+\paragraph*{Simplify}
+The main responsibility of the \Simplify procedure is to handle the algebraic
+pattern $\sum_{m=0}^{n}[a \le m \le b] f(m)$. Here: $n$ is a variable,
 $a, b \in \mathbb{N}_{0}$ are constants, and $f$ is an expression that may
 depend on $m$. \Simplify transforms this pattern into
-$f(a) + f(a+1) + \cdots + f(\min\{\, n, b \,\})$. For instance, in the case of
-\cref{example:overalltwo}, \Simplify transforms
-$g(l, m) = \sum_{k=0}^{m}[0 \le k \le 1]\binom{m}{k}g(l-1, m-k)$ into
-$g(l, m) = g(l-1, m) + mg(l-1, m-1)$.
+$f(a) + f(a+1) + \cdots + f(\min\{\, n, b \,\})$.
 
-\todo[inline]{Check if the above is still clear given all the changes.}
+\begin{example}\label{example:bijectionstwo}
+  Let us return to the bijection-counting problem from \cref{example:bijections}
+  and its initial solution described in \cref{example:bijectionstwo}. On
+  \autoref{line:second}, \Simplify transforms
+  $g(l, m) = \sum_{k=0}^{m}[0 \le k \le 1]\binom{m}{k}g(l-1, m-k)$ into
+  $g(l, m) = g(l-1, m) + mg(l-1, m-1)$. Then \FindBaseCases identifies two base
+  cases: $g(0, m)$ and $g(l, 0)$. In both cases, \CompileWithBaseCases recurses
+  on the formula $\mathcal{F}(g)$ simplified by assuming that one of the domains
+  is empty. In the first case, we recurse on the formula
+  $\forall x \in \Gamma\text{. }S(x) \lor \neg S(x)$, where $S$ is a predicate
+  introduced by preprocessing with weights $w^{+}(S) = 1$ and $w^{-}(S) = -1$.
+  Hence, we obtain the base case $g(0, m) = 0^{m}$. In the case of $g(l, 0)$,
+  \Propagate{$\psi$, $\Gamma$, $0$} returns an empty formula, resulting in
+  $g(l, 0) = 1$.
+
+  While these base cases overlap when $l = m = 0$, they remain consistent since
+  $0^{0} = 1$. Generally, let $\phi$ be a formula with two domains $\Gamma$ and
+  $\Delta$, and let $n, m \in \mathbb{N}_{0}$. Then the FOMC of
+  \Propagate{$\phi$, $\Delta$, $n$} assuming $|\Gamma| = m$ is the same as the
+  FOMC of \Propagate{$\phi$, $\Gamma$, $m$} assuming $|\Delta| = n$.
+\end{example}
 
 \subsection{Identifying a Sufficient Set of Base Cases}\label{sec:identifying}
-
-\todo[inline]{Prove correctness?}
 
 \begin{algorithm}[t]
   \caption{\protect\FindBaseCases{$\mathcal{E}$}}\label{alg:findbasecases}
@@ -734,7 +728,7 @@ case, a base case is added for each constant from $0$ up to (but not including)
 $c_{i}$.
 
 \begin{example}
-  Consider the recursive function $g$ from \cref{example:overalltwo}.
+  Consider the recursive function $g$ from \cref{example:bijectionstwo}.
   \FindBaseCases iterates over two function calls: $g(l-1, m)$ and
   $g(l-1, m-1)$. The former produces the base case $g(0, m)$, while the latter
   produces both $g(0, m)$ and $g(l, 0)$.
@@ -998,7 +992,7 @@ C++ program is produced, it can be executed with different command-line
 arguments to compute the model count of the formula for various domain sizes.
 
 \begin{algorithm}[t]
-  \caption{A sketch of the C++ program for the equations in \cref{example:overalltwo}, particularly highlighting the recursive definition of function $g$.}\label{alg:cpp}
+  \caption{A sketch of the C++ program for the equations in \cref{example:bijectionstwo}, particularly highlighting the recursive definition of function $g$.}\label{alg:cpp}
   initialise $\Cache_{g(0, m)}$, $\Cache_{g(l, 0)}$, $\Cache_{g}$, and $\Cache_{f}$\;
   \DontPrintSemicolon
   \textbf{Function} $g_{0,m}(m)$\textbf{:} \dots\;
@@ -1135,7 +1129,7 @@ or, equivalently, in conjunctive normal form as
 \]
 Finally, we include the bijection-counting problem previously utilised by Dilkas
 and Belle~\cite{DBLP:conf/kr/DilkasB23}. Its formulation in \FO{} is described
-in \cref{example:overall}. The equivalent formula in \Ctwo{} is
+in \cref{example:bijections}. The equivalent formula in \Ctwo{} is
 \[
   (\forall x \in \Delta\text{. }\exists^{=1} y \in \Delta\text{. }P(x, y)) \land (\forall y \in \Delta\text{. }\exists^{=1} x \in \Delta\text{. }P(x, y)).
 \]
