@@ -146,6 +146,8 @@
     \item Sentence vs formula: be consistent and not confusing
     \item 15 pages excluding references
     \item Go through the rest of formatting instructions (in GTD)
+    \item Make sure all the references (e.g., to examples are still valid)
+    \item Maybe add extra references to subsections
   \end{itemize}
 }
 \section{Introduction}
@@ -247,8 +249,13 @@ future work.
 
 \section{Preliminaries}\label{sec:preliminaries}
 
-\todo[inline]{Adjust the introduction to the new structure (with more
-  subsections)}
+\todo[inline,caption={}]{
+  \begin{itemize}
+    \item Adjust the introduction to the new structure (with more subsections)
+    \item If I need more space elsewhere, shortening the preliminaries to two
+          pages could work (I could expand the introduction by 0.5 page)
+  \end{itemize}
+}
 
 In \cref{sec:logic}, we summarise the basic principles of first-order logic.
 Then, in \cref{sec:threelogics}, we formally define (W)FOMC and discuss the
@@ -263,7 +270,11 @@ algebra and logic, we write $S\sigma$ to denote the application of a
 \emph{substitution} $\sigma$ to an expression $S$, where
 $\sigma = [x_{1} \mapsto y_{1}, x_{2} \mapsto y_{2}, \dots, x_{n} \mapsto y_{n}]$
 signifies the replacement of all instances of $x_{i}$ with $y_{i}$ for all
-$i = 1, \dots, n$.
+$i = 1, \dots, n$. Additionally, for any variable $n$ and
+$a, b \in \mathbb{N}_{0}$, let $[a \le n \le b] \coloneqq \begin{cases}
+  1 & \text{if $a \le n \le b$} \\
+  0 & \text{otherwise}
+\end{cases}$.
 
 \subsection{First-Order Logic}\label{sec:logic}
 
@@ -381,10 +392,12 @@ constrains all models to have \emph{precisely three positive literals with the
 In this section, we will formally define FOMC and its weighted variant. Note
 that, although this work focuses on FOMC, for sentences with existential
 quantifiers, computing the FOMC using \Cranetwo{} requires the use of WFOMC\@.
-For such sentences, Skolemization (described in \cref{sec:crane}) introduces
+For such sentences, preprocessing (described in \cref{sec:crane}) introduces
 predicates with non-unary weights that must be accounted for to compute the
-correct model count. Additionally, our formulation of the definition of WFOMC is
-somewhat complicated by the need to support any number of domains.
+correct model count.
+
+% Additionally, our formulation of the definition of WFOMC is
+% somewhat complicated by the need to support any number of domains.
 
 \begin{definition}[Structure, model]\label{def:model}
   Let $\phi$ be a formula in \FO{}. For each predicate $P/n$ in $\phi$, let
@@ -399,19 +412,20 @@ somewhat complicated by the need to support any number of domains.
 \end{definition}
 
 \begin{example}[Counting bijections]\label{example:overall}
-  Let $\phi$ be the following formula (previously examined by Dilkas and
+  Let us consider the following formula (previously examined by Dilkas and
   Belle~\cite{DBLP:conf/kr/DilkasB23}) that defines predicate $P$ as a bijection
   between two domains $\Gamma$ and $\Delta$:
-  \[
+  \begin{equation}\label[formula]{eq:bijections}
     \begin{gathered}
       (\forall x \in \Gamma\text{. }\exists y \in \Delta\text{. }P(x, y))\land{}\\
       (\forall y \in \Delta\text{. }\exists x \in \Gamma\text{. }P(x, y))\land{}\\
       (\forall x \in \Gamma\text{. }\forall y, z \in \Delta\text{. }P(x, y) \land P(x, z) \Rightarrow y = z)\land{}\\
       (\forall x, z \in \Gamma\text{. }\forall y \in \Delta\text{. }P(x, y) \land P(z, y) \Rightarrow x = z).
     \end{gathered}
-  \]
+  \end{equation}
   Let $\sigma$ be defined as $\sigma(\Gamma) \coloneqq \{\, 1, 2\,\}$, and
-  $\sigma(\Delta) \coloneqq \{\,a, b\,\}$. Then $\phi$ has two models:
+  $\sigma(\Delta) \coloneqq \{\,a, b\,\}$. Then \cref{eq:bijections} has two
+  models:
   \[
     \{\, P(1, a), P(2, b), \neg P(1, b), \neg P(2, a) \,\} \qquad \text{and} \qquad \{\, P(1, b), P(2, a), \neg P(1, a), \neg P(2, b) \,\}.
   \]
@@ -444,38 +458,74 @@ somewhat complicated by the need to support any number of domains.
   where the sum is over all models of $\phi$.
 \end{definition}
 
-\subsection{First-Order Knowledge Compilation}\label{sec:crane}
+\subsection{Crane and First-Order Knowledge Compilation}\label{sec:crane}
 
-\todo[inline]{It would be nice to give the necessary introduction to FOKC, or
-  \textsc{Crane} (an intuitive explanation early in the paper)}
+\todo[inline]{Make sure the distinction between function definitions and
+  equations is clear.}
 
-There are two crucial preprocessing steps that transform an arbitrary sentence
-in first-order logic into the form used internally: Skolemization and rewriting
-the sentence as a conjunction of clauses. We describe the former in more detail.
-\emph{Skolemization}~\cite{DBLP:conf/kr/BroeckMD14} is a procedure that
-transforms a formula with existential quantifiers into a formula without
-existential quantifiers \emph{with the same WFOMC}. (Note that it is different
-from the standard Skolemization that introduces function
-symbols~\cite{DBLP:books/daglib/0030198}.)
+As our work builds on \textsc{Crane}, in this section we will briefly outline
+the steps \textsc{Crane} goes through to compile an \FO{} formula into a set of
+function definitions. We divide the inner workings of the algorithm into two
+stages: preprocessing and compilation.
+
+\subsubsection{Preprocessing}
+
+The goal of this stage is to transform an arbitrary \FO{} formula into the
+format described in \cref{sec:logic}, most importantly by eliminating
+existential quantifiers. For example, the first conjunct of
+\cref{eq:bijections}, i.e.,
+\begin{equation}\label[formula]{eq:skolemizationinitial}
+  \forall x \in \Gamma\text{. }\exists y \in \Delta\text{. } P(x, y)
+\end{equation}
+is transformed into
+\begin{equation}\label[formula]{eq:skolemization}
+  \begin{aligned}
+    (\forall x \in \Gamma\text{. } &Z(x))\land{}\\
+    (\forall x \in \Gamma\text{. } \forall y \in \Delta\text{. } &Z(x) \lor \neg P(x, y))\land{}\\
+    (\forall x \in \Gamma\text{. } &S(x) \lor Z(x))\land{}\\
+    (\forall x \in \Gamma\text{. } \forall y \in \Delta\text{. } &S(x) \lor \neg P(x, y)),
+  \end{aligned}
+\end{equation}
+where $Z/1$ and $S/1$ are two new predicates with $w^{-}(S) = -1$. One can check
+that the WFOMC of \cref{eq:skolemizationinitial,eq:skolemization} is the same.
+
+\subsubsection{Compilation}
+
+At this stage, the preprocessed formula is compiled into the set $\mathcal{E}$
+of equations and two auxiliary maps $\mathcal{F}$ and $\mathcal{D}$.
+$\mathcal{F}$ maps function names to formulas, and $\mathcal{D}$ maps function
+names and argument indices to domains. $\mathcal{E}$ can contain any number of
+functions, one of which (which we will always denote by $f$) represents the
+solution to the FOMC problem. To compute the FOMC for particular domain sizes,
+$f$ must be evaluated with those domain sizes as arguments. $\mathcal{D}$
+records this correspondence between function arguments and domains.
 
 \begin{example}
-  Skolemization transforms
-  \begin{equation}\label[formula]{eq:skolemizationinitial}
-    \forall x \in \Gamma\text{. }\exists y \in \Delta\text{. } P(x, y)
-  \end{equation}
-  into
-  \begin{equation}\label[formula]{eq:skolemization}
-    \begin{aligned}
-      (\forall x \in \Gamma\text{. } &Z(x))\land{}\\
-      (\forall x \in \Gamma\text{. } \forall y \in \Delta\text{. } &Z(x) \lor \neg P(x, y))\land{}\\
-      (\forall x \in \Gamma\text{. } &S(x) \lor Z(x))\land{}\\
-      (\forall x \in \Gamma\text{. } \forall y \in \Delta\text{. } &S(x) \lor \neg P(x, y)).
-    \end{aligned}
-  \end{equation}
-  With suitable weights on the new predicates $S/1$ and $Z/1$, the WFOMC of
-  \cref{eq:skolemization} is equal to the FOMC of
-  \cref{eq:skolemizationinitial}.
+  \textsc{Crane} compiles \cref{eq:bijections} for bijection counting into
+  \begin{align*}
+    \mathcal{E} &= \left\{\,\begin{aligned}f(m, n) &= \sum_{l=0}^{n} \binom{n}{l}{(-1)}^{n-l}g(l, m),\\ g(l, m) &= \sum_{k=0}^{m}[0 \le k \le 1]\binom{m}{k}g(l-1, m-k)\end{aligned}\,\right\};\\
+    \mathcal{D} &= \{\, (f, 1) \mapsto \Gamma, (f, 2) \mapsto \Delta, (g, 1) \mapsto \Delta^{\top}, (g, 2) \mapsto \Gamma \,\},
+  \end{align*}
+  where $\Delta^{\top}$ is a newly introduced domain. (We omit the definition of
+  $\mathcal{F}$ as the formulas can get quite verbose.) To compute the number of
+  bijections between two sets of cardinality 3, one would evaluate $f(3, 3)$,
+  however, the definition of $g$ is incomplete: $g$ is a recursive function
+  presented without any base cases. $\mathcal{D}$ encodes that in $f(m, n)$, $m$
+  and $n$ represent $|\Gamma|$ and $|\Delta|$, respectively. Similarly, in
+  $g(l, m)$, $l$ represents $|\Delta^{\top}|$, and $m$ represents $|\Gamma|$.
 \end{example}
+
+Compilation is performed primarily by applying \emph{(compilation) rules} to
+formulas. \textsc{Crane} has two modes depending on how the algorithm chooses
+which compilation rule to apply to a formula (in case several alternatives are
+available). The first option is to use greedy search: there is a list of rules,
+and the first applicable rule is the one that gets used, disregarding all the
+others. The second option is to use a combination of greedy and
+\emph{breadth-first search} (BFS). That is, each compilation rule is identified
+as either greedy or non-greedy. Greedy rules are applied as soon as possible at
+any stage of the compilation process. BFS is executed over all applicable
+non-greedy rules, identifying the solution that can be constructed using the
+smallest number of such rules.
 
 \subsection{Algebra}\label{sec:algebra}
 
@@ -581,16 +631,6 @@ approaches~\cite{DBLP:conf/kr/KazemiP16}.
 
 \subsection{Completing the Definitions of Functions}\label{sec:completing}
 
-Before describing the main contribution of this work, let us review the
-essential aspects of FOKC as realised by \textsc{Crane}. The input formula is
-compiled into: set $\mathcal{E}$ of equations, map $\mathcal{F}$ from function
-names to formulas, and map $\mathcal{D}$ from function names and argument
-indices to domains. $\mathcal{E}$ can contain any number of functions, one of
-which (denoted by $f$) represents the solution to the FOMC problem. To compute
-the FOMC for particular domain sizes, $f$ must be evaluated with those domain
-sizes as arguments. $\mathcal{D}$ records this correspondence between function
-arguments and domains.
-
 \begin{algorithm}[t]
   \caption{\protect\CompileWithBaseCases{$\phi$}}\label{alg:compilewithbasecases}
   \KwIn{formula $\phi$}
@@ -603,6 +643,8 @@ arguments and domains.
     $\mathcal{E} \gets \mathcal{E} \cup \CompileWithBaseCases{$\psi$}$\;\label{line:final}
   }
 \end{algorithm}
+
+\todo[inline]{Connect this with the preliminaries?}
 
 \Cref{alg:compilewithbasecases} presents our overall approach for compiling a
 formula into equations that include the necessary base cases. To begin, we use
@@ -626,6 +668,8 @@ formulas and adds the resulting base case equations to $\mathcal{E}$.
   \textsc{Crane} on various derived formulas.
 \end{remark*}
 
+\todo[inline]{The example below builds on \cref{sec:crane}. Shorten it.}
+
 \begin{example}\label{example:overalltwo}
   Let us examine the first solution returned by \Cranetwo{} for the
   bijection-counting problem in \cref{example:overall}. After
@@ -640,7 +684,7 @@ formulas and adds the resulting base case equations to $\mathcal{E}$.
   \CompileWithBaseCases recurses on the formula $\mathcal{F}(g)$ simplified by
   assuming that one of the domains is empty. In the first case, we recurse on
   the formula $\forall x \in \Gamma\text{. }S(x) \lor \neg S(x)$, where $S$ is a
-  predicate introduced by Skolemization with weights $w^{+}(S) = 1$ and
+  predicate introduced by preprocessing with weights $w^{+}(S) = 1$ and
   $w^{-}(S) = -1$. Hence, we obtain the base case $g(0, m) = 0^{m}$. In the case
   of $g(l, 0)$, \Propagate{$\psi$, $\Gamma$, $0$} returns an empty formula,
   resulting in $g(l, 0) = 1$.
@@ -655,15 +699,13 @@ FOMC of \Propagate{$\phi$, $\Gamma$, $m$} assuming $|\Delta| = n$.
 Finally, the main responsibility of the \Simplify procedure is to handle the
 algebraic pattern $\sum_{m=0}^{n}[a \le m \le b] f(m)$. Here: $n$ is a variable,
 $a, b \in \mathbb{N}_{0}$ are constants, and $f$ is an expression that may
-depend on $m$. Additionally, $[a \le m \le b] = \begin{cases}
-  1 & \text{if $a \le m \le b$} \\
-  0 & \text{otherwise}
-\end{cases}$.
-\Simplify transforms this pattern into
+depend on $m$. \Simplify transforms this pattern into
 $f(a) + f(a+1) + \cdots + f(\min\{\, n, b \,\})$. For instance, in the case of
 \cref{example:overalltwo}, \Simplify transforms
 $g(l, m) = \sum_{k=0}^{m}[0 \le k \le 1]\binom{m}{k}g(l-1, m-k)$ into
 $g(l, m) = g(l-1, m) + mg(l-1, m-1)$.
+
+\todo[inline]{Check if the above is still clear given all the changes.}
 
 \subsection{Identifying a Sufficient Set of Base Cases}\label{sec:identifying}
 
@@ -1015,16 +1057,6 @@ return it.
   \begin{itemize}
     \item Experiments could be expanded by 1 page (``a more thorough and
           independent practical assessment'')
-    \item The difference between \Cranegreedy{} and \Cranebfs{} is in how the
-          algorithm chooses which compilation rule to apply to a formula. The
-          former uses greedy search: there is a list of rules, and the first
-          applicable rule is the one that gets used, disregarding all the
-          others. The latter uses a combination of greedy and breadth-first
-          search (BFS). That is, each compilation rule is identified as either
-          greedy or non-greedy. Greedy rules are applied as soon as possible at
-          any stage of the compilation process. BFS is executed over all
-          applicable non-greedy rules, identifying the solution that can be
-          constructed using the smallest number of such rules.
   \end{itemize}
 }
 
@@ -1036,7 +1068,7 @@ precision reasoning. Our experiments involve two versions of \Cranetwo{}:
 \Cranegreedy{} and \Cranebfs{}. Like its predecessor, \Cranetwo{} has two modes
 for applying compilation rules to formulas: one that uses a greedy search
 algorithm similar to \textsc{ForcLift} and another that combines greedy and
-breadth-first search.
+BFS\@.
 
 The experiments were conducted using an Intel Skylake \SI{2.4}{\giga\hertz} CPU
 with \SI{188}{\gibi\byte} of memory and CentOS~7. C++ programs were compiled
