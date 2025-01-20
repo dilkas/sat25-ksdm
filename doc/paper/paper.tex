@@ -251,9 +251,10 @@ future work.
 
 \todo[inline,caption={}]{
   \begin{itemize}
-    \item Adjust the introduction to the new structure (with more subsections)
     \item If I need more space elsewhere, shortening the preliminaries to two
-          pages could work (I could expand the introduction by 0.5 page)
+          pages (perhaps skipping Section 2.2 altogether?)
+    \item Adjust the introductory paragraph below to the new structure (with
+          more subsections)
   \end{itemize}
 }
 
@@ -460,9 +461,6 @@ correct model count.
 
 \subsection{Crane and First-Order Knowledge Compilation}\label{sec:crane}
 
-\todo[inline]{Make sure the distinction between function definitions and
-  equations is clear.}
-
 As our work builds on \textsc{Crane}, in this section we will briefly outline
 the steps \textsc{Crane} goes through to compile an \FO{} formula into a set of
 function definitions. We divide the inner workings of the algorithm into two
@@ -541,7 +539,7 @@ consisting of variables and constants. A (function) \emph{signature} is function
 call that contains only variables. Given two function calls $f(\mathbf{x})$ and
 $f(\mathbf{y})$, we say that $f(\mathbf{y})$ \emph{matches} $f(\mathbf{x})$ if
 $x_{i} = y_{i}$ whenever $x_{i}, y_{i} \in \mathbb{N}_{0}$. An \emph{equation}
-is $f(\mathbf{x}) = \expr{}$, where $f(\mathbf{x})$ is a signature.
+is $f(\mathbf{x}) = \expr{}$, where $f(\mathbf{x})$ is a function call.
 
 \begin{definition}[Base case]\label{def:basecase}
   Let $f(\mathbf{x})$ be a function call where each $x_{i}$ is either a constant
@@ -623,11 +621,6 @@ accurate model counting. Additionally, \cref{sec:cpp} explains the process of
 compiling equations into C++ code, greatly expanding upon the range of formulas
 that could previously be handled by similar
 approaches~\cite{DBLP:conf/kr/KazemiP16}.
-
-\todo[inline]{Somewhere: Recall that each equation is either the definition (did
-  I define what a definition is?) of a function or the definition of a base case
-  of a function. (I could put this in the preliminaries as definitions and then
-  reference them below)}
 
 \subsection{Completing the Definitions of Functions}\label{sec:completing}
 
