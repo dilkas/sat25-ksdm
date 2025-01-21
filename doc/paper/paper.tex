@@ -498,7 +498,7 @@ solution to the FOMC problem. To compute the FOMC for particular domain sizes,
 $f$ must be evaluated with those domain sizes as arguments. $\mathcal{D}$
 records this correspondence between function arguments and domains.
 
-\begin{example}
+\begin{example}\label{example:solution}
   \textsc{Crane} compiles \cref{eq:bijections} for bijection counting into
   \begin{align*}
     \mathcal{E} &= \left\{\,\begin{aligned}f(m, n) &= \sum_{l=0}^{n} \binom{n}{l}{(-1)}^{n-l}g(l, m),\\ g(l, m) &= \sum_{k=0}^{m}[0 \le k \le 1]\binom{m}{k}g(l-1, m-k)\end{aligned}\,\right\};\\
@@ -559,15 +559,9 @@ is $f(\mathbf{x}) = \expr{}$, where $f(\mathbf{x})$ is a function call.
 
 \section{Technical Contributions}\label{sec:main}
 
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item More emphasis on the motivation for each part of \Cranetwo{} (e.g.,
-          how \FindBaseCases addresses key issues in \textsc{Crane}) would add
-          depth to the contribution
-    \item this section should be expanded by 1 page (``a clear discussion of the
-          innovation aspect and technical parts'')
-  \end{itemize}
-}
+\todo[inline,caption={}]{Add a discussion of the innovation aspect and technical
+  parts. Motivate each part of \Cranetwo{} (e.g., how \FindBaseCases addresses
+  key issues in \textsc{Crane}).}
 
 \begin{figure*}[t]
   \centering
@@ -628,44 +622,26 @@ approaches~\cite{DBLP:conf/kr/KazemiP16}.
   \KwOut{set $\mathcal{E}$ of equations}
   $(\mathcal{E}, \mathcal{F}, \mathcal{D}) \gets \Compile{$\phi$}$\;
   $\mathcal{E} \gets \Simplify{$\mathcal{E}$}$\;\label{line:second}
-  \ForEach{base case $f(\mathbf{x}) \in \FindBaseCases{$\mathcal{E}$}$}{
+  \ForEach{base case $f(\mathbf{x}) \in \FindBaseCases{$\mathcal{E}$}$}{\label{line:loopy}
     $\psi \gets \mathcal{F}(f)$\;
-    \lForEach{index $i$ such that $x_{i} \in \mathbb{N}_{0}$}{$\psi \gets \Propagate{$\psi$, $\mathcal{D}(f, i)$, $x_i$}$}
+    \lForEach{index $i$ such that $x_{i} \in \mathbb{N}_{0}$}{$\psi \gets \Propagate{$\psi$, $\mathcal{D}(f, i)$, $x_i$}$}\label{line:propagate}
     $\mathcal{E} \gets \mathcal{E} \cup \CompileWithBaseCases{$\psi$}$\;\label{line:final}
   }
 \end{algorithm}
-
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item Reorganise this section (e.g., where do I put the description of
-          Simplify?), bringing some TODOs from above.
-    \item The algorithm’s recursive nature and its interaction with
-          \textsc{Crane} could be explained more clearly
-  \end{itemize}
-}
 
 \Cref{alg:compilewithbasecases} presents our overall approach for compiling a
 formula into equations that include the necessary base cases. To begin, we use
 \textsc{Crane} to compile the formula into the three components: $\mathcal{E}$,
 $\mathcal{F}$, and $\mathcal{D}$ (as described in \cref{sec:compilation}). After
-some algebraic simplification, $\mathcal{E}$ is passed to the \FindBaseCases
-procedure (see \cref{sec:identifying}). For each base case $f(\mathbf{x})$, we
-retrieve the logical formula $\mathcal{F}(f)$ associated with the function name
-$f$ and simplify it using the \Propagate procedure (explained in detail in
-\cref{sec:propagating}). We do this by iterating over all indices of
-$\mathbf{x}$, where $x_{i}$ is a constant, and using \Propagate to simplify
-$\psi$ by assuming that domain $\mathcal{D}(f, i)$ has size $x_{i}$. Finally, on
-\autoref{line:final}, \CompileWithBaseCases recurses on these simplified
-formulas and adds the resulting base case equations to $\mathcal{E}$.
-\Cref{example:bijections} below provides more detail.
-
-\begin{remark*}
-  Although \CompileWithBaseCases starts with a call to \textsc{Crane}, the
-  proposed algorithm is not just a post-processing step for FOKC because
-  \cref{alg:compilewithbasecases} is recursive and can issue more calls to
-  \textsc{Crane} on various derived formulas.
-\end{remark*}
-
+some algebraic simplifications (described below), $\mathcal{E}$ is passed to the
+\FindBaseCases procedure (see \cref{sec:identifying}). For each base case
+$f(\mathbf{x})$, we retrieve the logical formula $\mathcal{F}(f)$ associated
+with the function name $f$ and simplify it using the \Propagate procedure
+(explained in detail in \cref{sec:propagating}). We do this by iterating over
+all indices of $\mathbf{x}$, where $x_{i}$ is a constant, and using \Propagate
+to simplify $\psi$ by assuming that domain $\mathcal{D}(f, i)$ has size $x_{i}$.
+Finally, on \autoref{line:final}, \CompileWithBaseCases recurses on these
+simplified formulas and adds the resulting base case equations to $\mathcal{E}$.
 
 \paragraph*{Simplify}
 The main responsibility of the \Simplify procedure is to handle the algebraic
@@ -676,25 +652,65 @@ $f(a) + f(a+1) + \cdots + f(\min\{\, n, b \,\})$.
 
 \begin{example}\label{example:bijectionstwo}
   Let us return to the bijection-counting problem from \cref{example:bijections}
-  and its initial solution described in \cref{example:bijectionstwo}. On
-  \autoref{line:second}, \Simplify transforms
-  $g(l, m) = \sum_{k=0}^{m}[0 \le k \le 1]\binom{m}{k}g(l-1, m-k)$ into
-  $g(l, m) = g(l-1, m) + mg(l-1, m-1)$. Then \FindBaseCases identifies two base
-  cases: $g(0, m)$ and $g(l, 0)$. In both cases, \CompileWithBaseCases recurses
-  on the formula $\mathcal{F}(g)$ simplified by assuming that one of the domains
-  is empty. In the first case, we recurse on the formula
+  and its initial solution described in \cref{example:solution}. \Simplify
+  transforms $g(l, m) = \sum_{k=0}^{m}[0 \le k \le 1]\binom{m}{k}g(l-1, m-k)$
+  into $g(l, m) = g(l-1, m) + mg(l-1, m-1)$. Then \FindBaseCases identifies two
+  base cases: $g(0, m)$ and $g(l, 0)$. In both cases, \CompileWithBaseCases
+  recurses on the formula $\mathcal{F}(g)$ simplified by assuming that one of
+  the domains is empty. In the first case, we recurse on the formula
   $\forall x \in \Gamma\text{. }S(x) \lor \neg S(x)$, where $S$ is a predicate
   introduced by preprocessing with weights $w^{+}(S) = 1$ and $w^{-}(S) = -1$.
   Hence, we obtain the base case $g(0, m) = 0^{m}$. In the case of $g(l, 0)$,
   \Propagate{$\psi$, $\Gamma$, $0$} returns an empty formula, resulting in
-  $g(l, 0) = 1$.
-
-  While these base cases overlap when $l = m = 0$, they remain consistent since
-  $0^{0} = 1$. Generally, let $\phi$ be a formula with two domains $\Gamma$ and
-  $\Delta$, and let $n, m \in \mathbb{N}_{0}$. Then the FOMC of
-  \Propagate{$\phi$, $\Delta$, $n$} assuming $|\Gamma| = m$ is the same as the
-  FOMC of \Propagate{$\phi$, $\Gamma$, $m$} assuming $|\Delta| = n$.
+  $g(l, 0) = 1$. While these base cases overlap when $l = m = 0$, they remain
+  consistent since $0^{0} = 1$.
 \end{example}
+
+% Generally, let $\phi$ be a formula with two domains $\Gamma$ and $\Delta$, and
+% let $n, m \in \mathbb{N}_{0}$. Then the FOMC of \Propagate{$\phi$, $\Delta$,
+%   $n$} assuming $|\Gamma| = m$ is the same as the FOMC of \Propagate{$\phi$,
+%   $\Gamma$, $m$} assuming $|\Delta| = n$.
+
+% Although \CompileWithBaseCases starts with a call to \textsc{Crane}, the
+% proposed algorithm is not just a post-processing step for FOKC because
+% \cref{alg:compilewithbasecases} is recursive and can issue more calls to
+% \textsc{Crane} on various derived formulas.
+
+We end this section by proving that \CompileWithBaseCases terminates since each
+recursive call on \autoref{line:final} reduces the number of domains in the
+formula.
+
+\begin{theorem}
+  Given any \FO{} formula $\phi$, \CompileWithBaseCases{$\phi$} terminates.
+\end{theorem}
+
+To prove the theorem, we rely on two observations about the algorithms presented
+in \cref{sec:identifying,sec:propagating}.
+
+\begin{observation}\label{observation1}
+  Each base case returned by \FindBaseCases has at least one constant (in line
+  with \cref{def:basecase}).
+\end{observation}
+
+\begin{observation}\label{observation2}
+  For any formula $\phi$, domain $\Delta$, and $n \in \mathbb{N}_{0}$,
+  \Propagate{$\phi$, $\Delta$, $n$} returns a formula with no variables
+  quantified over $\Delta$.
+\end{observation}
+
+\begin{proof}
+  We proceed by induction on the number of domains that variables in $\phi$ are
+  quantified over. If there are no domains, then $\phi$ is essentially a
+  propositional formula, and \textsc{Crane} compiles it into an equation of the
+  form $f = \expr$ with no `function calls'. Suppose that \CompileWithBaseCases
+  terminates for all formulas with at most $n \in \mathbb{N}_{0}$ domains. Let
+  $\phi$ be a formula with $n+1$ domains. By \cref{observation1}, each base case
+  on \autoref{line:loopy} of \cref{alg:compilewithbasecases} has at least one
+  constant. Therefore, by \cref{observation2}, after \autoref{line:propagate},
+  formula $\psi$ has at most $n$ domains. Thus, \autoref{line:final} terminates
+  by the inductive hypothesis, completing the proof that \CompileWithBaseCases
+  terminates for an arbitrary formula with $n+1$ domains.
+\end{proof}
 
 \subsection{Identifying a Sufficient Set of Base Cases}\label{sec:identifying}
 
@@ -728,7 +744,7 @@ case, a base case is added for each constant from $0$ up to (but not including)
 $c_{i}$.
 
 \begin{example}
-  Consider the recursive function $g$ from \cref{example:bijectionstwo}.
+  Consider the recursive function $g$ from \cref{example:solution}.
   \FindBaseCases iterates over two function calls: $g(l-1, m)$ and
   $g(l-1, m-1)$. The former produces the base case $g(0, m)$, while the latter
   produces both $g(0, m)$ and $g(l, 0)$.
@@ -744,7 +760,7 @@ for the algorithm to terminate.\footnote{Note that characterising the
 section, let $\mathcal{E}$ denote the equations returned by
 \CompileWithBaseCases.
 
-\begin{theorem}[Termination]\label{thm:halting}
+\begin{theorem}\label{thm:halting}
   Let $f$ be an $n$-ary function in $\mathcal{E}$ and
   $\mathbf{x} \in \mathbb{N}_{0}^{n}$. Then the evaluation of $f(\mathbf{x})$
   terminates.
@@ -992,27 +1008,18 @@ C++ program is produced, it can be executed with different command-line
 arguments to compute the model count of the formula for various domain sizes.
 
 \begin{algorithm}[t]
-  \caption{A sketch of the C++ program for the equations in \cref{example:bijectionstwo}, particularly highlighting the recursive definition of function $g$.}\label{alg:cpp}
-  initialise $\Cache_{g(0, m)}$, $\Cache_{g(l, 0)}$, $\Cache_{g}$, and $\Cache_{f}$\;
-  \DontPrintSemicolon
-  \textbf{Function} $g_{0,m}(m)$\textbf{:} \dots\;
-  \textbf{Function} $g_{l,0}(l)$\textbf{:} \dots\;
-  \PrintSemicolon
+  \caption{A sketch of the C++ program for the equations in \cref{example:solution}, particularly highlighting the recursive definition of function $g$.}\label{alg:cpp}
+  initialise $\Cache_{g(0, m)}$, $\Cache_{g(l, 0)}$, $\Cache_{g}$, and
+  $\Cache_{f}$\; \DontPrintSemicolon \textbf{Function} $g_{0,m}(m)$\textbf{:}
+  \dots\; \textbf{Function} $g_{l,0}(l)$\textbf{:} \dots\; \PrintSemicolon
   \Fn{$g(l, m)$}{
     \lIf{$(l, m) \in \Cache_{g}$}{\Return{$\Cache_{g}(l, m)$}}\label{line:cache}
     \lIf{$l = 0$}{\Return{$g_{0,m}(m)$}}\label{line:basecaseone}
     \lIf{$m = 0$}{\Return{$g_{l,0}(l)$}}\label{line:basecasetwo}
-    $r \gets g(l-1, m) + mg(l-1,m-1)$\;
-    $\Cache_{g}(l, m) \gets r$\;
-    \Return{$r$}\;
-  }
-  \DontPrintSemicolon
-  \textbf{Function} $f(m, n)$\textbf{:} \dots\;
-  \PrintSemicolon
-  \Fn{\Main}{
-    $(m, n) \gets \Input{}$\;
-    \Return{$f(m, n)$}\;
-  }
+    $r \gets g(l-1, m) + mg(l-1,m-1)$\; $\Cache_{g}(l, m) \gets r$\;
+    \Return{$r$}\; } \DontPrintSemicolon \textbf{Function} $f(m, n)$\textbf{:}
+  \dots\; \PrintSemicolon \Fn{\Main}{ $(m, n) \gets \Input{}$\;
+    \Return{$f(m, n)$}\; }
 \end{algorithm}
 
 See \cref{alg:cpp} for the typical structure of a generated C++ program. Each
@@ -1040,12 +1047,8 @@ return it.
 % Baselines: List and describe the baseline methods or systems used for
 % comparison.
 
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item Experiments could be expanded by 1 page (``a more thorough and
-          independent practical assessment'')
-  \end{itemize}
-}
+\todo[inline]{Expand the section, adding a more thorough and independent
+  practical assessment}
 
 Our empirical evaluation sought to compare the runtime performance of
 {\Cranetwo} with the current state of the art, namely \textsc{FastWFOMC} and
