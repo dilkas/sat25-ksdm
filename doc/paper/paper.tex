@@ -559,10 +559,6 @@ is $f(\mathbf{x}) = \expr{}$, where $f(\mathbf{x})$ is a function call.
 
 \section{Technical Contributions}\label{sec:main}
 
-\todo[inline,caption={}]{Add a discussion of the innovation aspect and technical
-  parts. Motivate each part of \Cranetwo{} (e.g., how \FindBaseCases addresses
-  key issues in \textsc{Crane}).}
-
 \begin{figure*}[t]
   \centering
   \begin{tikzpicture}
@@ -598,21 +594,55 @@ is $f(\mathbf{x}) = \expr{}$, where $f(\mathbf{x})$ is a function call.
     which are then used to create a C++ program. This program can be executed
     with different command line arguments to calculate the model count of $\phi$
     for different domain sizes. To accomplish this, the \CompileWithBaseCases
-    procedure makes use of the FOKC algorithm of \textsc{Crane}, algebraic
-    simplification techniques (denoted as \Simplify), and two other auxiliary
-    procedures. }\label{fig:overview}
+    procedure uses \textsc{Crane}, algebraic simplification techniques (denoted
+    as \Simplify), and two other auxiliary procedures. }\label{fig:overview}
 \end{figure*}
 
-\Cref{fig:overview} provides an overview of \Cranetwo{}'s workflow.
-\Cref{sec:completing} describes the main algorithm for completing the
-definitions of recursive functions with a sufficient set of base cases.
-\Cref{sec:identifying,sec:propagating} describe subsidiary algorithms for
-constructing a set of base cases and their corresponding logical formulas.
-\Cref{sec:smoothing} explains the post-processing techniques for ensuring
-accurate model counting. Additionally, \cref{sec:cpp} explains the process of
-compiling equations into C++ code, greatly expanding upon the range of formulas
-that could previously be handled by similar
-approaches~\cite{DBLP:conf/kr/KazemiP16}.
+\Cref{fig:overview} provides an overview of \Cranetwo{}'s workflow. Below we
+briefly describe and motivate each procedure before going into more detail in
+the corresponding subsection.
+
+\CompileWithBaseCases (see \cref{sec:completing}), the core procedure of
+\Cranetwo{}, is responsible for completing the function definitions produced by
+\textsc{Crane} with the necessary base cases. To do so, it may recursively call
+itself (and \textsc{Crane}) on other formulas. We prove that the number of such
+recursive calls is upper bounded by the number of domains in the formula.
+
+\cref{sec:completing} also describes the \Simplify procedure for algebraic
+simplification. It is crucial for simplifying, e.g., a sum of $n$ terms, only
+two of which are non-zero. More generally, the equations returned by
+\textsc{Crane} often benefit from easy-to-detect algebraic simplifications such
+as $0 \cdot \text{anything} = 0$ and $\text{anything}^{0} = 1$.
+
+\FindBaseCases (described in \cref{sec:identifying}) inspects a set of equations
+to identify a sufficient set of base cases for a given set of equations. We
+prove that the returned set of base cases is sufficient, and the evaluation of
+the resulting function definitions will never get stuck in an infinite loop.
+
+\Cref{sec:propagating} introduces the \Propagate procedure that takes a formula
+$\phi$, a domain $\Delta$, and $n \in \mathbb{N}_{0}$. It returns $\phi$
+transformed with the assumption that $|\Delta| = n$, introducing $n$ new
+constants and removing all variables quantified over $\Delta$. For example, when
+computing a base case such as $f(0, y)$, \Propagate will significantly simplify
+$\phi$ with the assumption that the domain associated with the first parameter
+of $f$ (i.e., $\mathcal{D}(f, 1)$) is empty. When run on this simplified
+formula, \CompileWithBaseCases will return the equations for the base case
+$f(0, y)$.
+
+\Cref{sec:smoothing} describes a new kind of \emph{smoothing} used to ensure
+that \Propagate preserves the correct model count. Smoothing is a well-known
+technique in knowledge compilation algorithms for propositional model
+counting~\cite{darwiche2001tractable}. Although it has been applied to FOMC
+before~\cite{DBLP:conf/ijcai/BroeckTMDR11}, our setting requires a novel
+approach.
+
+\CompileWithBaseCases, together with the other procedures outlined above, return
+a set of equations that fully cover the base cases of all recursive functions.
+While these equations can be interesting and valuable in their own right, the
+users of FOMC algorithms typically expect a numerical answer. Thus,
+\cref{sec:cpp} describes how these equations are compiled into a C++ program
+that can be executed with different command-line arguments to compute the model
+count for different combinations of domain sizes.
 
 \subsection{Completing the Definitions of Functions}\label{sec:completing}
 
@@ -949,10 +979,9 @@ replacing the $m$ variables in $C$ with the $n$ new constants.
 
 \subsection{Smoothing the Base Cases}\label{sec:smoothing}
 
-\emph{Smoothing} modifies a circuit to reintroduce eliminated atoms, ensuring
-the correct model
-count~\cite{darwiche2001tractable,DBLP:conf/ijcai/BroeckTMDR11}. In this
-section, we describe a similar process performed on
+Smoothing modifies a circuit to reintroduce eliminated atoms, ensuring the
+correct model count~\cite{darwiche2001tractable,DBLP:conf/ijcai/BroeckTMDR11}.
+In this section, we describe a similar process performed on
 lines~\ref{line:presmoothing}--\ref{line:smoothing2} of \cref{alg:propagate}.
 Line~\ref{line:presmoothing} checks if smoothing is necessary, and
 lines~\ref{line:smoothing1} and~\ref{line:smoothing2} execute it. If the
