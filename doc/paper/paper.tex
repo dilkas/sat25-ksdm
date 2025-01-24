@@ -1067,15 +1067,6 @@ return it.
 
 \section{Experimental Evaluation}\label{sec:experiments}
 
-% 1. Introduction
-% Objective: Briefly state the goals of the experiments.
-% Overview: Summarize the structure of the section.
-
-% 2. Experimental Setup
-
-% Baselines: List and describe the baseline methods or systems used for
-% comparison.
-
 \todo[inline]{Expand the section, adding a more thorough and independent
   practical assessment}
 
@@ -1093,17 +1084,6 @@ The experiments were conducted using an Intel Skylake \SI{2.4}{\giga\hertz} CPU
 with \SI{188}{\gibi\byte} of memory and CentOS~7. C++ programs were compiled
 using the Intel C++ Compiler 2020u4. \textsc{FastWFOMC} ran on Julia~1.10.4,
 while the other algorithms were executed on the Java Virtual Machine 1.8.0\_201.
-
-% It would not make sense to include the original \textsc{Crane} algorithm in
-% the experiments or evaluate \Cranetwo{} without the C++ code generation
-% described in \cref{sec:cpp}. Indeed, these algorithms can only produce
-% mathematical definitions of functions without evaluating them.
-
-% While greedy search is more efficient (in terms of being able to handle larger
-% formulas), it is a heuristic that can miss some solutions.
-
-% Datasets: Provide details about the datasets used in the experiments,
-% including size, source, and any preprocessing steps.
 
 \subsection{Benchmarks}
 
@@ -1180,15 +1160,6 @@ where $w^{-}(R) = w^{-}(S) = -1$.
 
 \todo[inline]{Shrink/restructure to fit into the margins}
 
-%Since \textsc{FastWFOMC} does not support many-sorted logic, our experiments are
-%limited to formulas with a single domain. However, many of the counting problems
-%used in the experimental evaluation of
-%\textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23} become equivalent (in terms of
-%generating equivalent integer sequences) when restricted to a single domain.
-%Additionally, comparing \Cranetwo{} and \textsc{FastWFOMC} on a broader set of
-%problems is challenging because each problem needs to be represented in two
-%(quite different) logics: \FO{} and \UFO{}.
-
 The three benchmark families cover a wide range of possibilities. The
 `friends' benchmark stands out as it uses multiple predicates and can be
 expressed in \FO{} using just two variables without cardinality constraints or
@@ -1198,40 +1169,17 @@ quantifiers, or more than two variables. Lastly, the `bijections' benchmark is
 an example of a formula that \textsc{FastWFOMC} can handle but \textsc{ForcLift}
 cannot.
 
-% Metrics: Define the performance metrics used to evaluate the results (e.g.,
-% accuracy, precision, recall, F1-score, runtime).
-
-%A considerable difference between \textsc{ForcLift} and the other two algorithms
-%is that \textsc{ForcLift} does not support arbitrary precision whereas the other
-%algorithms use the GNU Multiple Precision Arithmetic Library. Thus, when the
-%count exceeds finite precision, \textsc{ForcLift} returns $\infty$.
-
 For evaluation purposes, we ran each algorithm on each benchmark using domains
 of sizes $2^{1}, 2^{2}, 2^{3}$, and so on, until an algorithm failed to handle a
 domain size due to timeout, out of memory error, or out of precision errors.
 While we separately measured compilation and inference time, we primarily focus
 on total runtime, dominated by the latter.
 
-% Environment: Describe the hardware and software environment (e.g.,
-% specifications of the computer, operating system, libraries, and tools used).
-
-
-
-% 3. Results and Analysis
-% Presentation of Results: Use tables, graphs, and charts to present the experimental results clearly.
-% Comparison with Baselines: Compare your method’s results with the baselines.
-% Discussion: Analyze and interpret the results, highlighting the strengths and potential weaknesses of your approach.
-% Insights: Provide insights or patterns observed from the results.
-% Challenges: Discuss any challenges or unexpected outcomes.
-% Acknowledgement: Honestly acknowledge any limitations of your experiments or method.
-
 \subsection{Results}
 
 \todo[inline,caption={}]{
   \begin{itemize}
-    \item On the `friends' and `functions' benchmarks, \textsc{ForcLift} runs
-          until the model count exceeds $2^{31}-1$.
-    \item We are not aware of any formulas on which \Cranetwo{} scales worse
+     \item We are not aware of any formulas on which \Cranetwo{} scales worse
           compared to either \textsc{ForcLift} or \textsc{FastWFOMC}. The one
           advantage that \textsc{FastWFOMC} has over \Cranetwo{} is its support
           for counting quantifiers.
@@ -1246,15 +1194,15 @@ on total runtime, dominated by the latter.
 \textsc{FastWFOMC} and \Cranebfs{} could handle the bijection-counting problem.
 For this benchmark, the largest domain sizes these algorithms could accommodate
 were \num{64} and \num{4096}, respectively. On the other two benchmarks,
-\textsc{ForcLift} had the lowest runtime. However, due to its finite precision,
-it only scaled up to domain sizes of \num{16} and \num{128} for `friends' and
-`functions', respectively. \textsc{FastWFOMC} outperformed \textsc{ForcLift} in
-the case of `friends', but not `functions', as it could handle domains of size
-\num{1024} and \num{64}, respectively. Furthermore, both \Cranebfs{} and
-\Cranegreedy{} performed similarly on both benchmarks. Similarly to the
-`bijections' benchmark, \Cranetwo{} significantly outperformed the other two
-algorithms, scaling up to domains of size \num{8192} and \num{67108864},
-respectively.
+\textsc{ForcLift} had the lowest runtime. However, since it can only handle
+model counts smaller than $2^{31}$, it only scales up to domain sizes of
+\num{16} and \num{128} for `friends' and `functions', respectively.
+\textsc{FastWFOMC} outperformed \textsc{ForcLift} in the case of `friends', but
+not `functions', as it could handle domains of size \num{1024} and \num{64},
+respectively. Furthermore, both \Cranebfs{} and \Cranegreedy{} performed
+similarly on both benchmarks. Similarly to the `bijections' benchmark,
+\Cranetwo{} significantly outperformed the other two algorithms, scaling up to
+domains of size \num{8192} and \num{67108864}, respectively.
 
 Another aspect of the experimental results that deserves separate discussion is
 compilation. Both Julia and Scala use just-in-time (JIT) compilation, which
@@ -1267,10 +1215,6 @@ neither significantly affects overall runtime. Specifically, \textsc{ForcLift}
 compilation typically takes around \SI{0.5}{\second}, while \Cranetwo{}
 compilation takes around \SI{2.3}{\second}.
 
-% 8. Conclusion
-% Summary: Briefly summarize the key findings from the experimental results.
-% Future Work: Suggest directions for future research based on your findings.
-
 Based on our experiments, which algorithm should be used in practice? If the
 formula can be handled by \textsc{ForcLift} and the domain sizes are reasonably
 small, \textsc{ForcLift} is likely the fastest algorithm. In other situations,
@@ -1281,7 +1225,7 @@ handle the formula.
 \section{Conclusion and Future Work}\label{sec:conclusion}
 
 In this work, we have presented a scalable automated FOKC-based approach to
-FOMC. Our algorithm involves completing the definitions of recursive functions
+FOMC\@. Our algorithm involves completing the definitions of recursive functions
 and subsequently translating all function definitions into C++ code. Empirical
 results demonstrate that \Cranetwo{} can scale to larger domain sizes than
 \textsc{FastWFOMC} while supporting a wider range of formulas than

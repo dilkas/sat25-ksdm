@@ -3,9 +3,9 @@ library(scales)
 library(tikzDevice)
 library(ggpubr)
 
-# df <- read.csv("../results/processed/results_with_counts.csv")
-# df$count <- NULL
-# write.csv(df, "../results/processed/results.csv")
+df <- read.csv("../results/processed/results_with_counts.csv")
+df$count <- NULL
+write.csv(df, "../results/processed/results.csv")
 
 df <- read.csv("../results/processed/results.csv")
 df$compilation.time <- df$compilation.time / 1000
@@ -25,7 +25,7 @@ df <- df[df$domain.size > 1,]
 # differences <- df %>% group_by(sequence, domain.size) %>%
 #   summarise(diff = 100 * (max(count) - min(count)) / min(count))
 
-tikz(file = "../doc/paper/plot.tex", width = 7, height = 3,
+tikz(file = "../doc/paper/plot.tex", width = 5, height = 2,
      standAlone = TRUE)
 ggplot(df, aes(domain.size, time, color = algorithm, linetype = algorithm,
                shape = algorithm)) +
