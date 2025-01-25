@@ -2,10 +2,11 @@ library(tidyverse)
 library(scales)
 library(tikzDevice)
 library(ggpubr)
+library(RColorBrewer)
 
-df <- read.csv("../results/processed/results_with_counts.csv")
-df$count <- NULL
-write.csv(df, "../results/processed/results.csv")
+#df <- read.csv("../results/processed/results_with_counts.csv")
+#df$count <- NULL
+#write.csv(df, "../results/processed/results.csv")
 
 df <- read.csv("../results/processed/results.csv")
 df$compilation.time <- df$compilation.time / 1000
@@ -19,6 +20,7 @@ df$sequence[df$sequence == "bijections"] <- "Bijections"
 df$sequence[df$sequence == "friends"] <- "Friends"
 df$sequence[df$sequence == "functions"] <- "Functions"
 df <- df[df$domain.size > 1,]
+dark2_colors <- brewer.pal(8, "Dark2")
 
 # Sanity check: differences between max and min counts as a percentage of the
 # min count
@@ -44,6 +46,65 @@ ggplot(df, aes(domain.size, time, color = algorithm, linetype = algorithm,
   theme(legend.position = "bottom") +
   scale_color_brewer(palette = "Dark2") +
   facet_wrap(vars(sequence))
+dev.off()
+
+tikz(file = "../../misc/talks-and-notes/monthly_talk/bijections.tex",
+     width = 4.25, height = 3, standAlone = TRUE)
+ggplot(df[df$sequence == "Bijections",],
+       aes(domain.size, time, color = algorithm, linetype = algorithm,
+           shape = algorithm)) +
+  geom_line() +
+  geom_point() +
+  scale_x_continuous(trans = log2_trans(), breaks = c(8, 64, 512, 4096),
+                     labels = c("$2^{3}$", "$2^{6}$", "$2^{9}$", "$2^{12}$")) +
+  scale_y_continuous(trans = log2_trans()) +
+  annotation_logticks(sides = "bl", colour = "#b3b3b3", base = 2) +
+  ylab("Total runtime (s)") +
+  xlab("Domain size") +
+  labs(color = "", linetype = "", shape = "") +
+  theme_grey(base_size = 9) +
+  theme(legend.position = "bottom") +
+  scale_color_manual(values = c(dark2_colors[1], dark2_colors[3])) +
+  scale_linetype_manual(values = c(1, 5)) +
+  scale_shape_manual(values = c(16, 15))
+dev.off()
+
+tikz(file = "../../misc/talks-and-notes/monthly_talk/friends.tex",
+     width = 4.25, height = 3, standAlone = TRUE)
+ggplot(df[df$sequence == "Friends",],
+       aes(domain.size, time, color = algorithm, linetype = algorithm,
+           shape = algorithm)) +
+  geom_line() +
+  geom_point() +
+  scale_x_continuous(trans = log2_trans(), breaks = c(8, 64, 512, 4096),
+                     labels = c("$2^{3}$", "$2^{6}$", "$2^{9}$", "$2^{12}$")) +
+  scale_y_continuous(trans = log2_trans()) +
+  annotation_logticks(sides = "bl", colour = "#b3b3b3", base = 2) +
+  ylab("Total runtime (s)") +
+  xlab("Domain size") +
+  labs(color = "", linetype = "", shape = "") +
+  theme_grey(base_size = 9) +
+  theme(legend.position = "bottom") +
+  scale_color_brewer(palette = "Dark2")
+dev.off()
+
+tikz(file = "../../misc/talks-and-notes/monthly_talk/functions.tex",
+     width = 4.25, height = 3, standAlone = TRUE)
+ggplot(df[df$sequence == "Functions",],
+       aes(domain.size, time, color = algorithm, linetype = algorithm,
+           shape = algorithm)) +
+  geom_line() +
+  geom_point() +
+  scale_x_continuous(trans = log2_trans(), breaks = c(8, 64, 512, 4096),
+                     labels = c("$2^{3}$", "$2^{6}$", "$2^{9}$", "$2^{12}$")) +
+  scale_y_continuous(trans = log2_trans()) +
+  annotation_logticks(sides = "bl", colour = "#b3b3b3", base = 2) +
+  ylab("Total runtime (s)") +
+  xlab("Domain size") +
+  labs(color = "", linetype = "", shape = "") +
+  theme_grey(base_size = 9) +
+  theme(legend.position = "bottom") +
+  scale_color_brewer(palette = "Dark2")
 dev.off()
 
 # ============== DEGREE FINDING (not doing this right now) ================
