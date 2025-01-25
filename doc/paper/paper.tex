@@ -141,14 +141,11 @@
   \begin{itemize}
     \item Perhaps I can list the `authors contributed equally' statement as part
           of Funding. Check K's recent papers.
-    \item Finish adding DOIs or URLs to (non-book) references (and reformatting
-          indentation) (and check reference formatting) (is the part about
-          non-book references correct? Check previous proceedings) (maybe one
-          more exception (graded logics)?) (I might be done)
     \item Sentence vs formula: be consistent and not confusing
     \item 15 pages excluding references
     \item Go through the rest of formatting instructions (in GTD)
-    \item Make sure all the references (e.g., to examples are still valid)
+    \item Make sure all the internal references (e.g., to examples) are still
+          valid
     \item Maybe add extra references to subsections
   \end{itemize}
 }
@@ -710,7 +707,7 @@ for the algorithm to terminate.\footnote{Note that characterising the
   fine-grained complexity of the solutions found by \Cranetwo{} or other FOMC
   algorithms is an emerging area of research. These questions have been
   partially addressed in previous
-  work~\cite{DBLP:conf/kr/DilkasB23,tóth2024complexityweightedfirstordermodel}
+  work~\cite{DBLP:conf/kr/DilkasB23,DBLP:conf/kr/TothK24}
   and are orthogonal to the goals of this section.} For the remainder of this
 section, let $\mathcal{E}$ denote the equations returned by
 \CompileWithBaseCases.
@@ -994,9 +991,7 @@ return it.
 
 Our empirical evaluation sought to compare the runtime performance of
 {\Cranetwo} with the current state of the art, namely \textsc{FastWFOMC} and
-\textsc{ForcLift}. It is worth remarking that \textsc{ForcLift} does not support
-arbitrary precision, and returns error for cases that requires arbitrary
-precision reasoning. Our experiments involve two versions of \Cranetwo{}:
+\textsc{ForcLift}. Our experiments involve two versions of \Cranetwo{}:
 \Cranegreedy{} and \Cranebfs{}. Like its predecessor, \Cranetwo{} has two modes
 for applying compilation rules to formulas: one that uses a greedy search
 algorithm similar to \textsc{ForcLift} and another that combines greedy and
@@ -1019,19 +1014,27 @@ while the other algorithms were executed on the Java Virtual Machine 1.8.0\_201.
   \end{itemize}
 }
 
+We compare these algorithms using three benchmarks from previous studies. The
+first benchmark is the function-counting problem from \cref{example:functions},
+previously examined by Dilkas and Belle~\cite{DBLP:conf/kr/DilkasB23}. The
+second benchmark is a variant of the well-known `Friends and Smokers' (hitherto
+referred to as `friends') Markov logic
+network~\cite{DBLP:conf/aaai/SinglaD08,DBLP:conf/uai/BroeckCD12}. In \Ctwo{},
+\FO{}, and \UFO{}, this problem can be formulated as
+\[
+  (\forall x,y \in \Delta\text{. } S(x) \land F(x, y) \Rightarrow S(y)) \land (\forall x \in \Delta\text{. }S(x) \Rightarrow C(x))
+\]
+or, equivalently, in conjunctive normal form as
+\[
+  (\forall x,y \in \Delta\text{. }S(y) \lor \neg S(x) \lor \neg F(x, y)) \land (\forall x \in \Delta\text{. } C(x) \lor \neg S(x)).
+\]
+Finally, we include the bijection-counting problem previously utilised by Dilkas
+and Belle~\cite{DBLP:conf/kr/DilkasB23}. Its formulation in \FO{} is described
+in \cref{example:bijections}.
+
 \begin{example}[Counting functions]\label{example:functions}
   To define predicate $P$ as a function from a domain $\Delta$ to itself, in
-  \Ctwo{} one would write $\forall x \in \Delta\text{.
-  }\exists^{=1} y \in \Delta\text{. }P(x, y)$. In \UFO{}, the same could be
-  written as
-  \begin{equation}\label[formula]{eq:functions1}
-    (\forall x, y \in \Delta\text{. }S(x) \lor \neg P(x, y)) \land (|P| = |\Delta|),
-  \end{equation}
-  where $w^{-}(S) = -1$. Although \cref{eq:functions1} has more models compared
-  to its counterpart in \Ctwo{}, the negative weight $w^{-}(S) = -1$ makes some
-  of the terms in \cref{eq:wfomc} cancel out.
-
-  Equivalently, in \FO{} we would write
+  \FO{} we would write
   \begin{equation}\label[formula]{eq:fo}
     \begin{gathered}
       (\forall x \in \Gamma\text{. }\exists y \in \Delta\text{. }P(x, y)) \land (\forall x \in \Gamma\text{. }\forall y, z \in \Delta\text{. }P(x, y) \land P(x, z) \Rightarrow y = z).
@@ -1047,31 +1050,6 @@ while the other algorithms were executed on the Java Virtual Machine 1.8.0\_201.
   algorithms to find efficient solutions.
 \end{example}
 
-We compare these algorithms using three benchmarks from previous studies. The
-first benchmark is the function-counting problem from \cref{example:functions},
-previously examined by Dilkas and Belle~\cite{DBLP:conf/kr/DilkasB23}. The
-second benchmark is a variant of the well-known `Friends and Smokers' Markov
-logic network~\cite{DBLP:conf/aaai/SinglaD08,DBLP:conf/uai/BroeckCD12}. In
-\Ctwo{}, \FO{}, and \UFO{}, this problem can be formulated as
-\[
-  (\forall x,y \in \Delta\text{. } S(x) \land F(x, y) \Rightarrow S(y)) \land (\forall x \in \Delta\text{. }S(x) \Rightarrow C(x))
-\]
-or, equivalently, in conjunctive normal form as
-\[
-  (\forall x,y \in \Delta\text{. }S(y) \lor \neg S(x) \lor \neg F(x, y)) \land (\forall x \in \Delta\text{. } C(x) \lor \neg S(x)).
-\]
-Finally, we include the bijection-counting problem previously utilised by Dilkas
-and Belle~\cite{DBLP:conf/kr/DilkasB23}. Its formulation in \FO{} is described
-in \cref{example:bijections}. The equivalent formula in \Ctwo{} is
-\[
-  (\forall x \in \Delta\text{. }\exists^{=1} y \in \Delta\text{. }P(x, y)) \land (\forall y \in \Delta\text{. }\exists^{=1} x \in \Delta\text{. }P(x, y)).
-\]
-Similarly, in \UFO{} the same formula can be written as
-\[
-  (\forall x, y \in \Delta\text{. }R(x) \lor \neg P(x, y)) \land (\forall x, y \in \Delta\text{. }S(x) \lor \neg P(y, x)) \land (|P| = |\Delta|),
-\]
-where $w^{-}(R) = w^{-}(S) = -1$.
-
 \begin{figure*}[t]
   \centering
   \includegraphics{plot.pdf}
@@ -1079,8 +1057,9 @@ where $w^{-}(R) = w^{-}(S) = -1$.
     that both axes are on a logarithmic scale.}\label{fig:plot}
 \end{figure*}
 
-\todo[inline]{Add lines of best fit (and comment on them) to expand this section
-  a bit?}
+\todo[inline]{For each curve, check which polynomial or exponential model best
+  fits the data to expand this section a bit (without plotting them, but
+  describing the method).}
 
 The three benchmark families cover a wide range of possibilities. The
 `friends' benchmark stands out as it uses multiple predicates and can be
@@ -1111,6 +1090,10 @@ on total runtime, dominated by the latter.
           GNU Multiple Precision Arithmetic Library.
   \end{itemize}
 }
+
+\todo[inline]{Incorporate into the text below: It is worth remarking that
+  \textsc{ForcLift} does not support arbitrary precision, and returns error for
+  cases that requires arbitrary precision reasoning. }
 
 \Cref{fig:plot} presents a summary of the experimental results. Only
 \textsc{FastWFOMC} and \Cranebfs{} could handle the bijection-counting problem.
@@ -1198,6 +1181,8 @@ detailed insights into the computational demands of different formulas.
           \cref{sec:experiments})
     \item Make sure the rest of the paper doesn't refer to these logics (or
           describe examples in them)
+    \item Move the URLs to the main text
+    \item Later (probably) move this to a different file
   \end{itemize}
 }
 
@@ -1212,11 +1197,10 @@ its extensions
 \textsc{FastWFOMC}\footnote{\url{https://github.com/jan-toth/FastWFOMC.jl}} and
 related methods~\cite{DBLP:journals/jair/Kuzelka21,DBLP:conf/aaai/MalhotraS22}.
 Finally, \UFO{} is the input format supported by the most recent implementation
-of \textsc{FastWFOMC}~\cite{tóth2024complexityweightedfirstordermodel}. All
-three logics are function-free, and domains are always assumed to be finite. As
-usual, we presuppose the \emph{unique name assumption}, which states that two
-constants are equal if and only if they are the same
-constant~\cite{DBLP:books/aw/RN2020}.
+of \textsc{FastWFOMC}~\cite{DBLP:conf/kr/TothK24}. All three logics are
+function-free, and domains are always assumed to be finite. As usual, we
+presuppose the \emph{unique name assumption}, which states that two constants
+are equal if and only if they are the same constant~\cite{DBLP:books/aw/RN2020}.
 
 \renewcommand*{\thefootnote}{\arabic{footnote}}
 
@@ -1254,5 +1238,44 @@ other hand, does not support any existential quantifiers but instead
 incorporates \emph{(equality) cardinality constraints}. For example, $|P| = 3$
 constrains all models to have \emph{precisely three positive literals with the
   predicate $P$}.
+
+\subsection{Our Benchmarks in \Ctwo{} and \UFO{}}
+
+\todo[inline,caption={}]{
+  \begin{itemize}
+    \item An introductory paragraph
+    \item Figure out the right order in which the information below should be
+          presented
+    \item Make the text below coherent
+    \item Refer to it in the main text (and make sure the reference sticks when
+          I transfer this to a separate file)
+  \end{itemize}
+}
+
+`Friends' in \Ctwo{} and \UFO{} is the same as in \FO{}.
+
+For `bijections', the equivalent formula in \Ctwo{} is
+\[
+  (\forall x \in \Delta\text{. }\exists^{=1} y \in \Delta\text{.
+  }P(x, y)) \land (\forall y \in \Delta\text{. }\exists^{=1} x \in \Delta\text{.
+  }P(x, y)).
+\]
+Similarly, in \UFO{} the same formula can be written as
+\[
+  (\forall x, y \in \Delta\text{.
+  }R(x) \lor \neg P(x, y)) \land (\forall x, y \in \Delta\text{.
+  }S(x) \lor \neg P(y, x)) \land (|P| = |\Delta|),
+\]
+where $w^{-}(R) = w^{-}(S) = -1$.
+
+For `functions', in \Ctwo{} one would write $\forall x \in \Delta\text{.
+}\exists^{=1} y \in \Delta\text{. }P(x, y)$. In \UFO{}, the same could be
+written as
+\begin{equation}\label[formula]{eq:functions1}
+  (\forall x, y \in \Delta\text{. }S(x) \lor \neg P(x, y)) \land (|P| = |\Delta|),
+\end{equation}
+where $w^{-}(S) = -1$. Although \cref{eq:functions1} has more models compared to
+its counterpart in \Ctwo{}, the negative weight $w^{-}(S) = -1$ makes some of
+the terms in \cref{eq:wfomc} cancel out.
 
 \end{document}
