@@ -95,8 +95,12 @@ ggplot(df[df$sequence == "Functions",],
            shape = algorithm)) +
   geom_line() +
   geom_point() +
-  scale_x_continuous(trans = log2_trans(), breaks = c(8, 64, 512, 4096),
-                     labels = c("$2^{3}$", "$2^{6}$", "$2^{9}$", "$2^{12}$")) +
+  scale_x_continuous(trans = log2_trans(),
+                     breaks = c(8, 64, 512, 4096, 32768, 262144, 2097152,
+                                16777216, 134217728),
+                     labels = c("$2^{3}$", "$2^{6}$", "$2^{9}$", "$2^{12}$",
+                                "$2^{15}$", "$2^{18}$", "$2^{21}$", "$2^{24}$",
+                                "$2^{27}$")) +
   scale_y_continuous(trans = log2_trans()) +
   annotation_logticks(sides = "bl", colour = "#b3b3b3", base = 2) +
   ylab("Total runtime (s)") +
