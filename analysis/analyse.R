@@ -17,7 +17,7 @@ df$algorithm[df$algorithm == "greedy"] <- "\\textsc{Gantry-Greedy}"
 df$algorithm[df$algorithm == "fastwfomc"] <- "\\textsc{FastWFOMC}"
 df$algorithm[df$algorithm == "forclift"] <- "\\textsc{ForcLift}"
 df$sequence[df$sequence == "bijections"] <- "Bijections"
-df$sequence[df$sequence == "friends"] <- "Friends"
+df$sequence[df$sequence == "friends"] <- "Friends \\& Smokers"
 df$sequence[df$sequence == "functions"] <- "Functions"
 df <- df[df$domain.size > 1,]
 dark2_colors <- brewer.pal(8, "Dark2")

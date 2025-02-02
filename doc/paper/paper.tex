@@ -89,6 +89,9 @@
 \newcommand{\Cranetwo}{\textsc{Gantry}}
 \newcommand{\Cranebfs}{\textsc{Gantry-BFS}}
 \newcommand{\Cranegreedy}{\textsc{Gantry-Greedy}}
+\newcommand{\friends}{\emph{Friends \& Smokers}}
+\newcommand{\functions}{\emph{Functions}}
+\newcommand{\bijections}{\emph{Bijections}}
 
 \SetKwProg{Fn}{Function}{:}{}
 \SetKwData{Cache}{Cache}
@@ -640,6 +643,9 @@ formula.
   Given any \FO{} formula $\phi$, \CompileWithBaseCases{$\phi$} terminates.
 \end{theorem}
 
+\todo[inline]{Reformulate the theorem above into an upper bound (as I informally
+  mention earlier in the text)}
+
 To prove the theorem, we rely on two observations about the algorithms presented
 in \cref{sec:identifying,sec:propagating}.
 
@@ -996,63 +1002,68 @@ return it.
 Our empirical evaluation sought to compare the runtime performance of
 {\Cranetwo} with the current state of the art, namely \textsc{FastWFOMC} and
 \textsc{ForcLift}. Our experiments involve two versions of \Cranetwo{}:
-\Cranegreedy{} and \Cranebfs{}. Like its predecessor, \Cranetwo{} has two modes
-for applying compilation rules to formulas: one that uses a greedy search
-algorithm similar to \textsc{ForcLift} and another that combines greedy and
-BFS\@.
+\Cranegreedy{} and \Cranebfs{}. Like its predecessor (see
+\cref{sec:compilation}), \Cranetwo{} has two modes for applying compilation
+rules to formulas: one that uses a greedy search algorithm similar to
+\textsc{ForcLift} and another that combines greedy and BFS\@.
 
 The experiments were conducted using an Intel Skylake \SI{2.4}{\giga\hertz} CPU
 with \SI{188}{\gibi\byte} of memory and CentOS~7. C++ programs were compiled
 using the Intel C++ Compiler 2020u4. \textsc{FastWFOMC} ran on Julia~1.10.4,
 while the other algorithms were executed on the Java Virtual Machine 1.8.0\_201.
 
+We ran each algorithm on each benchmark using domains of sizes
+$2^{1}, 2^{2}, 2^{3}$, and so on, until an algorithm failed to handle a domain
+size due to timeout (of \SI{1}{\hour}), out of memory error, or out of precision
+errors. While we separately measured compilation and inference time, we
+primarily focus on total runtime, dominated by the latter.
+
 \subsection{Benchmarks}
 
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item Make sure it's clear what the `raw' instances are
-    \item Don't emphasise that the benchmarks come from my previous work
-    \item Integrate the example below into the text, possibly moving irrelevant
-          details (such as the formulas in other logics) to supplementary
-          material
-  \end{itemize}
-}
-
-We compare these algorithms using three benchmarks from previous studies. The
-first benchmark is the function-counting problem from \cref{example:functions},
-previously examined by Dilkas and Belle~\cite{DBLP:conf/kr/DilkasB23}. The
-second benchmark is a variant of the well-known `Friends and Smokers' (hitherto
-referred to as `friends') Markov logic
-network~\cite{DBLP:conf/aaai/SinglaD08,DBLP:conf/uai/BroeckCD12}. In \Ctwo{},
-\FO{}, and \UFO{}, this problem can be formulated as
+We compare these algorithms using three benchmarks from previous work. The first
+benchmark is the bijection-counting problem from \cref{example:bijections}. The
+next benchmark is a variant of the well-known \friends{} Markov logic
+network~\cite{DBLP:conf/aaai/SinglaD08,DBLP:conf/uai/BroeckCD12}, which can be
+formulated as
 \[
-  (\forall x,y \in \Delta\text{. } S(x) \land F(x, y) \Rightarrow S(y)) \land (\forall x \in \Delta\text{. }S(x) \Rightarrow C(x))
+  (\forall x,y \in \Delta\text{.
+  } S(x) \land F(x, y) \Rightarrow S(y)) \land (\forall x \in \Delta\text{.
+  }S(x) \Rightarrow C(x)).
 \]
-or, equivalently, in conjunctive normal form as
+In this formula, we have three predicates $S$, $F$, and $C$ that denote smoking,
+friendship, and cancer, respectively. The first clause states that friends of
+smokers are also smokers, and the second clause asserts that smoking causes
+cancer. Common additions to this formula include making the friendship relation
+symmetric and assigning probabilities to each clause. Finally, we include the
+function-counting problem~\cite{DBLP:conf/kr/DilkasB23}
 \[
-  (\forall x,y \in \Delta\text{. }S(y) \lor \neg S(x) \lor \neg F(x, y)) \land (\forall x \in \Delta\text{. } C(x) \lor \neg S(x)).
+  (\forall x \in \Gamma\text{. }\exists y \in \Delta\text{.
+  }P(x, y)) \land (\forall x \in \Gamma\text{. }\forall y, z \in \Delta\text{.
+  }P(x, y) \land P(x, z) \Rightarrow y = z)
 \]
-Finally, we include the bijection-counting problem previously utilised by Dilkas
-and Belle~\cite{DBLP:conf/kr/DilkasB23}. Its formulation in \FO{} is described
-in \cref{example:bijections}.
+as our last benchmark. Here, predicate $P$ is defined as a function from
+$\Gamma$ to $\Delta$. The first clause asserts that each $x$ must have at least
+one corresponding $y$, while the second clause ensures that there is only one
+such $y$.
 
-\begin{example}[Counting functions]\label{example:functions}
-  To define predicate $P$ as a function from a domain $\Delta$ to itself, in
-  \FO{} we would write
-  \begin{equation}\label[formula]{eq:fo}
-    \begin{gathered}
-      (\forall x \in \Gamma\text{. }\exists y \in \Delta\text{. }P(x, y)) \land (\forall x \in \Gamma\text{. }\forall y, z \in \Delta\text{. }P(x, y) \land P(x, z) \Rightarrow y = z).
-    \end{gathered}
-  \end{equation}
-  The first clause asserts that each $x$ must have at least one corresponding
-  $y$, while the second statement adds the condition that if $x$ is mapped to
-  both $y$ and $z$, then $y$ must equal $z$. It is important to note that
-  \cref{eq:fo} is written with two domains instead of just one. However, we can
-  still determine the correct number of functions by assuming that the sizes of
-  $\Gamma$ and $\Delta$ are equal. This formulation, as observed by Dilkas and
-  Belle~\cite{DBLP:conf/kr/DilkasB23}, can prove beneficial in enabling FOKC
-  algorithms to find efficient solutions.
-\end{example}
+\begin{remark*}
+  We formulate \bijections{} and \functions{} benchmarks using two domains
+  $\Gamma$ and $\Delta$ as such a formulation is known to help FOKC algorithms
+  find efficient solutions~\cite{DBLP:conf/kr/DilkasB23}. To compare \Cranetwo{}
+  and \textsc{ForcLift} with \textsc{FastWFOMC} that has no support for multiple
+  domains, we set $|\Gamma| = |\Delta|$.
+\end{remark*}
+
+The three benchmarks cover a wide range of possibilities. The \friends{}
+benchmark uses multiple predicates and can be expressed in \FO{} using two
+variables without cardinality constraints or counting quantifiers. The
+\functions{} benchmark, on the other hand, can still be handled by all the
+algorithms, but it requires cardinality constraints, counting quantifiers, or
+more than two variables, depending on the formulation and the capabilities of
+the algorithm. Lastly, the \bijections{} benchmark is an example of a formula
+that \textsc{FastWFOMC} can handle but \textsc{ForcLift} cannot.
+
+\subsection{Results}
 
 \begin{figure*}[t]
   \centering
@@ -1061,30 +1072,11 @@ in \cref{example:bijections}.
     that both axes are on a logarithmic scale.}\label{fig:plot}
 \end{figure*}
 
-\todo[inline]{For each curve, check which polynomial or exponential model best
-  fits the data to expand this section a bit (without plotting them, but
-  describing the method).}
-
-The three benchmark families cover a wide range of possibilities. The
-`friends' benchmark stands out as it uses multiple predicates and can be
-expressed in \FO{} using just two variables without cardinality constraints or
-counting quantifiers. The `functions' benchmark, on the other hand, can still be
-handled by all the algorithms, but it requires cardinality constraints, counting
-quantifiers, or more than two variables. Lastly, the `bijections' benchmark is
-an example of a formula that \textsc{FastWFOMC} can handle but \textsc{ForcLift}
-cannot.
-
-For evaluation purposes, we ran each algorithm on each benchmark using domains
-of sizes $2^{1}, 2^{2}, 2^{3}$, and so on, until an algorithm failed to handle a
-domain size due to timeout, out of memory error, or out of precision errors.
-While we separately measured compilation and inference time, we primarily focus
-on total runtime, dominated by the latter.
-
-\subsection{Results}
-
 \todo[inline,caption={}]{
   \begin{itemize}
-     \item We are not aware of any formulas on which \Cranetwo{} scales worse
+    \item Maybe add exact powers of two as vertical dotted lines (with both
+          labels and lines in, say, red). Also try to expand this section a bit.
+    \item We are not aware of any formulas on which \Cranetwo{} scales worse
           compared to either \textsc{ForcLift} or \textsc{FastWFOMC}. The one
           advantage that \textsc{FastWFOMC} has over \Cranetwo{} is its support
           for counting quantifiers.
@@ -1105,11 +1097,11 @@ For this benchmark, the largest domain sizes these algorithms could accommodate
 were \num{64} and \num{4096}, respectively. On the other two benchmarks,
 \textsc{ForcLift} had the lowest runtime. However, since it can only handle
 model counts smaller than $2^{31}$, it only scales up to domain sizes of
-\num{16} and \num{128} for `friends' and `functions', respectively.
-\textsc{FastWFOMC} outperformed \textsc{ForcLift} in the case of `friends', but
-not `functions', as it could handle domains of size \num{1024} and \num{64},
+\num{16} and \num{128} for \friends{} and \functions{}, respectively.
+\textsc{FastWFOMC} outperformed \textsc{ForcLift} in the case of \friends{}, but
+not \functions{}, as it could handle domains of size \num{1024} and \num{64},
 respectively. Furthermore, both \Cranebfs{} and \Cranegreedy{} performed
-similarly on both benchmarks. Similarly to the `bijections' benchmark,
+similarly on both benchmarks. Similarly to the \bijections{} benchmark,
 \Cranetwo{} significantly outperformed the other two algorithms, scaling up to
 domains of size \num{8192} and \num{67108864}, respectively.
 
@@ -1139,7 +1131,7 @@ and subsequently translating all function definitions into C++ code. Empirical
 results demonstrate that \Cranetwo{} can scale to larger domain sizes than
 \textsc{FastWFOMC} while supporting a wider range of formulas than
 \textsc{ForcLift}. The ability to efficiently handle large domain sizes is
-particularly crucial in the weighted setting, as illustrated by the `friends'
+particularly crucial in the weighted setting, as illustrated by the \friends{}
 example discussed in \cref{sec:experiments}, where the model captures complex
 social networks with probabilistic relationships. Without this scalability, the
 practical usefulness of these models would be limited.
@@ -1256,9 +1248,9 @@ constrains all models to have \emph{precisely three positive literals with the
   \end{itemize}
 }
 
-`Friends' in \Ctwo{} and \UFO{} is the same as in \FO{}.
+\friends{} in \Ctwo{} and \UFO{} is the same as in \FO{}.
 
-For `bijections', the equivalent formula in \Ctwo{} is
+For \bijections{}, the equivalent formula in \Ctwo{} is
 \[
   (\forall x \in \Delta\text{. }\exists^{=1} y \in \Delta\text{.
   }P(x, y)) \land (\forall y \in \Delta\text{. }\exists^{=1} x \in \Delta\text{.
@@ -1272,7 +1264,7 @@ Similarly, in \UFO{} the same formula can be written as
 \]
 where $w^{-}(R) = w^{-}(S) = -1$.
 
-For `functions', in \Ctwo{} one would write $\forall x \in \Delta\text{.
+For \functions{}, in \Ctwo{} one would write $\forall x \in \Delta\text{.
 }\exists^{=1} y \in \Delta\text{. }P(x, y)$. In \UFO{}, the same could be
 written as
 \begin{equation}\label[formula]{eq:functions1}

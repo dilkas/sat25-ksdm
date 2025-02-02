@@ -1,4 +1,4 @@
-TIMEOUT = 15
+TIMEOUT = 3600
 MAX_MEMORY_KB = 177419059
 
 CRANE = /usr/bin/time -v java -jar target/scala-2.11/crane-assembly-1.0.jar -t $(TIMEOUT) -d 0 --format-in mln
