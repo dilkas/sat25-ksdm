@@ -67,12 +67,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \usepackage[linesnumbered,ruled,vlined]{algorithm2e}
-\usepackage{booktabs}
-\usepackage{pifont}
 \usepackage{siunitx}
 \usepackage{tikz}
 \usepackage{microtype}
-\usepackage[backgroundcolor=lightgray]{todonotes}
+\usepackage[backgroundcolor=lightgray]{todonotes} % TODO: temporary
 \usepackage{mathtools}
 
 \usetikzlibrary{arrows.meta}
@@ -80,12 +78,8 @@
 \usetikzlibrary{positioning}
 \usetikzlibrary{shapes.misc}
 
-\newcommand{\cmark}{\ding{51}}
-\newcommand{\xmark}{\ding{55}}
 \newcommand{\expr}{\mathtt{expr}}
-\newcommand{\Ctwo}{$\mathsf{C}^{2}$}
 \newcommand{\FO}{$\mathsf{FO}$}
-\newcommand{\UFO}{$\mathsf{UFO}^{2} + \mathsf{CC}$}
 \newcommand{\Cranetwo}{\textsc{Gantry}}
 \newcommand{\Cranebfs}{\textsc{Gantry-BFS}}
 \newcommand{\Cranegreedy}{\textsc{Gantry-Greedy}}
@@ -219,13 +213,14 @@ FOMC algorithms are diverse, with approaches ranging from \emph{first-order
   knowledge compilation} (FOKC) to cell
 enumeration~\cite{DBLP:conf/uai/BremenK21}, local
 search~\cite{DBLP:journals/pvldb/NiuRDS11}, and Monte Carlo
-sampling~\cite{DBLP:journals/cacm/GogateD16}. Among these, FOKC-based algorithms
-are particularly prominent, transforming formulas into structured
-representations such as circuits or graphs. Even when multiple algorithms are
-able to solve the same instance, FOKC algorithms are known to find
-polynomial-time solutions, where the polynomial has a lower degree compared to
-other approaches~\cite{DBLP:conf/kr/DilkasB23}. The recently developed ability
-of a FOKC algorithm to formulate solutions in terms of recursive
+sampling~\cite{DBLP:journals/cacm/GogateD16}. (See the technical appendix for a
+more detailed comparison of the state-of-the-art FOMC algorithms.) Among these,
+FOKC-based algorithms are particularly prominent, transforming formulas into
+structured representations such as circuits or graphs. Even when multiple
+algorithms are able to solve the same instance, FOKC algorithms are known to
+find polynomial-time solutions, where the polynomial has a lower degree compared
+to other approaches~\cite{DBLP:conf/kr/DilkasB23}. The recently developed
+ability of a FOKC algorithm to formulate solutions in terms of recursive
 functions~\cite{DBLP:conf/kr/DilkasB23} is also noteworthy as the only other
 proposed alternative is to guess recursive
 relations~\cite{DBLP:conf/ilp/BarvinekB0ZK21}. Notable examples of FOKC
@@ -265,11 +260,10 @@ future work.
 }
 
 In \cref{sec:logic}, we summarise the basic principles of first-order logic.
-Then, in \cref{sec:threelogics}, we formally define (W)FOMC and discuss the
-distinctions between three variations of first-order logic used for FOMC.\@
-Finally, in \cref{sec:algebra}, we introduce the terminology used to describe
-the output of the original \textsc{Crane} algorithm, i.e., functions and
-equations that define them.
+Then, in ??, we formally define (W)FOMC and\ldots Finally, in
+\cref{sec:algebra}, we introduce the terminology used to describe the output of
+the original \textsc{Crane} algorithm, i.e., functions and equations that define
+them.
 
 \paragraph*{Notation}
 We use $\mathbb{N}_{0}$ to represent the set of non-negative integers. In both
@@ -1109,13 +1103,6 @@ handle the formula.
 
 \section{Conclusion and Future Work}\label{sec:conclusion}
 
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item Somewhere: reference the appendix, saying that `we provide a more
-          detailed comparison of the capabilities of the algorithms'
-  \end{itemize}
-}
-
 In this work, we have presented a scalable automated FOKC-based approach to
 FOMC\@. Our algorithm involves completing the definitions of recursive functions
 and subsequently translating all function definitions into C++ code. Empirical
@@ -1130,139 +1117,13 @@ practical usefulness of these models would be limited.
 Future directions for research include conducting a comprehensive experimental
 comparison of FOMC algorithms to better understand their comparative performance
 across various formulas. The capabilities of \Cranetwo{} could also be
-characterised theoretically, e.g.\ by proving completeness for specific logic
-fragments like \Ctwo{}. Additionally, the efficiency of FOMC algorithms can be
-further analysed using fine-grained complexity, which would provide more
+characterised theoretically, e.g., by proving completeness for logic fragments
+liftable by other algorithms. Additionally, the efficiency of FOMC algorithms
+can be further analysed using fine-grained complexity, which would provide more
 detailed insights into the computational demands of different formulas.
 
+\todo[inline]{Cite a bunch of papers for the liftable fragments.}
+
 \bibliography{paper}
-
-\appendix
-\section{The Three Logics of FOMC}\label{sec:threelogics}
-
-\begin{table}[t]
-  \centering
-  \begin{tabular}{llclll}
-    \toprule
-    Logic & Sorts & Constants & Variables & Quantifiers & Additional atoms\\
-    \midrule
-    \FO & one or more & \cmark & unlimited & $\forall$, $\exists$ & $x = y$\\
-    \Ctwo & one & \xmark & two & $\forall$, $\exists$, $\exists^{= k}$, $\exists^{\le k}$, $\exists^{\ge k}$ & ---\\
-    \UFO & one & \xmark & two & $\forall$ & $|P| = m$\\
-    \bottomrule
-  \end{tabular}
-  \caption{A comparison of the three logics used in FOMC\@. The
-    2\textsuperscript{nd}--5\textsuperscript{th} columns refer to: the number of
-    sorts, support for constants, the maximum number of variables, and supported
-    quantifiers, respectively. The last column lists supported atoms in addition
-    to those of the form $P(\mathbf{t})$ for a predicate $P/n$ and an $n$-tuple
-    of terms $\mathbf{t}$. Here: $k$ and $m$ are non-negative integers, with the
-    latter depending on the domain size, $P$ represents a predicate, and $x$ and
-    $y$ are terms. }\label{tbl:logics}
-\end{table}
-
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item Reference the table
-    \item Delete references to this appendix (except for one place, probably in
-          \cref{sec:experiments})
-    \item Make sure the rest of the paper doesn't refer to these logics (or
-          describe examples in them)
-    \item Move the URLs to the main text
-    \item Later (probably) move this to a different file
-  \end{itemize}
-}
-
-\renewcommand*{\thefootnote}{\fnsymbol{footnote}}
-
-There are three first-order logics commonly used in FOMC: \FO{}, \Ctwo{}, and
-\UFO{}. First, \FO{} is the input format for
-\textsc{ForcLift}\footnote{\url{https://github.com/UCLA-StarAI/Forclift}} and
-its extensions
-\textsc{Crane}\footnote{\url{https://doi.org/10.5281/zenodo.8004077}} and
-\Cranetwo{}. Second, \Ctwo{} is often used in the literature on
-\textsc{FastWFOMC}\footnote{\url{https://github.com/jan-toth/FastWFOMC.jl}} and
-related methods~\cite{DBLP:journals/jair/Kuzelka21,DBLP:conf/aaai/MalhotraS22}.
-Finally, \UFO{} is the input format supported by the most recent implementation
-of \textsc{FastWFOMC}~\cite{DBLP:conf/kr/TothK24}. All three logics are
-function-free, and domains are always assumed to be finite. As usual, we
-presuppose the \emph{unique name assumption}, which states that two constants
-are equal if and only if they are the same constant~\cite{DBLP:books/aw/RN2020}.
-
-\renewcommand*{\thefootnote}{\arabic{footnote}}
-
-In \FO{}, each term is assigned to a \emph{sort}, and each predicate $P/n$ is
-assigned to a sequence of $n$ sorts. Each sort has its corresponding domain.
-These assignments to sorts are typically left implicit and can be reconstructed
-from the quantifiers. For example, $\forall x,y \in \Delta\text{. }P(x, y)$
-implies that variables $x$ and $y$ have the same sort. On the other hand,
-$\forall x \in \Delta\text{. }\forall y \in \Gamma\text{. } P(x, y)$ implies
-that $x$ and $y$ have different sorts, and it would be improper to write, for
-example, $\forall x \in \Delta\text{. }\forall y \in \Gamma\text{.
-} P(x, y) \lor x = y$. \FO{} is also the only logic to support constants,
-formulas with more than two variables, and the equality predicate. While we do
-not explicitly refer to sorts in subsequent sections of this paper, the
-many-sorted nature of \FO{} is paramount to the algorithms presented therein.
-
-\begin{remark*}
-  In the case of \textsc{ForcLift} and its extensions, support for a formula as
-  valid input does not imply that the algorithm can compile the formula into a
-  circuit or graph suitable for lifted model counting. However, it is known that
-  \textsc{ForcLift} compilation is guaranteed to succeed on any \FO{} formula
-  without constants and with at most two
-  variables~\cite{DBLP:conf/nips/Broeck11,DBLP:conf/kr/BroeckMD14}.
-\end{remark*}
-
-Compared to \FO{}, \Ctwo{} and \UFO{} lack support for constants, the equality
-predicate, multiple domains, and formulas with more than two variables. The
-advantage that \Ctwo{} brings over \FO{} is the inclusion of \emph{counting
-  quantifiers}. That is, alongside $\forall$ and $\exists$, \Ctwo{} supports
-$\exists^{=k}$, $\exists^{\le k}$, and $\exists^{\ge k}$ for any positive
-integer $k$. For example, $\exists^{=1} x\text{. }\phi(x)$ means that there
-exists \emph{exactly one} $x$ such that $\phi(x)$, and $\exists^{\le 2} x\text{.
-}\phi(x)$ means that there exist \emph{at most two} such $x$. \UFO{}, on the
-other hand, does not support any existential quantifiers but instead
-incorporates \emph{(equality) cardinality constraints}. For example, $|P| = 3$
-constrains all models to have \emph{precisely three positive literals with the
-  predicate $P$}.
-
-\subsection{Our Benchmarks in \Ctwo{} and \UFO{}}
-
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item An introductory paragraph
-    \item Figure out the right order in which the information below should be
-          presented
-    \item Make the text below coherent
-    \item Refer to it in the main text (and make sure the reference sticks when
-          I transfer this to a separate file)
-  \end{itemize}
-}
-
-\friends{} in \Ctwo{} and \UFO{} is the same as in \FO{}.
-
-For \bijections{}, the equivalent formula in \Ctwo{} is
-\[
-  (\forall x \in \Delta\text{. }\exists^{=1} y \in \Delta\text{.
-  }P(x, y)) \land (\forall y \in \Delta\text{. }\exists^{=1} x \in \Delta\text{.
-  }P(x, y)).
-\]
-Similarly, in \UFO{} the same formula can be written as
-\[
-  (\forall x, y \in \Delta\text{.
-  }R(x) \lor \neg P(x, y)) \land (\forall x, y \in \Delta\text{.
-  }S(x) \lor \neg P(y, x)) \land (|P| = |\Delta|),
-\]
-where $w^{-}(R) = w^{-}(S) = -1$.
-
-For \functions{}, in \Ctwo{} one would write $\forall x \in \Delta\text{.
-}\exists^{=1} y \in \Delta\text{. }P(x, y)$. In \UFO{}, the same could be
-written as
-\begin{equation}\label[formula]{eq:functions1}
-  (\forall x, y \in \Delta\text{. }S(x) \lor \neg P(x, y)) \land (|P| = |\Delta|),
-\end{equation}
-where $w^{-}(S) = -1$. Although \cref{eq:functions1} has more models compared to
-its counterpart in \Ctwo{}, the negative weight $w^{-}(S) = -1$ makes some of
-the terms in \cref{eq:wfomc} cancel out.
 
 \end{document}

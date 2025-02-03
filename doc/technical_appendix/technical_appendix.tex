@@ -1,0 +1,208 @@
+\documentclass[a4paper,UKenglish,cleveref, autoref, thm-restate]{lipics-v2021}
+%This is a template for producing LIPIcs articles. 
+%See lipics-v2021-authors-guidelines.pdf for further information.
+%for A4 paper format use option "a4paper", for US-letter use option "letterpaper"
+%for british hyphenation rules use option "UKenglish", for american hyphenation rules use option "USenglish"
+%for section-numbered lemmas etc., use "numberwithinsect"
+%for enabling cleveref support, use "cleveref"
+%for enabling autoref support, use "autoref"
+%for anonymousing the authors (e.g. for double-blind review), add "anonymous"
+%for enabling thm-restate support, use "thm-restate"
+%for enabling a two-column layout for the author/affilation part (only applicable for > 6 authors), use "authorcolumns"
+%for producing a PDF according the PDF/A standard, add "pdfa"
+
+\pdfoutput=1 %uncomment to ensure pdflatex processing (mandatatory e.g. to submit to arXiv)
+\hideLIPIcs  %uncomment to remove references to LIPIcs series (logo, DOI, ...), e.g. when preparing a pre-final version to be uploaded to arXiv or another public repository
+
+%\graphicspath{{./graphics/}}%helpful if your graphic files are in another directory
+
+\bibliographystyle{plainurl}% the mandatory bibstyle
+
+\title{Towards Practical First-Order Model Counting: Technical Appendix}
+
+\author{Ananth K. Kidambi}{Indian Institute of Technology Bombay, Mumbai, India}{210051002@iitb.ac.in}{}{}
+\author{Guramrit Singh}{Indian Institute of Technology Bombay, Mumbai, India}{guramrit@iitb.ac.in}{}{}
+\author{Paulius Dilkas}{University of Toronto, Toronto, Canada \and Vector Institute, Toronto, Canada \and \url{https://dilkas.github.io/}}{paulius.dilkas@utoronto.ca}{https://orcid.org/0000-0001-9185-7840}{}
+\author{Kuldeep S. Meel}{University of Toronto, Toronto, Canada \and \url{https://www.cs.toronto.edu/~meel/}}{meel@cs.toronto.edu}{https://orcid.org/0000-0001-9423-5270}{}
+
+\authorrunning{A.\,K. Kidambi, G. Singh, P. Dilkas, and K.\,S. Meel}
+\Copyright{Ananth K. Kidambi, Guramrit Singh, Paulius Dilkas, and Kuldeep S. Meel}
+
+\relatedversion{} %optional, e.g. full version hosted on arXiv, HAL, or other respository/website
+
+%\supplement{}%optional, e.g. related research data, source code, ... hosted on a repository like zenodo, figshare, GitHub, ...
+%\supplementdetails[linktext={opt. text shown instead of the URL}, cite=DBLP:books/mk/GrayR93, subcategory={Description, Subcategory}, swhid={Software Heritage Identifier}]{General Classification (e.g. Software, Dataset, Model, ...)}{URL to related version} %linktext, cite, and subcategory are optional
+
+%\funding{(Optional) general funding statement \dots}%optional, to capture a funding statement, which applies to all authors. Please enter author specific funding statements as fifth argument of the \author macro.
+
+%\acknowledgements{I want to thank \dots}%optional
+
+%\nolinenumbers %uncomment to disable line numbering
+
+
+
+%Editor-only macros:: begin (do not touch as author)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\EventEditors{John Q. Open and Joan R. Access}
+\EventNoEds{2}
+\EventLongTitle{42nd Conference on Very Important Topics (CVIT 2016)}
+\EventShortTitle{CVIT 2016}
+\EventAcronym{CVIT}
+\EventYear{2016}
+\EventDate{December 24--27, 2016}
+\EventLocation{Little Whinging, United Kingdom}
+\EventLogo{}
+\SeriesVolume{42}
+\ArticleNo{23}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{booktabs}
+\usepackage{pifont}
+\usepackage[backgroundcolor=lightgray]{todonotes} % TODO: temporary
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\newcommand{\Ctwo}{$\mathsf{C}^{2}$}
+\newcommand{\FO}{$\mathsf{FO}$}
+\newcommand{\UFO}{$\mathsf{UFO}^{2} + \mathsf{CC}$}
+\newcommand{\Cranetwo}{\textsc{Gantry}}
+\newcommand{\friends}{\emph{Friends \& Smokers}}
+\newcommand{\functions}{\emph{Functions}}
+\newcommand{\bijections}{\emph{Bijections}}
+
+\crefalias{formula}{equation}
+\crefname{formula}{Formula}{Formulas}
+\creflabelformat{formula}{#2\textup{(#1)}#3}
+
+\begin{document}
+
+\maketitle
+
+\section{The Three Logics of FOMC}\label{sec:threelogics}
+
+\begin{table}[t]
+  \centering
+  \begin{tabular}{llclll}
+    \toprule
+    Logic & Sorts & Constants & Variables & Quantifiers & Additional atoms\\
+    \midrule
+    \FO & one or more & \cmark & unlimited & $\forall$, $\exists$ & $x = y$\\
+    \Ctwo & one & \xmark & two & $\forall$, $\exists$, $\exists^{= k}$, $\exists^{\le k}$, $\exists^{\ge k}$ & ---\\
+    \UFO & one & \xmark & two & $\forall$ & $|P| = m$\\
+    \bottomrule
+  \end{tabular}
+  \caption{A comparison of the three logics used in FOMC\@. The
+    2\textsuperscript{nd}--5\textsuperscript{th} columns refer to: the number of
+    sorts, support for constants, the maximum number of variables, and supported
+    quantifiers, respectively. The last column lists supported atoms in addition
+    to those of the form $P(\mathbf{t})$ for a predicate $P/n$ and an $n$-tuple
+    of terms $\mathbf{t}$. Here: $k$ and $m$ are non-negative integers, with the
+    latter depending on the domain size, $P$ represents a predicate, and $x$ and
+    $y$ are terms. }\label{tbl:logics}
+\end{table}
+
+\todo[inline,caption={}]{
+  \begin{itemize}
+    \item Reference the table
+    \item Make sure the rest of the paper doesn't refer to these logics (or
+          describe examples in them)
+    \item Move the URLs to the main text (and make sure that each algorithm name
+          is combined with a citation at least once)
+    \item Later (probably) move this to a different file
+  \end{itemize}
+}
+
+\renewcommand*{\thefootnote}{\fnsymbol{footnote}}
+
+There are three first-order logics commonly used in FOMC: \FO{}, \Ctwo{}, and
+\UFO{}. First, \FO{} is the input format for
+\textsc{ForcLift}\footnote{\url{https://github.com/UCLA-StarAI/Forclift}} and
+its extensions
+\textsc{Crane}\footnote{\url{https://doi.org/10.5281/zenodo.8004077}} and
+\Cranetwo{}. Second, \Ctwo{} is often used in the literature on
+\textsc{FastWFOMC}\footnote{\url{https://github.com/jan-toth/FastWFOMC.jl}} and
+related methods~\cite{DBLP:journals/jair/Kuzelka21,DBLP:conf/aaai/MalhotraS22}.
+Finally, \UFO{} is the input format supported by the most recent implementation
+of \textsc{FastWFOMC}~\cite{DBLP:conf/kr/TothK24}. All three logics are
+function-free, and domains are always assumed to be finite. As usual, we
+presuppose the \emph{unique name assumption}, which states that two constants
+are equal if and only if they are the same constant~\cite{DBLP:books/aw/RN2020}.
+
+\renewcommand*{\thefootnote}{\arabic{footnote}}
+
+In \FO{}, each term is assigned to a \emph{sort}, and each predicate $P/n$ is
+assigned to a sequence of $n$ sorts. Each sort has its corresponding domain.
+These assignments to sorts are typically left implicit and can be reconstructed
+from the quantifiers. For example, $\forall x,y \in \Delta\text{. }P(x, y)$
+implies that variables $x$ and $y$ have the same sort. On the other hand,
+$\forall x \in \Delta\text{. }\forall y \in \Gamma\text{. } P(x, y)$ implies
+that $x$ and $y$ have different sorts, and it would be improper to write, for
+example, $\forall x \in \Delta\text{. }\forall y \in \Gamma\text{.
+} P(x, y) \lor x = y$. \FO{} is also the only logic to support constants,
+formulas with more than two variables, and the equality predicate. While we do
+not explicitly refer to sorts in subsequent sections of this paper, the
+many-sorted nature of \FO{} is paramount to the algorithms presented therein.
+
+\begin{remark*}
+  In the case of \textsc{ForcLift} and its extensions, support for a formula as
+  valid input does not imply that the algorithm can compile the formula into a
+  circuit or graph suitable for lifted model counting. However, it is known that
+  \textsc{ForcLift} compilation is guaranteed to succeed on any \FO{} formula
+  without constants and with at most two
+  variables~\cite{DBLP:conf/nips/Broeck11,DBLP:conf/kr/BroeckMD14}.
+\end{remark*}
+
+Compared to \FO{}, \Ctwo{} and \UFO{} lack support for constants, the equality
+predicate, multiple domains, and formulas with more than two variables. The
+advantage that \Ctwo{} brings over \FO{} is the inclusion of \emph{counting
+  quantifiers}. That is, alongside $\forall$ and $\exists$, \Ctwo{} supports
+$\exists^{=k}$, $\exists^{\le k}$, and $\exists^{\ge k}$ for any positive
+integer $k$. For example, $\exists^{=1} x\text{. }\phi(x)$ means that there
+exists \emph{exactly one} $x$ such that $\phi(x)$, and $\exists^{\le 2} x\text{.
+}\phi(x)$ means that there exist \emph{at most two} such $x$. \UFO{}, on the
+other hand, does not support any existential quantifiers but instead
+incorporates \emph{(equality) cardinality constraints}. For example, $|P| = 3$
+constrains all models to have \emph{precisely three positive literals with the
+  predicate $P$}.
+
+\subsection{Our Benchmarks in \Ctwo{} and \UFO{}}
+
+\todo[inline,caption={}]{
+  \begin{itemize}
+    \item An introductory paragraph
+    \item Figure out the right order in which the information below should be
+          presented
+    \item Make the text below coherent
+    \item Refer to it in the main text (and make sure the reference sticks when
+          I transfer this to a separate file)
+  \end{itemize}
+}
+
+\friends{} in \Ctwo{} and \UFO{} is the same as in \FO{}.
+
+For \bijections{}, the equivalent formula in \Ctwo{} is
+\[
+  (\forall x \in \Delta\text{. }\exists^{=1} y \in \Delta\text{.
+  }P(x, y)) \land (\forall y \in \Delta\text{. }\exists^{=1} x \in \Delta\text{.
+  }P(x, y)).
+\]
+Similarly, in \UFO{} the same formula can be written as
+\[
+  (\forall x, y \in \Delta\text{.
+  }R(x) \lor \neg P(x, y)) \land (\forall x, y \in \Delta\text{.
+  }S(x) \lor \neg P(y, x)) \land (|P| = |\Delta|),
+\]
+where $w^{-}(R) = w^{-}(S) = -1$.
+
+For \functions{}, in \Ctwo{} one would write $\forall x \in \Delta\text{.
+}\exists^{=1} y \in \Delta\text{. }P(x, y)$. In \UFO{}, the same could be
+written as
+\begin{equation}\label[formula]{eq:functions1}
+  (\forall x, y \in \Delta\text{. }S(x) \lor \neg P(x, y)) \land (|P| = |\Delta|),
+\end{equation}
+where $w^{-}(S) = -1$. Although \cref{eq:functions1} has more models compared to
+its counterpart in \Ctwo{}, the negative weight $w^{-}(S) = -1$ makes some of
+the terms in the definition of WFOMC cancel out.
+
+\bibliography{../paper/paper.bib}
+
+\end{document}
