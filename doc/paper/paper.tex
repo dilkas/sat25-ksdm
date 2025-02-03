@@ -1011,12 +1011,17 @@ The experiments were conducted using an Intel Skylake \SI{2.4}{\giga\hertz} CPU
 with \SI{188}{\gibi\byte} of memory and CentOS~7. C++ programs were compiled
 using the Intel C++ Compiler 2020u4. \textsc{FastWFOMC} ran on Julia~1.10.4,
 while the other algorithms were executed on the Java Virtual Machine 1.8.0\_201.
+Note that, although implemented in different languages, both \Cranetwo{} and
+\textsc{FastWFOMC} use the GNU Multiple Precision Arithmetic Library for
+arbitrary-precision arithmetic.
 
 We ran each algorithm on each benchmark using domains of sizes
 $2^{1}, 2^{2}, 2^{3}$, and so on, until an algorithm failed to handle a domain
 size due to timeout (of \SI{1}{\hour}), out of memory error, or out of precision
 errors. While we separately measured compilation and inference time, we
-primarily focus on total runtime, dominated by the latter.
+primarily focus on total runtime, dominated by the latter. We verified the
+accuracy of the numerical answers using the corresponding integer sequences on
+the On-Line Encyclopedia of Integer Sequences~\cite{oeis}.
 
 \subsection{Benchmarks}
 
@@ -1072,25 +1077,6 @@ that \textsc{FastWFOMC} can handle but \textsc{ForcLift} cannot.
     that both axes are on a logarithmic scale.}\label{fig:plot}
 \end{figure*}
 
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item Maybe add exact powers of two as vertical dotted lines (with both
-          labels and lines in, say, red). Also try to expand this section a bit.
-    \item We are not aware of any formulas on which \Cranetwo{} scales worse
-          compared to either \textsc{ForcLift} or \textsc{FastWFOMC}. The one
-          advantage that \textsc{FastWFOMC} has over \Cranetwo{} is its support
-          for counting quantifiers.
-    \item Regarding programming languages and accuracy, we verified that the
-          answers match for smaller domain sizes. Also, although written in
-          different languages, both \Cranetwo{} and \textsc{FastWFOMC} use the
-          GNU Multiple Precision Arithmetic Library.
-  \end{itemize}
-}
-
-\todo[inline]{Incorporate into the text below: It is worth remarking that
-  \textsc{ForcLift} does not support arbitrary precision, and returns error for
-  cases that requires arbitrary precision reasoning. }
-
 \Cref{fig:plot} presents a summary of the experimental results. Only
 \textsc{FastWFOMC} and \Cranebfs{} could handle the bijection-counting problem.
 For this benchmark, the largest domain sizes these algorithms could accommodate
@@ -1105,16 +1091,14 @@ similarly on both benchmarks. Similarly to the \bijections{} benchmark,
 \Cranetwo{} significantly outperformed the other two algorithms, scaling up to
 domains of size \num{8192} and \num{67108864}, respectively.
 
-Another aspect of the experimental results that deserves separate discussion is
-compilation. Both Julia and Scala use just-in-time (JIT) compilation, which
-means that \textsc{FastWFOMC} and \textsc{ForcLift} take longer to run on the
-smallest domain size, where most JIT compilation occurs. In the case of
-\Cranetwo{}, it is only run once per benchmark, so the JIT compilation time is
-included in its overall runtime across all domain sizes. Additionally, while
-\textsc{ForcLift}'s compilation is generally faster than that of \Cranetwo{},
-neither significantly affects overall runtime. Specifically, \textsc{ForcLift}
-compilation typically takes around \SI{0.5}{\second}, while \Cranetwo{}
-compilation takes around \SI{2.3}{\second}.
+One might notice that the runtime of \textsc{FastWFOMC} and \textsc{ForcLift} is
+slightly higher on the smallest domain size. This peculiarity is the consequence
+of \emph{just-in-time} (JIT) compilation. As \Cranetwo{} is only run once per
+benchmark, the JIT compilation time is included in its overall runtime across
+all domain sizes. Additionally, while \textsc{ForcLift}'s compilation is
+generally faster than that of \Cranetwo{}, neither significantly affects overall
+runtime. Specifically, \textsc{ForcLift} compilation typically takes around
+\SI{0.5}{\second}, while \Cranetwo{} compilation takes around \SI{2.3}{\second}.
 
 Based on our experiments, which algorithm should be used in practice? If the
 formula can be handled by \textsc{ForcLift} and the domain sizes are reasonably
@@ -1124,6 +1108,13 @@ small, \textsc{ForcLift} is likely the fastest algorithm. In other situations,
 handle the formula.
 
 \section{Conclusion and Future Work}\label{sec:conclusion}
+
+\todo[inline,caption={}]{
+  \begin{itemize}
+    \item Somewhere: reference the appendix, saying that `we provide a more
+          detailed comparison of the capabilities of the algorithms'
+  \end{itemize}
+}
 
 In this work, we have presented a scalable automated FOKC-based approach to
 FOMC\@. Our algorithm involves completing the definitions of recursive functions
