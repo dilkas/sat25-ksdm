@@ -614,16 +614,13 @@ $f(a) + f(a+1) + \cdots + f(\min\{\, n, b \,\})$.
 % \cref{alg:compilewithbasecases} is recursive and can issue more calls to
 % \textsc{Crane} on various derived sentences.
 
-We end this section by proving that \CompileWithBaseCases terminates since each
-recursive call on \autoref{line:final} reduces the number of domains in the
-sentence.
+We end this section by bounding the recursion depth of the \CompileWithBaseCases
+procedure, thus proving that the algorithm terminates.
 
 \begin{theorem}
-  Given any \FO{} sentence $\phi$, \CompileWithBaseCases{$\phi$} terminates.
+  Let $\phi$ be an \FO{} sentence with $n$ domains. Then the maximum recursion
+  depth of \CompileWithBaseCases{$\phi$} is $n$.
 \end{theorem}
-
-\todo[inline]{Reformulate the theorem above into an upper bound (as I informally
-  mention earlier in the text)}
 
 To prove the theorem, we rely on two observations about the algorithms presented
 in \cref{sec:identifying,sec:propagating}.
@@ -640,18 +637,16 @@ in \cref{sec:identifying,sec:propagating}.
 \end{observation}
 
 \begin{proof}
-  We proceed by induction on the number of domains that variables in $\phi$ are
-  quantified over. If there are no domains, then $\phi$ is essentially a
+  We proceed by induction on $n$. If $n=0$, then $\phi$ is essentially a
   propositional formula, and \textsc{Crane} compiles it into an equation of the
-  form $f = \expr$ with no `function calls'. Suppose that \CompileWithBaseCases
-  terminates for all sentences with at most $n \in \mathbb{N}_{0}$ domains. Let
-  $\phi$ be a sentence with $n+1$ domains. By \cref{observation1}, each base
-  case on \autoref{line:loopy} of \cref{alg:compilewithbasecases} has at least
-  one constant. Therefore, by \cref{observation2}, after
-  \autoref{line:propagate}, sentence $\psi$ has at most $n$ domains. Thus,
-  \autoref{line:final} terminates by the inductive hypothesis, completing the
-  proof that \CompileWithBaseCases terminates for an arbitrary sentence with
-  $n+1$ domains.
+  form $f = \expr$ with no `function calls'. Suppose that---for all sentences
+  with at most $n$ domains---\CompileWithBaseCases terminates with a recursion
+  depth of at most $n$. Let $\phi$ be a sentence with $n+1$ domains. By
+  \cref{observation1}, each base case on \autoref{line:loopy} of
+  \cref{alg:compilewithbasecases} has at least one constant. Therefore, by
+  \cref{observation2}, after \autoref{line:propagate}, sentence $\psi$ has at
+  most $n$ domains. Thus, \autoref{line:final} terminates with a recursion depth
+  of at most $n$ by the inductive hypothesis, completing the inductive proof.
 \end{proof}
 
 \subsection{Identifying a Sufficient Set of Base Cases}\label{sec:identifying}
@@ -1104,11 +1099,11 @@ Future directions for research include conducting a comprehensive experimental
 comparison of FOMC algorithms to better understand their comparative performance
 across various sentences. The capabilities of \Cranetwo{} could also be
 characterised theoretically, e.g., by proving completeness for logic fragments
-liftable by other algorithms. Additionally, the efficiency of FOMC algorithms
-can be further analysed using fine-grained complexity, which would provide more
-detailed insights into the computational demands of different sentences.
-
-\todo[inline]{Cite a bunch of papers for the liftable fragments.}
+liftable by other
+algorithms~\cite{DBLP:journals/jair/Kuzelka21,DBLP:conf/aaai/TothK23,DBLP:journals/ai/BremenK23}.
+Additionally, the efficiency of FOMC algorithms can be further analysed using
+fine-grained complexity, which would provide more detailed insights into the
+computational demands of different sentences.
 
 \bibliography{paper}
 
