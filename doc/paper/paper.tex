@@ -79,7 +79,6 @@
 \usetikzlibrary{shapes.misc}
 
 \newcommand{\expr}{\mathtt{expr}}
-\newcommand{\FO}{$\mathsf{FO}$}
 \newcommand{\Cranetwo}{\textsc{Gantry}}
 \newcommand{\Cranebfs}{\textsc{Gantry-BFS}}
 \newcommand{\Cranegreedy}{\textsc{Gantry-Greedy}}
@@ -309,7 +308,7 @@ predicates with non-unary weights that must be accounted for to compute the
 correct model count.
 
 \begin{definition}[Structure, model]\label{def:model}
-  Let $\phi$ be a sentence in \FO{}. For each predicate $P/n$ in $\phi$, let
+  Let $\phi$ be a sentence. For each predicate $P/n$ in $\phi$, let
   ${(\Delta_{i}^{P})}_{i=1}^{n}$ be a list of the corresponding domains. Let
   $\sigma$ be a map from the domains of $\phi$ to their interpretations as
   finite sets such that the sets are pairwise disjoint, and the constants in
@@ -350,8 +349,9 @@ correct model count.
   without worrying how (or if) they apply to the second domain.
 \end{remark*}
 
+% TODO: maybe itemize?
 \begin{definition}[WFOMC instance]\label{def:instance}
-  A \emph{WFOMC instance} comprises: a sentence $\phi$ in \FO{}, two (rational)
+  A \emph{WFOMC instance} comprises: a sentence $\phi$, two (rational)
   \emph{weights} $w^{+}(P)$ and $w^{-}(P)$ assigned to each predicate $P$ in
   $\phi$, and $\sigma$ as described in \cref{def:model}. Unless specified
   otherwise, we assume all weights to be equal to 1.
@@ -370,16 +370,15 @@ correct model count.
 \subsection{Crane and First-Order Knowledge Compilation}\label{sec:crane}
 
 As our work builds on \textsc{Crane}, in this section we will briefly outline
-the steps \textsc{Crane} goes through to compile an \FO{} sentence into a set of
+the steps \textsc{Crane} goes through to compile a sentence into a set of
 function definitions. We divide the inner workings of the algorithm into two
 stages: preprocessing and compilation.
 
 \subsubsection{Preprocessing}
 
-The goal of this stage is to transform an arbitrary \FO{} sentence into the
-format described in \cref{sec:logic}, most importantly by eliminating
-existential quantifiers. For example, the first conjunct of
-\cref{eq:bijections}, i.e.,
+The goal of this stage is to transform an arbitrary sentence into the format
+described in \cref{sec:logic}, most importantly by eliminating existential
+quantifiers. For example, the first conjunct of \cref{eq:bijections}, i.e.,
 \begin{equation}\label[formula]{eq:skolemizationinitial}
   \forall x \in \Gamma\text{. }\exists y \in \Delta\text{. } P(x, y)
 \end{equation}
@@ -618,8 +617,8 @@ We end this section by bounding the recursion depth of the \CompileWithBaseCases
 procedure, thus proving that the algorithm terminates.
 
 \begin{theorem}
-  Let $\phi$ be an \FO{} sentence with $n$ domains. Then the maximum recursion
-  depth of \CompileWithBaseCases{$\phi$} is $n$.
+  Let $\phi$ be a sentence with $n$ domains. Then the maximum recursion depth of
+  \CompileWithBaseCases{$\phi$} is $n$.
 \end{theorem}
 
 To prove the theorem, we rely on two observations about the algorithms presented
@@ -869,6 +868,8 @@ $C$ quantified over $\Delta$. If $m=0$, $C$ is added directly to $\phi'$.
 Otherwise, a clause is added to $\phi'$ for every possible combination of
 replacing the $m$ variables in $C$ with the $n$ new constants.
 
+% TODO: maybe turn the footnote into a remark?
+
 \begin{example}
   Let $C \equiv \forall x \in \Gamma\text{. }\forall y, z \in \Delta\text{.
   } \neg P(x, y) \lor \neg P(x, z) \lor y=z$. Then
@@ -975,12 +976,14 @@ return it.
 \section{Experimental Evaluation}\label{sec:experiments}
 
 Our empirical evaluation sought to compare the runtime performance of
-{\Cranetwo} with the current state of the art, namely \textsc{FastWFOMC} and
-\textsc{ForcLift}. Our experiments involve two versions of \Cranetwo{}:
-\Cranegreedy{} and \Cranebfs{}. Like its predecessor (see
-\cref{sec:compilation}), \Cranetwo{} has two modes for applying compilation
-rules to sentences: one that uses a greedy search algorithm similar to
-\textsc{ForcLift} and another that combines greedy and BFS\@.
+{\Cranetwo} with the current state of the art, namely
+\textsc{FastWFOMC}\footnote{\url{https://github.com/jan-toth/FastWFOMC.jl}}~\cite{DBLP:conf/kr/TothK24,DBLP:conf/uai/BremenK21}
+and \textsc{ForcLift}\footnote{\url{https://github.com/UCLA-StarAI/Forclift}}.
+Our experiments involve two versions of \Cranetwo{}: \Cranegreedy{} and
+\Cranebfs{}. Like its predecessor (see \cref{sec:compilation}), \Cranetwo{} has
+two modes for applying compilation rules to sentences: one that uses a greedy
+search algorithm similar to \textsc{ForcLift} and another that combines greedy
+and BFS\@.
 
 The experiments were conducted using an Intel Skylake \SI{2.4}{\giga\hertz} CPU
 with \SI{188}{\gibi\byte} of memory and CentOS~7. C++ programs were compiled
@@ -1002,7 +1005,7 @@ the On-Line Encyclopedia of Integer Sequences~\cite{oeis}.
 
 We compare these algorithms using three benchmarks from previous work. The first
 benchmark is the bijection-counting problem from \cref{example:bijections}. The
-next benchmark is a variant of the well-known \friends{} Markov logic
+second benchmark is a variant of the well-known \friends{} Markov logic
 network~\cite{DBLP:conf/aaai/SinglaD08,DBLP:conf/uai/BroeckCD12}, which can be
 formulated as
 \[
@@ -1021,7 +1024,7 @@ include the function-counting problem~\cite{DBLP:conf/kr/DilkasB23}
   }P(x, y)) \land (\forall x \in \Gamma\text{. }\forall y, z \in \Delta\text{.
   }P(x, y) \land P(x, z) \Rightarrow y = z)
 \]
-as our last benchmark. Here, predicate $P$ is defined as a function from
+as our third benchmark. Here, predicate $P$ is defined as a function from
 $\Gamma$ to $\Delta$. The first clause asserts that each $x$ must have at least
 one corresponding $y$, while the second clause ensures that there is only one
 such $y$.
@@ -1034,14 +1037,20 @@ such $y$.
   domains, we set $|\Gamma| = |\Delta|$.
 \end{remark*}
 
+\begin{remark*}
+  For completeness, the technical appendix includes translations of these
+  sentences to logics relevant to other (W)FOMC algorithms.
+\end{remark*}
+
+% TODO: this paragraph might not make any sense without the technical appendix
 The three benchmarks cover a wide range of possibilities. The \friends{}
-benchmark uses multiple predicates and can be expressed in \FO{} using two
-variables without cardinality constraints or counting quantifiers. The
-\functions{} benchmark, on the other hand, can still be handled by all the
-algorithms, but it requires cardinality constraints, counting quantifiers, or
-more than two variables, depending on the formulation and the capabilities of
-the algorithm. Lastly, the \bijections{} benchmark is an example of a sentence
-that \textsc{FastWFOMC} can handle but \textsc{ForcLift} cannot.
+benchmark uses multiple predicates and can be expressed using two variables
+without cardinality constraints or counting quantifiers. The \functions{}
+benchmark, on the other hand, can still be handled by all the algorithms, but it
+requires cardinality constraints, counting quantifiers, or more than two
+variables, depending on the formulation and the capabilities of the algorithm.
+Lastly, the \bijections{} benchmark is an example of a sentence that
+\textsc{FastWFOMC} can handle but \textsc{ForcLift} cannot.
 
 \subsection{Results}
 
