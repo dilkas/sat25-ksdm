@@ -70,7 +70,7 @@
 \newcommand{\bijections}{\emph{Bijections}}
 
 \crefalias{formula}{equation}
-\crefname{formula}{Formula}{Formulas}
+\crefname{formula}{Sentence}{Sentences}
 \creflabelformat{formula}{#2\textup{(#1)}#3}
 
 \begin{document}
@@ -138,21 +138,21 @@ $\forall x \in \Delta\text{. }\forall y \in \Gamma\text{. } P(x, y)$ implies
 that $x$ and $y$ have different sorts, and it would be improper to write, for
 example, $\forall x \in \Delta\text{. }\forall y \in \Gamma\text{.
 } P(x, y) \lor x = y$. \FO{} is also the only logic to support constants,
-formulas with more than two variables, and the equality predicate. While we do
+sentences with more than two variables, and the equality predicate. While we do
 not explicitly refer to sorts in subsequent sections of this paper, the
 many-sorted nature of \FO{} is paramount to the algorithms presented therein.
 
 \begin{remark*}
-  In the case of \textsc{ForcLift} and its extensions, support for a formula as
-  valid input does not imply that the algorithm can compile the formula into a
+  In the case of \textsc{ForcLift} and its extensions, support for a sentence as
+  valid input does not imply that the algorithm can compile the sentence into a
   circuit or graph suitable for lifted model counting. However, it is known that
-  \textsc{ForcLift} compilation is guaranteed to succeed on any \FO{} formula
+  \textsc{ForcLift} compilation is guaranteed to succeed on any \FO{} sentence
   without constants and with at most two
   variables~\cite{DBLP:conf/nips/Broeck11,DBLP:conf/kr/BroeckMD14}.
 \end{remark*}
 
 Compared to \FO{}, \Ctwo{} and \UFO{} lack support for constants, the equality
-predicate, multiple domains, and formulas with more than two variables. The
+predicate, multiple domains, and sentences with more than two variables. The
 advantage that \Ctwo{} brings over \FO{} is the inclusion of \emph{counting
   quantifiers}. That is, alongside $\forall$ and $\exists$, \Ctwo{} supports
 $\exists^{=k}$, $\exists^{\le k}$, and $\exists^{\ge k}$ for any positive
@@ -179,13 +179,13 @@ constrains all models to have \emph{precisely three positive literals with the
 
 \friends{} in \Ctwo{} and \UFO{} is the same as in \FO{}.
 
-For \bijections{}, the equivalent formula in \Ctwo{} is
+For \bijections{}, the equivalent sentence in \Ctwo{} is
 \[
   (\forall x \in \Delta\text{. }\exists^{=1} y \in \Delta\text{.
   }P(x, y)) \land (\forall y \in \Delta\text{. }\exists^{=1} x \in \Delta\text{.
   }P(x, y)).
 \]
-Similarly, in \UFO{} the same formula can be written as
+Similarly, in \UFO{} the same sentence can be written as
 \[
   (\forall x, y \in \Delta\text{.
   }R(x) \lor \neg P(x, y)) \land (\forall x, y \in \Delta\text{.
