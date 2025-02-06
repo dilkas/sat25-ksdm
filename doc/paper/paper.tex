@@ -113,7 +113,7 @@
 \crefname{clause}{Clause}{Clauses}
 \creflabelformat{clause}{#2\textup{(#1)}#3}
 \crefalias{formula}{equation}
-\crefname{formula}{Formula}{Formulas}
+\crefname{formula}{Sentence}{Sentence}
 \creflabelformat{formula}{#2\textup{(#1)}#3}
 
 \begin{document}
@@ -141,7 +141,6 @@
 \todo[inline,caption={}]{
   For the entire paper:
   \begin{itemize}
-    \item Sentence vs formula: be consistent and not confusing
     \item 15 pages excluding references
     \item Make sure all the internal references (e.g., to examples) are still
           valid
@@ -157,7 +156,7 @@
     \item We would like to clarify that the main contribution of this work
           consists of everything needed to complement recursive function
           definitions with the necessary base cases. This process includes
-          identifying the base cases and their corresponding formulas,
+          identifying the base cases and their corresponding sentences,
           transforming them (including applying a new smoothing procedure), and
           recursively reusing Crane. C++ code generation, although relatively
           straightforward, is crucial for the usability of the algorithm.
@@ -195,16 +194,16 @@ tasks~\cite{DBLP:journals/ai/WangPWK24}.
 % 3. Why is it hard? (E.g., why do naive approaches fail?)
 
 The complexity of FOMC is generally measured by \emph{data complexity}, with a
-formula classified as \emph{liftable} if it can be solved in polynomial time
+sentence classified as \emph{liftable} if it can be solved in polynomial time
 relative to the domain size~\cite{DBLP:conf/starai/JaegerB12}. While all
-formulas with up to two variables are known to be
+sentences with up to two variables are known to be
 liftable~\cite{DBLP:conf/nips/Broeck11,DBLP:conf/kr/BroeckMD14}, Beame et
 al.~\cite{DBLP:conf/pods/BeameBGS15} demonstrated that liftability does not
-extend to all formulas, identifying an unliftable formula with three variables.
-Recent work has further extended the liftable fragment with additional
-axioms~\cite{DBLP:conf/aaai/TothK23,DBLP:journals/ai/BremenK23} and counting
-quantifiers~\cite{DBLP:journals/jair/Kuzelka21}, expanding our understanding of
-liftability.
+extend to all sentences, identifying an unliftable sentence with three
+variables. Recent work has further extended the liftable fragment with
+additional axioms~\cite{DBLP:conf/aaai/TothK23,DBLP:journals/ai/BremenK23} and
+counting quantifiers~\cite{DBLP:journals/jair/Kuzelka21}, expanding our
+understanding of liftability.
 
 % 4. Why hasn't it been solved before? (Or, what's wrong with previous proposed
 % solutions? How does mine differ?)
@@ -215,7 +214,7 @@ enumeration~\cite{DBLP:conf/uai/BremenK21}, local
 search~\cite{DBLP:journals/pvldb/NiuRDS11}, and Monte Carlo
 sampling~\cite{DBLP:journals/cacm/GogateD16}. (See the technical appendix for a
 more detailed comparison of the state-of-the-art FOMC algorithms.) Among these,
-FOKC-based algorithms are particularly prominent, transforming formulas into
+FOKC-based algorithms are particularly prominent, transforming sentences into
 structured representations such as circuits or graphs. Even when multiple
 algorithms are able to solve the same instance, FOKC algorithms are known to
 find polynomial-time solutions, where the polynomial has a lower degree compared
@@ -231,7 +230,7 @@ successor \textsc{Crane}~\cite{DBLP:conf/kr/DilkasB23}.
 % specific limitations.
 
 The \textsc{Crane} algorithm marked a significant step forward, expanding the
-range of formulas handled by FOMC algorithms. However, it had notable
+range of sentences handled by FOMC algorithms. However, it had notable
 limitations: it required manual evaluation of function definitions to compute
 model counts and introduced recursive functions without proper base cases,
 making it more complex to use. To address these shortcomings, we present
@@ -250,20 +249,13 @@ future work.
 
 \section{Preliminaries}\label{sec:preliminaries}
 
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item If I need more space elsewhere, shortening the preliminaries to two
-          pages (perhaps skipping Section 2.2 altogether?)
-    \item Adjust the introductory paragraph below to the new structure (with
-          more subsections)
-  \end{itemize}
-}
-
-In \cref{sec:logic}, we summarise the basic principles of first-order logic.
-Then, in ??, we formally define (W)FOMC and\ldots Finally, in
-\cref{sec:algebra}, we introduce the terminology used to describe the output of
-the original \textsc{Crane} algorithm, i.e., functions and equations that define
-them.
+We begin this section by describing some notation that we will use throughout
+the paper. Then, in \cref{sec:logic,sec:fomc} respectively, we introduce the
+basic terminology of first-order logic and formally define (W)FOMC\@.
+\Cref{sec:crane} outlines the principles of FOKC, particularly in the context of
+\textsc{Crane}. Finally, in \cref{sec:algebra}, we introduce the algebraic
+terminology used to describe the output of \textsc{Crane}, i.e., functions and
+equations that define them.
 
 \paragraph*{Notation}
 We use $\mathbb{N}_{0}$ to represent the set of non-negative integers. In both
@@ -298,20 +290,20 @@ atom is \emph{ground} if it contains no variables, i.e., only constants. A
 }\phi(x_{1}, x_{2}, \dots, x_{n})$, where $\phi$ is a disjunction of literals
 that only contain variables $x_{1}, \dots, x_{n}$ (and any constants). We say
 that a clause is a \emph{(positive) unit clause} if there is only one literal
-with a predicate, and it is a positive literal. Finally, a \emph{formula} is a
+with a predicate, and it is a positive literal. Finally, a \emph{sentence} is a
 conjunction of clauses. Throughout the paper, we will use set-theoretic
-notation, interpreting a formula as a set of clauses and a clause as a set of
+notation, interpreting a sentence as a set of clauses and a clause as a set of
 literals.
 
 \begin{remark*}
   Conforming with previous work~\cite{DBLP:conf/ijcai/BroeckTMDR11}, the
   definition of a clause includes universal quantifiers for all variables
-  within. While it is possible to rewrite the entire formula with all
+  within. While it is possible to rewrite the entire sentence with all
   quantifiers at the front~\cite{hinman2018fundamentals}, the format we describe
   has proven itself convenient to work with.
 \end{remark*}
 
-\subsection{First-Order Model Counting}
+\subsection{First-Order Model Counting}\label{sec:fomc}
 
 In this section, we will formally define FOMC and its weighted variant. Note
 that, although this work focuses on FOMC, for sentences with existential
@@ -320,11 +312,8 @@ For such sentences, preprocessing (described in \cref{sec:crane}) introduces
 predicates with non-unary weights that must be accounted for to compute the
 correct model count.
 
-% Additionally, our formulation of the definition of WFOMC is
-% somewhat complicated by the need to support any number of domains.
-
 \begin{definition}[Structure, model]\label{def:model}
-  Let $\phi$ be a formula in \FO{}. For each predicate $P/n$ in $\phi$, let
+  Let $\phi$ be a sentence in \FO{}. For each predicate $P/n$ in $\phi$, let
   ${(\Delta_{i}^{P})}_{i=1}^{n}$ be a list of the corresponding domains. Let
   $\sigma$ be a map from the domains of $\phi$ to their interpretations as
   finite sets such that the sets are pairwise disjoint, and the constants in
@@ -336,7 +325,7 @@ correct model count.
 \end{definition}
 
 \begin{example}[Counting bijections]\label{example:bijections}
-  Let us consider the following formula (previously examined by Dilkas and
+  Let us consider the following sentence (previously examined by Dilkas and
   Belle~\cite{DBLP:conf/kr/DilkasB23}) that defines predicate $P$ as a bijection
   between two domains $\Gamma$ and $\Delta$:
   \begin{equation}\label[formula]{eq:bijections}
@@ -366,7 +355,7 @@ correct model count.
 \end{remark*}
 
 \begin{definition}[WFOMC instance]\label{def:instance}
-  A \emph{WFOMC instance} comprises: a formula $\phi$ in \FO{}, two (rational)
+  A \emph{WFOMC instance} comprises: a sentence $\phi$ in \FO{}, two (rational)
   \emph{weights} $w^{+}(P)$ and $w^{-}(P)$ assigned to each predicate $P$ in
   $\phi$, and $\sigma$ as described in \cref{def:model}. Unless specified
   otherwise, we assume all weights to be equal to 1.
@@ -385,13 +374,13 @@ correct model count.
 \subsection{Crane and First-Order Knowledge Compilation}\label{sec:crane}
 
 As our work builds on \textsc{Crane}, in this section we will briefly outline
-the steps \textsc{Crane} goes through to compile an \FO{} formula into a set of
+the steps \textsc{Crane} goes through to compile an \FO{} sentence into a set of
 function definitions. We divide the inner workings of the algorithm into two
 stages: preprocessing and compilation.
 
 \subsubsection{Preprocessing}
 
-The goal of this stage is to transform an arbitrary \FO{} formula into the
+The goal of this stage is to transform an arbitrary \FO{} sentence into the
 format described in \cref{sec:logic}, most importantly by eliminating
 existential quantifiers. For example, the first conjunct of
 \cref{eq:bijections}, i.e.,
@@ -412,9 +401,9 @@ that the WFOMC of \cref{eq:skolemizationinitial,eq:skolemization} is the same.
 
 \subsubsection{Compilation}\label{sec:compilation}
 
-At this stage, the preprocessed formula is compiled into the set $\mathcal{E}$
+At this stage, the preprocessed sentence is compiled into the set $\mathcal{E}$
 of equations and two auxiliary maps $\mathcal{F}$ and $\mathcal{D}$.
-$\mathcal{F}$ maps function names to formulas, and $\mathcal{D}$ maps function
+$\mathcal{F}$ maps function names to sentences, and $\mathcal{D}$ maps function
 names and argument indices to domains. $\mathcal{E}$ can contain any number of
 functions, one of which (which we will always denote by $f$) represents the
 solution to the FOMC problem. To compute the FOMC for particular domain sizes,
@@ -428,8 +417,8 @@ records this correspondence between function arguments and domains.
     \mathcal{D} &= \{\, (f, 1) \mapsto \Gamma, (f, 2) \mapsto \Delta, (g, 1) \mapsto \Delta^{\top}, (g, 2) \mapsto \Gamma \,\},
   \end{align*}
   where $\Delta^{\top}$ is a newly introduced domain. (We omit the definition of
-  $\mathcal{F}$ as the formulas can get quite verbose.) To compute the number of
-  bijections between two sets of cardinality 3, one would evaluate $f(3, 3)$,
+  $\mathcal{F}$ as the sentences can get quite verbose.) To compute the number
+  of bijections between two sets of cardinality 3, one would evaluate $f(3, 3)$,
   however, the definition of $g$ is incomplete: $g$ is a recursive function
   presented without any base cases. $\mathcal{D}$ encodes that in $f(m, n)$, $m$
   and $n$ represent $|\Gamma|$ and $|\Delta|$, respectively. Similarly, in
@@ -437,8 +426,8 @@ records this correspondence between function arguments and domains.
 \end{example}
 
 Compilation is performed primarily by applying \emph{(compilation) rules} to
-formulas. \textsc{Crane} has two modes depending on how the algorithm chooses
-which compilation rule to apply to a formula (in case several alternatives are
+sentences. \textsc{Crane} has two modes depending on how the algorithm chooses
+which compilation rule to apply to a sentence (in case several alternatives are
 available). The first option is to use greedy search: there is a list of rules,
 and the first applicable rule is the one that gets used, disregarding all the
 others. The second option is to use a combination of greedy and
@@ -513,10 +502,10 @@ is $f(\mathbf{x}) = \expr{}$, where $f(\mathbf{x})$ is a function call.
     \draw[-Latex,dashed] (compilewithbasecases) -- node[midway,right] {uses} (simplify);
   \end{tikzpicture}
   \caption[]{The outline of using \Cranetwo{} to compute the model count of a
-    formula $\phi$. First, the formula is compiled into a set of equations,
-    which are then used to create a C++ program. This program can be executed
-    with different command line arguments to calculate the model count of $\phi$
-    for different domain sizes. To accomplish this, the \CompileWithBaseCases
+    sentence $\phi$. First, $\phi$ is compiled into a set of equations, which
+    are then used to create a C++ program. This program can be executed with
+    different command line arguments to calculate the model count of $\phi$ for
+    different domain sizes. To accomplish this, the \CompileWithBaseCases
     procedure uses \textsc{Crane}, algebraic simplification techniques (denoted
     as \Simplify), and two other auxiliary procedures. }\label{fig:overview}
 \end{figure*}
@@ -528,8 +517,8 @@ the corresponding subsection.
 \CompileWithBaseCases (see \cref{sec:completing}), the core procedure of
 \Cranetwo{}, is responsible for completing the function definitions produced by
 \textsc{Crane} with the necessary base cases. To do so, it may recursively call
-itself (and \textsc{Crane}) on other formulas. We prove that the number of such
-recursive calls is upper bounded by the number of domains in the formula.
+itself (and \textsc{Crane}) on other sentences. We prove that the number of such
+recursive calls is upper bounded by the number of domains in the sentences.
 
 \cref{sec:completing} also describes the \Simplify procedure for algebraic
 simplification. It is crucial for simplifying, e.g., a sum of $n$ terms, only
@@ -542,14 +531,14 @@ to identify a sufficient set of base cases for a given set of equations. We
 prove that the returned set of base cases is sufficient, and the evaluation of
 the resulting function definitions will never get stuck in an infinite loop.
 
-\Cref{sec:propagating} introduces the \Propagate procedure that takes a formula
+\Cref{sec:propagating} introduces the \Propagate procedure that takes a sentence
 $\phi$, a domain $\Delta$, and $n \in \mathbb{N}_{0}$. It returns $\phi$
 transformed with the assumption that $|\Delta| = n$, introducing $n$ new
 constants and removing all variables quantified over $\Delta$. For example, when
 computing a base case such as $f(0, y)$, \Propagate will significantly simplify
 $\phi$ with the assumption that the domain associated with the first parameter
 of $f$ (i.e., $\mathcal{D}(f, 1)$) is empty. When run on this simplified
-formula, \CompileWithBaseCases will return the equations for the base case
+sentence, \CompileWithBaseCases will return the equations for the base case
 $f(0, y)$.
 
 \Cref{sec:smoothing} describes a new kind of \emph{smoothing} used to ensure
@@ -571,7 +560,7 @@ count for different combinations of domain sizes.
 
 \begin{algorithm}[t]
   \caption{\protect\CompileWithBaseCases{$\phi$}}\label{alg:compilewithbasecases}
-  \KwIn{formula $\phi$}
+  \KwIn{sentence $\phi$}
   \KwOut{set $\mathcal{E}$ of equations}
   $(\mathcal{E}, \mathcal{F}, \mathcal{D}) \gets \Compile{$\phi$}$\;
   $\mathcal{E} \gets \Simplify{$\mathcal{E}$}$\;\label{line:second}
@@ -583,18 +572,18 @@ count for different combinations of domain sizes.
 \end{algorithm}
 
 \Cref{alg:compilewithbasecases} presents our overall approach for compiling a
-formula into equations that include the necessary base cases. To begin, we use
-\textsc{Crane} to compile the formula into the three components: $\mathcal{E}$,
+sentence into equations that include the necessary base cases. To begin, we use
+\textsc{Crane} to compile the sentence into the three components: $\mathcal{E}$,
 $\mathcal{F}$, and $\mathcal{D}$ (as described in \cref{sec:compilation}). After
 some algebraic simplifications (described below), $\mathcal{E}$ is passed to the
 \FindBaseCases procedure (see \cref{sec:identifying}). For each base case
-$f(\mathbf{x})$, we retrieve the logical formula $\mathcal{F}(f)$ associated
-with the function name $f$ and simplify it using the \Propagate procedure
-(explained in detail in \cref{sec:propagating}). We do this by iterating over
-all indices of $\mathbf{x}$, where $x_{i}$ is a constant, and using \Propagate
-to simplify $\psi$ by assuming that domain $\mathcal{D}(f, i)$ has size $x_{i}$.
-Finally, on \autoref{line:final}, \CompileWithBaseCases recurses on these
-simplified formulas and adds the resulting base case equations to $\mathcal{E}$.
+$f(\mathbf{x})$, we retrieve the sentence $\mathcal{F}(f)$ associated with the
+function name $f$ and simplify it using the \Propagate procedure (explained in
+detail in \cref{sec:propagating}). We do this by iterating over all indices of
+$\mathbf{x}$, where $x_{i}$ is a constant, and using \Propagate to simplify
+$\psi$ by assuming that domain $\mathcal{D}(f, i)$ has size $x_{i}$. Finally, on
+\autoref{line:final}, \CompileWithBaseCases recurses on these simplified
+sentences and adds the resulting base case equations to $\mathcal{E}$.
 
 \paragraph*{Simplify}
 The main responsibility of the \Simplify procedure is to handle the algebraic
@@ -609,32 +598,32 @@ $f(a) + f(a+1) + \cdots + f(\min\{\, n, b \,\})$.
   transforms $g(l, m) = \sum_{k=0}^{m}[0 \le k \le 1]\binom{m}{k}g(l-1, m-k)$
   into $g(l, m) = g(l-1, m) + mg(l-1, m-1)$. Then \FindBaseCases identifies two
   base cases: $g(0, m)$ and $g(l, 0)$. In both cases, \CompileWithBaseCases
-  recurses on the formula $\mathcal{F}(g)$ simplified by assuming that one of
-  the domains is empty. In the first case, we recurse on the formula
+  recurses on the sentence $\mathcal{F}(g)$ simplified by assuming that one of
+  the domains is empty. In the first case, we recurse on the sentence
   $\forall x \in \Gamma\text{. }S(x) \lor \neg S(x)$, where $S$ is a predicate
   introduced by preprocessing with weights $w^{+}(S) = 1$ and $w^{-}(S) = -1$.
   Hence, we obtain the base case $g(0, m) = 0^{m}$. In the case of $g(l, 0)$,
-  \Propagate{$\psi$, $\Gamma$, $0$} returns an empty formula, resulting in
+  \Propagate{$\psi$, $\Gamma$, $0$} returns an empty sentence, resulting in
   $g(l, 0) = 1$. While these base cases overlap when $l = m = 0$, they remain
   consistent since $0^{0} = 1$.
 \end{example}
 
-% Generally, let $\phi$ be a formula with two domains $\Gamma$ and $\Delta$, and
-% let $n, m \in \mathbb{N}_{0}$. Then the FOMC of \Propagate{$\phi$, $\Delta$,
-%   $n$} assuming $|\Gamma| = m$ is the same as the FOMC of \Propagate{$\phi$,
-%   $\Gamma$, $m$} assuming $|\Delta| = n$.
+% Generally, let $\phi$ be a sentence with two domains $\Gamma$ and $\Delta$,
+% and let $n, m \in \mathbb{N}_{0}$. Then the FOMC of \Propagate{$\phi$,
+% $\Delta$, $n$} assuming $|\Gamma| = m$ is the same as the FOMC of
+% \Propagate{$\phi$, $\Gamma$, $m$} assuming $|\Delta| = n$.
 
 % Although \CompileWithBaseCases starts with a call to \textsc{Crane}, the
 % proposed algorithm is not just a post-processing step for FOKC because
 % \cref{alg:compilewithbasecases} is recursive and can issue more calls to
-% \textsc{Crane} on various derived formulas.
+% \textsc{Crane} on various derived sentences.
 
 We end this section by proving that \CompileWithBaseCases terminates since each
 recursive call on \autoref{line:final} reduces the number of domains in the
-formula.
+sentence.
 
 \begin{theorem}
-  Given any \FO{} formula $\phi$, \CompileWithBaseCases{$\phi$} terminates.
+  Given any \FO{} sentence $\phi$, \CompileWithBaseCases{$\phi$} terminates.
 \end{theorem}
 
 \todo[inline]{Reformulate the theorem above into an upper bound (as I informally
@@ -649,8 +638,8 @@ in \cref{sec:identifying,sec:propagating}.
 \end{observation}
 
 \begin{observation}\label{observation2}
-  For any formula $\phi$, domain $\Delta$, and $n \in \mathbb{N}_{0}$,
-  \Propagate{$\phi$, $\Delta$, $n$} returns a formula with no variables
+  For any sentence $\phi$, domain $\Delta$, and $n \in \mathbb{N}_{0}$,
+  \Propagate{$\phi$, $\Delta$, $n$} returns a sentence with no variables
   quantified over $\Delta$.
 \end{observation}
 
@@ -659,13 +648,14 @@ in \cref{sec:identifying,sec:propagating}.
   quantified over. If there are no domains, then $\phi$ is essentially a
   propositional formula, and \textsc{Crane} compiles it into an equation of the
   form $f = \expr$ with no `function calls'. Suppose that \CompileWithBaseCases
-  terminates for all formulas with at most $n \in \mathbb{N}_{0}$ domains. Let
-  $\phi$ be a formula with $n+1$ domains. By \cref{observation1}, each base case
-  on \autoref{line:loopy} of \cref{alg:compilewithbasecases} has at least one
-  constant. Therefore, by \cref{observation2}, after \autoref{line:propagate},
-  formula $\psi$ has at most $n$ domains. Thus, \autoref{line:final} terminates
-  by the inductive hypothesis, completing the proof that \CompileWithBaseCases
-  terminates for an arbitrary formula with $n+1$ domains.
+  terminates for all sentences with at most $n \in \mathbb{N}_{0}$ domains. Let
+  $\phi$ be a sentence with $n+1$ domains. By \cref{observation1}, each base
+  case on \autoref{line:loopy} of \cref{alg:compilewithbasecases} has at least
+  one constant. Therefore, by \cref{observation2}, after
+  \autoref{line:propagate}, sentence $\psi$ has at most $n$ domains. Thus,
+  \autoref{line:final} terminates by the inductive hypothesis, completing the
+  proof that \CompileWithBaseCases terminates for an arbitrary sentence with
+  $n+1$ domains.
 \end{proof}
 
 \subsection{Identifying a Sufficient Set of Base Cases}\label{sec:identifying}
@@ -835,8 +825,8 @@ increasing generality.
 
 \begin{algorithm}[t]
   \caption{\protect\Propagate{$\phi$, $\Delta$, $n$}}\label{alg:propagate}
-  \KwIn{formula $\phi$, domain $\Delta$, $n \in \mathbb{N}_{0}$}
-  \KwOut{formula $\phi'$}
+  \KwIn{sentence $\phi$, domain $\Delta$, $n \in \mathbb{N}_{0}$}
+  \KwOut{sentence $\phi'$}
   $\phi' \gets \emptyset$\;
   \uIf{$n = 0$}{
     \ForEach{clause $C \in \phi$}{
@@ -860,11 +850,11 @@ increasing generality.
   }
 \end{algorithm}
 
-\Cref{alg:propagate}, called \Propagate, modifies the formula $\phi$ based on
+\Cref{alg:propagate}, called \Propagate, modifies the sentence $\phi$ based on
 the assumption that $|\Delta| = n$. When $n=0$, some clauses become vacuously
 satisfied and can be removed. When $n > 0$, partial grounding is performed by
 replacing all variables quantified over $\Delta$ with constants. (None of the
-formulas examined in this work had $n > 1$.) \Cref{alg:propagate} handles these
+sentences examined in this work had $n > 1$.) \Cref{alg:propagate} handles these
 two cases separately. For a literal or a clause $C$, the set of corresponding
 domains is denoted as $\Doms(C)$.
 
@@ -877,7 +867,7 @@ In the case of $n = 0$, there are three types of clauses to consider:
   \item those that have some literals with variables quantified over $\Delta$
   and some without.\label[type]{type3}
 \end{enumerate}
-Clauses of \cref{type1} are transferred to the new formula $\phi'$ without any
+Clauses of \cref{type1} are transferred to the new sentence $\phi'$ without any
 changes. For clauses of \cref{type2}, $C'$ is empty, so these clauses are
 filtered out. As for clauses of \cref{type3}, a new kind of smoothing is
 performed, which will be explained in \cref{sec:smoothing}.
@@ -893,7 +883,7 @@ replacing the $m$ variables in $C$ with the $n$ new constants.
   } \neg P(x, y) \lor \neg P(x, z) \lor y=z$. Then
   $\Doms(C) = \Doms(\neg P(x, y)) = \Doms(\neg P(x, z)) = \{\, \Gamma, \Delta \,\}$,
   and $\Doms(y=z) = \{\, \Delta \,\}$. A call to \Propagate{$\{\, C \,\}$,
-    $\Delta$, $3$} would result in the following formula with nine clauses:
+    $\Delta$, $3$} would result in the following sentence with nine clauses:
   \begin{align*}
     (\forall x \in \Gamma\text{. }\neg P(x, c_{1}) \lor& \neg P(x, c_{1}) \lor c_{1}=c_{1})\land{}\\
     (\forall x \in \Gamma\text{. }\neg P(x, c_{1}) \lor& \neg P(x, c_{2}) \lor c_{1}=c_{2})\land{}\\
@@ -915,7 +905,7 @@ condition on \autoref{line:presmoothing} is not satisfied, the clause is not
 smoothed but omitted.
 
 Suppose \Propagate is called with arguments $(\phi, \Delta, 0)$, i.e., we are
-simplifying the formula $\phi$ by assuming that the domain $\Delta$ is empty.
+simplifying the sentence $\phi$ by assuming that the domain $\Delta$ is empty.
 Informally, if there is a predicate $P$ in $\phi$ unrelated to $\Delta$,
 smoothing preserves all occurrences of $P$ even if all clauses with $P$ become
 vacuously satisfied.
@@ -939,7 +929,7 @@ vacuously satisfied.
   correct FOMC should be $2^{|\Gamma|^2 - |\Gamma'|^2}$. However, without
   \autoref{line:smoothing2}, \Propagate would simplify $\phi$ to
   $\forall y, z \in \Gamma'\text{. }P(y, z)$. In this case, $P$ is a subset of
-  $\Gamma' \times \Gamma'$. This simplified formula has only one model:
+  $\Gamma' \times \Gamma'$. This simplified sentence has only one model:
   $\{\, P(y, z) \mid y, z \in \Gamma' \,\}$. By including
   \autoref{line:smoothing2}, \Propagate transforms $\phi$ to
   \[
@@ -960,7 +950,7 @@ C++ code. Recall that this step is crucial for the usability of the algorithm,
 otherwise function definitions would remain purely mathematical, with no
 convenient way to compute the model count for particular domain sizes. Once a
 C++ program is produced, it can be executed with different command-line
-arguments to compute the model count of the formula for various domain sizes.
+arguments to compute the model count of the sentence for various domain sizes.
 
 \begin{algorithm}[t]
   \caption{A sketch of the C++ program for the equations in \cref{example:solution}, particularly highlighting the recursive definition of function $g$.}\label{alg:cpp}
@@ -998,7 +988,7 @@ Our empirical evaluation sought to compare the runtime performance of
 \textsc{ForcLift}. Our experiments involve two versions of \Cranetwo{}:
 \Cranegreedy{} and \Cranebfs{}. Like its predecessor (see
 \cref{sec:compilation}), \Cranetwo{} has two modes for applying compilation
-rules to formulas: one that uses a greedy search algorithm similar to
+rules to sentences: one that uses a greedy search algorithm similar to
 \textsc{ForcLift} and another that combines greedy and BFS\@.
 
 The experiments were conducted using an Intel Skylake \SI{2.4}{\giga\hertz} CPU
@@ -1029,12 +1019,12 @@ formulated as
   } S(x) \land F(x, y) \Rightarrow S(y)) \land (\forall x \in \Delta\text{.
   }S(x) \Rightarrow C(x)).
 \]
-In this formula, we have three predicates $S$, $F$, and $C$ that denote smoking,
-friendship, and cancer, respectively. The first clause states that friends of
-smokers are also smokers, and the second clause asserts that smoking causes
-cancer. Common additions to this formula include making the friendship relation
-symmetric and assigning probabilities to each clause. Finally, we include the
-function-counting problem~\cite{DBLP:conf/kr/DilkasB23}
+In this sentence, we have three predicates $S$, $F$, and $C$ that denote
+smoking, friendship, and cancer, respectively. The first clause states that
+friends of smokers are also smokers, and the second clause asserts that smoking
+causes cancer. Common additions to this sentence include making the friendship
+relation symmetric and assigning probabilities to each clause. Finally, we
+include the function-counting problem~\cite{DBLP:conf/kr/DilkasB23}
 \[
   (\forall x \in \Gamma\text{. }\exists y \in \Delta\text{.
   }P(x, y)) \land (\forall x \in \Gamma\text{. }\forall y, z \in \Delta\text{.
@@ -1059,7 +1049,7 @@ variables without cardinality constraints or counting quantifiers. The
 \functions{} benchmark, on the other hand, can still be handled by all the
 algorithms, but it requires cardinality constraints, counting quantifiers, or
 more than two variables, depending on the formulation and the capabilities of
-the algorithm. Lastly, the \bijections{} benchmark is an example of a formula
+the algorithm. Lastly, the \bijections{} benchmark is an example of a sentence
 that \textsc{FastWFOMC} can handle but \textsc{ForcLift} cannot.
 
 \subsection{Results}
@@ -1095,11 +1085,11 @@ runtime. Specifically, \textsc{ForcLift} compilation typically takes around
 \SI{0.5}{\second}, while \Cranetwo{} compilation takes around \SI{2.3}{\second}.
 
 Based on our experiments, which algorithm should be used in practice? If the
-formula can be handled by \textsc{ForcLift} and the domain sizes are reasonably
+sentence can be handled by \textsc{ForcLift} and the domain sizes are reasonably
 small, \textsc{ForcLift} is likely the fastest algorithm. In other situations,
 \Cranetwo{} is expected to be significantly more efficient than
 \textsc{FastWFOMC} regardless of domain size, provided both algorithms can
-handle the formula.
+handle the sentence.
 
 \section{Conclusion and Future Work}\label{sec:conclusion}
 
@@ -1107,7 +1097,7 @@ In this work, we have presented a scalable automated FOKC-based approach to
 FOMC\@. Our algorithm involves completing the definitions of recursive functions
 and subsequently translating all function definitions into C++ code. Empirical
 results demonstrate that \Cranetwo{} can scale to larger domain sizes than
-\textsc{FastWFOMC} while supporting a wider range of formulas than
+\textsc{FastWFOMC} while supporting a wider range of sentences than
 \textsc{ForcLift}. The ability to efficiently handle large domain sizes is
 particularly crucial in the weighted setting, as illustrated by the \friends{}
 example discussed in \cref{sec:experiments}, where the model captures complex
@@ -1116,11 +1106,11 @@ practical usefulness of these models would be limited.
 
 Future directions for research include conducting a comprehensive experimental
 comparison of FOMC algorithms to better understand their comparative performance
-across various formulas. The capabilities of \Cranetwo{} could also be
+across various sentences. The capabilities of \Cranetwo{} could also be
 characterised theoretically, e.g., by proving completeness for logic fragments
 liftable by other algorithms. Additionally, the efficiency of FOMC algorithms
 can be further analysed using fine-grained complexity, which would provide more
-detailed insights into the computational demands of different formulas.
+detailed insights into the computational demands of different sentences.
 
 \todo[inline]{Cite a bunch of papers for the liftable fragments.}
 
