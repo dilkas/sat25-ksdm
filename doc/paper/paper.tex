@@ -151,19 +151,6 @@
 }
 \section{Introduction}
 
-\todo[inline,caption={}]{
-  \begin{itemize}
-    \item We would like to clarify that the main contribution of this work
-          consists of everything needed to complement recursive function
-          definitions with the necessary base cases. This process includes
-          identifying the base cases and their corresponding sentences,
-          transforming them (including applying a new smoothing procedure), and
-          recursively reusing Crane. C++ code generation, although relatively
-          straightforward, is crucial for the usability of the algorithm.
-    \item Focus more on current work
-  \end{itemize}
-}
-
 % 1. What is the problem?
 % 2. Why is it interesting and important?
 
@@ -240,11 +227,20 @@ larger than previous algorithms and simplifies the user experience by
 automatically handling base cases and compiling function definitions into
 efficient C++ programs.
 
-In \cref{sec:preliminaries}, we cover some preliminaries, and in
-\cref{sec:main}, we detail all our technical contributions. Finally, in
-\cref{sec:experiments}, we present our experimental results, demonstrating
-\Cranetwo{}'s performance compared to other FOMC algorithms, and, in
-\cref{sec:conclusion}, we conclude the paper by discussing promising avenues for
+The paper is structured as follows. \Cref{sec:preliminaries} covers the
+necessary preliminaries including notation, terminology, and background
+information about (W)FOMC and FOKC\@. \Cref{sec:main} describes all aspects of
+\Cranetwo{}:
+\begin{itemize}
+  \item its overall structure and interactions with \textsc{Crane},
+  \item how we identify a sufficient set of base cases for a recursive function,
+  \item how we construct the sentence that `describes' each base case, and
+  \item how function definitions are compiled into a C++ program with caching
+        mechanisms that ensure efficiency.
+\end{itemize}
+Then, \cref{sec:experiments} presents our experimental results, demonstrating
+\Cranetwo{}'s performance compared to other FOMC algorithms. Finally,
+\cref{sec:conclusion} concludes the paper by discussing promising avenues for
 future work.
 
 \section{Preliminaries}\label{sec:preliminaries}
