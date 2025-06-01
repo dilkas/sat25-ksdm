@@ -1,8 +1,0 @@
-.venv
-Makefile
-dsharp
-
-*.dot
-*.nnf
-*.png
-*.o
