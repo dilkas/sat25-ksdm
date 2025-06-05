@@ -1,4 +1,4 @@
-\documentclass[a4paper,UKenglish,cleveref,autoref,thm-restate]{lipics-v2021}
+\documentclass[a4paper,UKenglish,cleveref,autoref]{lipics-v2021}
 \pdfoutput=1
 \bibliographystyle{plainurl}
 
@@ -7,8 +7,7 @@
 \author{Ananth K. Kidambi}{Indian Institute of Technology Bombay, Mumbai, India}{210051002@iitb.ac.in}{}{}
 \author{Guramrit Singh}{Indian Institute of Technology Bombay, Mumbai, India}{guramrit@iitb.ac.in}{}{}
 \author{Paulius Dilkas}{University of Toronto, Toronto, Canada \and Vector Institute, Toronto, Canada \and \url{https://dilkas.github.io/}}{paulius.dilkas@utoronto.ca}{https://orcid.org/0000-0001-9185-7840}{}
-\author{Kuldeep S. Meel}{University of Toronto, Toronto, Canada \and \url{https://www.cs.toronto.edu/~meel/}}{meel@cs.toronto.edu}{https://orcid.org/0000-0001-9423-5270}{}
-% TODO: add another affiliation for K (separate by \and)
+\author{Kuldeep S. Meel}{Georgia Institute of Technology, Atlanta, GA, USA \and University of Toronto, Toronto, Canada \and \url{https://www.cs.toronto.edu/~meel/}}{meel@cs.toronto.edu}{https://orcid.org/0000-0001-9423-5270}{}
 
 \authorrunning{A.\,K. Kidambi, G. Singh, P. Dilkas, and K.\,S. Meel}
 \Copyright{Ananth K. Kidambi, Guramrit Singh, Paulius Dilkas, and Kuldeep S. Meel}
@@ -21,6 +20,8 @@
 
 \relatedversion{}
 
+\supplementdetails[subcategory={Source Code}]{Software}{https://doi.org/10.5281/zenodo.15583934}
+
 \funding{This research was funded in part by the Natural Sciences and
   Engineering Research Council of Canada (NSERC), funding reference number
   RGPIN-2024-05956, and the Digital Research Alliance of Canada
@@ -28,8 +29,8 @@
 
 \acknowledgements{The first two authors contributed equally. Part of the
   research was conducted while all authors were at the National University of
-  Singapore.}
-% TODO: acknowledge the reviewers (for making this work readable)
+  Singapore. We express our gratitude to the anonymous reviewers for their
+  valuable comments and suggestions.}
 
 \nolinenumbers
 
@@ -48,8 +49,10 @@
 \usepackage[linesnumbered,ruled,vlined]{algorithm2e}
 \usepackage{siunitx}
 \usepackage{tikz}
-\usepackage{microtype}
 \usepackage{mathtools}
+\usepackage{booktabs}
+\usepackage[table]{xcolor}
+\usepackage{pifont}
 
 \usetikzlibrary{arrows.meta}
 \usetikzlibrary{fit}
@@ -57,12 +60,18 @@
 \usetikzlibrary{shapes.misc}
 
 \newcommand{\expr}{\mathtt{expr}}
-\newcommand{\Cranetwo}{\textsc{Gantry}}
-\newcommand{\Cranebfs}{\textsc{Gantry-BFS}}
-\newcommand{\Cranegreedy}{\textsc{Gantry-Greedy}}
+\newcommand{\Cranetwo}{\textsc{Crane2}}
+\newcommand{\Cranebfs}{\textsc{Crane2-BFS}}
+\newcommand{\Cranegreedy}{\textsc{Crane2-Greedy}}
 \newcommand{\friends}{\emph{Friends \& Smokers}}
 \newcommand{\functions}{\emph{Functions}}
 \newcommand{\bijections}{\emph{Bijections}}
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\newcommand{\Ctwo}{$\mathsf{C}^{2}$}
+\newcommand{\FO}{$\mathsf{FO}$}
+\newcommand{\UFO}{$\mathsf{UFO}^{2} + \mathsf{CC}$}
 
 \SetKwProg{Fn}{Function}{:}{}
 \SetKwData{Cache}{Cache}
@@ -81,6 +90,8 @@
 \DeclareMathOperator{\Doms}{Doms}
 
 \sisetup{group-separator = {,}}
+\sisetup{range-phrase=--}
+
 \newtheorem{assumption}[theorem]{Assumption}
 
 \crefalias{enumi}{type}
@@ -93,10 +104,6 @@
 \crefname{formula}{sentence}{sentences}
 \creflabelformat{formula}{#2\textup{(#1)}#3}
 
-% NOTE: page limit of 20 pages, excluding title-page and bibliography but
-% including any appendices
-
-% TODO: (at the end): remove all comments
 \begin{document}
 
 \maketitle
@@ -161,12 +168,11 @@ FOMC algorithms are diverse, with approaches ranging from \emph{first-order
   knowledge compilation} (FOKC) to cell
 enumeration~\cite{DBLP:conf/uai/BremenK21}, local
 search~\cite{DBLP:journals/pvldb/NiuRDS11}, and Monte Carlo
-sampling~\cite{DBLP:journals/cacm/GogateD16}. (See the technical appendix for a
-more detailed comparison of the state-of-the-art FOMC algorithms.) FOKC-based
-algorithms are particularly prominent, transforming sentences into structured
-representations such as circuits or graphs. Even when multiple algorithms can
-solve the same instance, FOKC algorithms are known to find polynomial-time
-solutions where the polynomial has a lower degree than other
+sampling~\cite{DBLP:journals/cacm/GogateD16}. FOKC-based algorithms are
+particularly prominent, transforming sentences into structured representations
+such as circuits or graphs. Even when multiple algorithms can solve the same
+instance, FOKC algorithms are known to find polynomial-time solutions where the
+polynomial has a lower degree than other
 approaches~\cite{DBLP:conf/kr/DilkasB23}. The recently developed ability of a
 FOKC algorithm to formulate solutions in terms of recursive
 functions~\cite{DBLP:conf/kr/DilkasB23} is also noteworthy since the only other
@@ -206,20 +212,21 @@ future work.
 
 We begin this section by describing some notation that we will use throughout
 the paper. Then, in \cref{sec:logic,sec:fomc}, we introduce the basic
-terminology of first-order logic and formally define (W)FOMC\@. \Cref{sec:crane}
-outlines the principles of FOKC, particularly in the context of \textsc{Crane}.
-Finally, in \cref{sec:algebra}, we introduce the algebraic terminology used to
-describe the output of \textsc{Crane}, i.e., functions and equations that define
-them.
+terminology of first-order logic and formally define (W)FOMC\@.
+\Cref{sec:threelogics} provides a brief overview of the different types of
+first-order logics commonly used in FOMC literature. \Cref{sec:crane} outlines
+the principles of FOKC, particularly in the context of \textsc{Crane}. Finally,
+in \cref{sec:algebra}, we introduce the algebraic terminology used to describe
+the output of \textsc{Crane}, i.e., functions and equations that define them.
 
 \paragraph*{Notation}
 We use $\mathbb{N}_{0}$ to represent the set of non-negative integers. In both
-algebra and logic, we write $S\sigma$ to denote the application of a
-\emph{substitution} $\sigma$ to an expression $S$, where
-$\sigma = [x_{1} \mapsto y_{1}, x_{2} \mapsto y_{2}, \dots, x_{n} \mapsto y_{n}]$
-signifies the replacement of all instances of $x_{i}$ with $y_{i}$ for all
-$i = 1, \dots, n$. Additionally, for any variable $n$ and
-$a, b \in \mathbb{N}_{0}$, let $[a \le n \le b] \coloneqq \begin{cases}
+algebra and logic, we write
+$S[x_{1} \mapsto y_{1}, x_{2} \mapsto y_{2}, \dots, x_{n} \mapsto y_{n}]$ to
+denote the application of a \emph{substitution} to an expression $S$, where all
+instances of $x_{i}$ are replaced with $y_{i}$ for all $i = 1, \dots, n$.
+Additionally, for any variable $n$ and $a, b \in \mathbb{N}_{0}$, let
+$[a \le n \le b] \coloneqq \begin{cases}
   1 & \text{if $a \le n \le b$} \\
   0 & \text{otherwise}
 \end{cases}$.
@@ -271,10 +278,11 @@ non-unary weights that must be accounted for to compute the correct model count.
   $\sigma$ be a map from the domains of $\phi$ to their interpretations as
   finite sets, ensuring the sets are pairwise disjoint and contain the
   corresponding constants from $\phi$. A \emph{structure} of $\phi$ is a set $M$
-  of ground literals defined by adding to $M$ either $P(\mathbf{t})$ or
+  of ground literals. It is defined by adding to $M$ either $P(\mathbf{t})$ or
   $\neg P(\mathbf{t})$ for every predicate $P/n$ in $\phi$ and every $n$-tuple
-  $\mathbf{t} \in \prod_{i=1}^{n} \sigma(\Delta_{i}^{P})$. A structure is a
-  \emph{model} if it makes $\phi$ valid.
+  $\mathbf{t} \in \prod_{i=1}^{n} \sigma(\Delta_{i}^{P})$. (Here, $\prod$ is the
+  usual Cartesian product.) A structure is a \emph{model} if it makes $\phi$
+  valid.
 \end{definition}
 
 \begin{example}[Counting bijections]\label{example:bijections}
@@ -295,16 +303,6 @@ non-unary weights that must be accounted for to compute the correct model count.
     \{\, P(1, a), P(2, b), \neg P(1, b), \neg P(2, a) \,\} \qquad \text{and} \qquad \{\, P(1, b), P(2, a), \neg P(1, a), \neg P(2, b) \,\}.
   \]
 \end{example}
-
-\begin{remark*}
-  The distinctness of domains is significant in two respects. First, in terms of
-  expressiveness, a clause such as $\forall x \in \Delta\text{. }P(x, x)$ is
-  valid if predicate $P$ operates over two copies of the same domain and invalid
-  otherwise. Second, having more distinct domains makes the problem more
-  decomposable for the FOKC algorithm. With distinct domains, the algorithm can
-  make assumptions or deductions about, e.g., the first domain of predicate $P$
-  without worrying how (or if) they apply to the second domain.
-\end{remark*}
 
 \begin{definition}[WFOMC instance]\label{def:instance}
   A \emph{WFOMC instance} comprises:
@@ -327,6 +325,78 @@ non-unary weights that must be accounted for to compute the correct model count.
   where the sum is over all models of $\phi$.
 \end{definition}
 
+\subsection{The Three Logics of FOMC}\label{sec:threelogics}
+
+\begin{table}[t]
+  \centering
+  \caption{A comparison of the three logics used in FOMC\@. The
+    2\textsuperscript{nd}--5\textsuperscript{th} columns refer to the number of
+    sorts, support for constants, the maximum number of variables, and supported
+    quantifiers, respectively. The last column lists supported atoms in addition
+    to those of the form $P(\mathbf{t})$ for a predicate $P/n$ and an $n$-tuple
+    of terms $\mathbf{t}$. Here, $k$ and $m$ are non-negative integers, where
+    $m$ depends on the domain size, $P$ is a predicate, and $x$ and $y$ are
+    terms.}\label{tbl:logics}
+  \begin{tabular}{llclll}
+    \toprule
+    Logic & Sorts & Constants & Variables & Quantifiers & Add.\ atoms\\
+    \midrule
+    \rowcolor{gray!10}
+    \FO & one or more & \cmark & unlimited & $\forall$, $\exists$ & $x = y$\\
+    \Ctwo & \multirow{2}{*}{one} & \multirow{2}{*}{\xmark} & \multirow{2}{*}{two} & $\forall$, $\exists$, $\exists^{= k}$, $\exists^{\le k}$, $\exists^{\ge k}$ & ---\\
+    \UFO & & & & $\forall$ & $|P| = m$\\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+FOMC commonly utilises three types of first-order logic: \FO{}, \Ctwo{}, and
+\UFO{}. \Cref{tbl:logics} summarises the key differences among them. \FO{} is
+the input format for \textsc{ForcLift} and its extensions \textsc{Crane} and
+\Cranetwo{}. \Ctwo{} is often used in the literature on \textsc{FastWFOMC} and
+related methods~\cite{DBLP:journals/jair/Kuzelka21,DBLP:conf/aaai/MalhotraS22}.
+(Note that no algorithm accepts \Ctwo{} as input.) Finally, \UFO{} is the input
+format supported by the most recent implementation of
+\textsc{FastWFOMC}~\cite{DBLP:conf/kr/TothK24}. All three logics are
+function-free, and domains are always assumed to be finite. As usual, we
+presuppose the \emph{unique name assumption}, which states that two constants
+are equal if and only if they are the same constant~\cite{DBLP:books/aw/RN2020}.
+
+In \FO{}, each term has a designated \emph{sort}, and each predicate $P/n$
+corresponds to a sequence of $n$ sorts. Each sort has its corresponding domain.
+These assignments to sorts are typically left implicit and follow from the
+quantifiers, e.g., $\forall x,y \in \Delta\text{. }P(x, y)$ implies that the
+variables $x$ and $y$ have the same sort. On the other hand,
+$\forall x \in \Delta\text{. }\forall y \in \Gamma\text{. } P(x, y)$ implies
+that $x$ and $y$ have different sorts, and it would be improper to write, for
+example, $\forall x \in \Delta\text{. }\forall y \in \Gamma\text{.
+} P(x, y) \lor x = y$. \FO{} is also the only logic to support constants,
+sentences with more than two variables, and the equality predicate. While we do
+not explicitly refer to sorts in the rest of the paper, the many-sorted nature
+of \FO{} is paramount to the algorithms presented therein.
+
+\begin{remark*}
+  In the case of \textsc{ForcLift} and its extensions, support for a sentence as
+  valid input does not imply that the algorithm can compile the sentence into a
+  circuit or graph suitable for lifted model counting. However,
+  \textsc{ForcLift} compilation always succeeds on any \FO{} sentence without
+  constants and with at most two
+  variables~\cite{DBLP:conf/nips/Broeck11,DBLP:conf/kr/BroeckMD14}.
+\end{remark*}
+
+Compared to \FO{}, \Ctwo{} and \UFO{} lack support for constants, the equality
+predicate, multiple domains, and sentences with more than two variables. The
+advantage that \Ctwo{} brings over \FO{} is the inclusion of \emph{counting
+  quantifiers}. That is, alongside $\forall$ and $\exists$, \Ctwo{} supports
+$\exists^{=k}$, $\exists^{\le k}$, and $\exists^{\ge k}$ for any positive
+integer $k$. For example, $\exists^{=1} x\text{. }\phi(x)$ means that there
+exists \emph{exactly one} $x$ such that $\phi(x)$, and $\exists^{\le 2} x\text{.
+}\phi(x)$ means that there exist \emph{at most two} such $x$. \UFO{}, on the
+other hand, does not support any existential quantifiers but instead
+incorporates \emph{(equality) cardinality constraints}. For example, $|P| = 3$
+constrains all models to have \emph{precisely three positive literals with the
+  predicate $P$}. Except when stated otherwise, we will write all example
+sentences in \FO{}.
+
 \subsection{Crane and First-Order Knowledge Compilation}\label{sec:crane}
 
 As our work builds on \textsc{Crane}, in this section, we will briefly outline
@@ -337,8 +407,9 @@ stages: preprocessing and compilation.
 \subsubsection{Preprocessing}\label{sec:preprocessing}
 
 This stage transforms an arbitrary sentence into the format described in
-\cref{sec:logic}, primarily by eliminating existential quantifiers. For example,
-the first conjunct of \cref{eq:bijections}, i.e.,
+\cref{sec:logic}, primarily by eliminating existential quantifiers via a process
+called \emph{Skolemization}~\cite{DBLP:conf/kr/BroeckMD14}. For example, the
+first conjunct of \cref{eq:bijections}, i.e.,
 \begin{equation}\label[formula]{eq:skolemizationinitial}
   \forall x \in \Gamma\text{. }\exists y \in \Delta\text{. } P(x, y)
 \end{equation}
@@ -351,21 +422,44 @@ is transformed into
     (\forall x \in \Gamma\text{. } \forall y \in \Delta\text{. } &S(x) \lor \neg P(x, y)),
   \end{aligned}
 \end{equation}
-where $Z/1$ and $S/1$ are two new predicates with $w^{-}(S) = -1$. One can
-verify that the WFOMC of \cref{eq:skolemizationinitial,eq:skolemization} is the
-same.
+where $Z/1$ and $S/1$ are two new predicates with $w^{-}(S) = -1$. The idea
+behind Skolemization is that the output sentence has more models, but for every
+additional model with a positive weight, there is an equivalent model with a
+negative weight. Hence, the WFOMC of
+\cref{eq:skolemizationinitial,eq:skolemization} is the same. Moreover, note that
+in this example, preprocessing introduces some redundancy, i.e., the second and
+third clauses of \cref{eq:skolemization} could be removed. These redundancies
+are handled at the beginning of the compilation process described in
+\cref{sec:compilation}.
+
+To illustrate how Skolemization preserves the WFOMC, we let $\Gamma = \{\,a\,\}$
+and $\Delta = \{\,1, 2\,\}$ and assume that $w^+(P) = w^-(P) = 1$. Here, for
+conciseness, we omit negative literals when writing models.
+\Cref{eq:skolemizationinitial} has three models: $\{\,P(a, 1)\,\}$,
+$\{\,P(a, 2)\,\}$, and $\{\,P(a, 1), P(a, 2)\,\}$, all with weight 1, so the
+WFOMC is 3. \Cref{eq:skolemization} has the following models:
+\begin{itemize}
+  \item $\{\,Z(a)\,\}$,
+  \item $\{\,Z(a), S(a)\,\}$,
+  \item $\{\,Z(a), S(a), P(a, 1)\,\}$,
+  \item $\{\,Z(a), S(a), P(a, 2)\,\}$,
+  \item $\{\,Z(a), S(a), P(a, 1), P(a, 2)\,\}$.
+\end{itemize}
+The first model has a weight of -1 because $w^-(S) = -1$, while all the other
+models have a weight of 1. Hence, the WFOMC is $4 - 1 = 3$.
 
 \subsubsection{Compilation}\label{sec:compilation}
 
 After preprocessing, \textsc{Crane} compiles the sentence into the triple
 $(\mathcal{E}, \mathcal{F}, \mathcal{D})$, where $\mathcal{E}$ is the set of
 equations, and $\mathcal{F}$ and $\mathcal{D}$ are auxiliary maps. $\mathcal{F}$
-maps function names to sentences. $\mathcal{D}$ maps function names and argument
-indices to domains. $\mathcal{E}$ can contain any number of functions, one of
-which (which we will always denote as $f$) represents the solution to the FOMC
-problem. Computing the FOMC for specific domain sizes involves invoking $f$ with
-those sizes as inputs. $\mathcal{D}$ records this correspondence between
-function arguments and domains.
+maps function names to sentences in such a way that the evaluation of the former
+corresponds to the FOMC of the latter. $\mathcal{D}$ maps function names and
+argument indices to domains. The equations in $\mathcal{E}$ can define an
+arbitrary number of functions, one of which (which we will always denote as $f$)
+represents the solution to the FOMC problem. Computing the FOMC for specific
+domain sizes involves invoking $f$ with those sizes as inputs. $\mathcal{D}$
+records this correspondence between function arguments and domains.
 
 \begin{example}\label{example:solution}
   \textsc{Crane} compiles \cref{eq:bijections} for bijection counting into
@@ -430,7 +524,7 @@ function call.
 
 \section{Technical Contributions}\label{sec:main}
 
-\begin{figure*}[t]
+\begin{figure}[t]
   \centering
   \begin{tikzpicture}
     \node[anchor=west] at (-1, 0) (formula) {$\phi$};
@@ -467,7 +561,7 @@ function call.
     domain sizes. To accomplish this, the \CompileWithBaseCases procedure
     employs \textsc{Crane}, algebraic simplification techniques (denoted as
     \Simplify), and two other auxiliary procedures. }\label{fig:overview}
-\end{figure*}
+\end{figure}
 
 \Cref{fig:overview} provides an overview of \Cranetwo{}'s workflow. We will
 briefly describe and motivate each procedure before going into more detail in
@@ -483,7 +577,8 @@ recursive calls is upper bound by the number of domains.
 simplification. It is crucial for simplifying, e.g., a sum of $n$ terms, only
 some of which are non-zero. More generally, the equations returned by
 \textsc{Crane} often benefit from easily detectable algebraic simplifications
-such as $0 \cdot \text{anything} = 0$ and $\text{anything}^{0} = 1$.
+such as $0 \cdot \text{anything} = 0$ and $\text{anything}^{0} = 1$. Note that
+the latter includes $0^{0} = 1$, as 1 is the multiplicative identity.
 
 \FindBaseCases (described in \cref{sec:identifying}) inspects a set of equations
 to identify a sufficient set of base cases for a given set of equations. We
@@ -660,20 +755,21 @@ In the rest of this section, we will show that the base cases identified by
   \Cranetwo{} or other FOMC algorithms is an emerging area of research. These
   questions have been partially addressed in previous
   work~\cite{DBLP:conf/kr/DilkasB23,DBLP:conf/kr/TothK24} and are unrelated to
-  the goals of this section.} Let $\mathcal{E}$ denote the equations returned by
-\CompileWithBaseCases.
+  the goals of this section.}
 
 \begin{theorem}\label{thm:halting}
-  Given an $n$-ary function $f$ in $\mathcal{E}$ and
-  $\mathbf{x} \in \mathbb{N}_{0}^{n}$, the evaluation of $f(\mathbf{x})$
-  terminates.
+  Let $\mathcal{E}$ denote the set of equations returned by
+  \CompileWithBaseCases, and let $f$ be one of the functions defined in
+  $\mathcal{E}$. The evaluation of $f(\mathbf{x})$ terminates for any tuple
+  $\mathbf{x}$ of non-negative integers (of appropriate length).
 \end{theorem}
 
 We prove \cref{thm:halting} using double induction. First, we apply induction to
 the number of functions in $\mathcal{E}$. Then, we use induction on the arity of
 the `last' function in $\mathcal{E}$ according to a topological ordering. Before
-proving \cref{thm:halting}, we make a few observations about this and
-previous~\cite{DBLP:conf/kr/DilkasB23,DBLP:conf/ijcai/BroeckTMDR11} work.
+proving \cref{thm:halting}, we make a few observations that are immediate
+consequences of this and previous
+work~\cite{DBLP:conf/kr/DilkasB23,DBLP:conf/ijcai/BroeckTMDR11}.
 
 \begin{observation}\label{assumption1}
   For each function $f$, there is precisely one equation $e \in \mathcal{E}$
@@ -687,13 +783,19 @@ previous~\cite{DBLP:conf/kr/DilkasB23,DBLP:conf/ijcai/BroeckTMDR11} work.
   not contain function calls to $f_{j}$ with $j > i$.
 \end{observation}
 
-\Cref{assumption2} prevents mutual recursion and other cyclic scenarios.
+\Cref{assumption2} prevents mutual recursion and other cyclic scenarios. It
+arises from the timeline of FOKC and the fact that, while constructing a graph,
+the algorithm cannot draw an edge to a vertex that does not yet exist.
 
 \begin{observation}\label{assumption3}
   For each equation $(f(\mathbf{x}) = \expr) \in \mathcal{E}$, the evaluation
   of $\expr$ terminates when provided with the values of all relevant function
   calls.
 \end{observation}
+
+Indeed, each $\expr$ is defined by a node type, all of which are finite
+computations listed in previous
+work~\cite{DBLP:conf/kr/DilkasB23,DBLP:conf/nips/Broeck11,DBLP:conf/ijcai/BroeckTMDR11}.
 
 \begin{corollary}\label{fact}
   If $f$ is a non-recursive function with no function calls on the RHS of its
@@ -765,6 +867,9 @@ increasing generality.
   hypothesis. It remains to show that the evaluation of the recursive equation
   for $f$ terminates, but this follows from \cref{assumption3}.
 \end{proof}
+
+Now that we have handled the special case when $\mathcal{E}$ defines one
+function, we are ready to prove the main theorem.
 
 \begin{proof}[Proof of \cref{thm:halting}]
   We proceed by induction on the number of functions $n$. The base case of $n=1$
@@ -899,11 +1004,17 @@ goal: constructing a tautological clause that retains the literals in $C'$.
 
 In this section, we will describe the final step of \Cranetwo{} as outlined in
 \cref{fig:overview}, i.e., translating the set of equations $\mathcal{E}$ into
-C++ code. Recall that this step is crucial for the usability of the algorithm;
+C++ code. (Note that the compilation does not rely on any unique features of
+C++; the equations could easily be compiled into any other programming
+language.) Recall that this step is crucial for the usability of the algorithm;
 otherwise, function definitions would remain purely mathematical, with no
 convenient way to compute the model count for particular domain sizes. Once a
 C++ program is produced, it can be executed with different command-line
 arguments to determine the model count of the sentence for various domain sizes.
+A typical C++ program for one of the benchmarks in \cref{sec:experiments}
+contains about \numrange{80}{100} lines of code. Moreover, although we focus on
+FOMC in this work, support for WFOMC could easily be added by using
+floating-point numbers instead of integers.
 
 \begin{algorithm}[t]
   \caption{A sketch of the C++ program for the equations in
@@ -954,15 +1065,15 @@ The experiments used an Intel Skylake \SI{2.4}{\giga\hertz} CPU with
 Virtual Machine 1.8.0\_201 for \textsc{ForcLift} and \Cranetwo{}. Although
 implemented in different languages, \Cranetwo{} and \textsc{FastWFOMC} use the
 same GNU Multiple Precision Arithmetic Library for arbitrary-precision
-arithmetic.
+arithmetic. Additionally, while \textsc{ForcLift} could be extended to support
+arbitrary-precision arithmetic, its compilation rules are not extensive enough
+to handle some of the benchmarks.
 
 We ran each algorithm on each benchmark using domains of size
 $2^{1}, 2^{2}, 2^{3}$, and so on until an algorithm failed to handle a domain
 size due to a timeout (of one hour) or out-of-memory or out-of-precision errors.
-While we separately measured compilation and inference time, we primarily focus
-on total runtime, dominated by the latter. We verified the accuracy of the
-numerical answers using the corresponding integer sequences in the On-Line
-Encyclopedia of Integer Sequences~\cite{oeis}.
+We verified the accuracy of the numerical answers using the corresponding
+integer sequences in the On-Line Encyclopedia of Integer Sequences~\cite{oeis}.
 
 \subsection{Benchmarks}
 
@@ -999,6 +1110,35 @@ corresponding $y$, while the second clause ensures the uniqueness of such a $y$.
   multiple domains, we set $|\Gamma| = |\Delta|$.
 \end{remark*}
 
+\paragraph*{Our Benchmarks in \Ctwo{} and \UFO{}}
+For completeness and reproducibility, let us translate the benchmark sentences
+from \FO{} to \Ctwo{} and \UFO{}. Since \friends{} is a relatively simple
+sentence, it remains the same in \Ctwo{} and \UFO{}. For \functions{}, in
+\Ctwo{}, one would write
+\[
+  \forall x \in \Delta\text{. }\exists^{=1} y \in \Delta\text{. }P(x, y).
+\]
+In \UFO{}, the equivalent formulation is
+\begin{equation}\label[formula]{eq:functions1}
+  (\forall x, y \in \Delta\text{. }S(x) \lor \neg P(x, y)) \land (|P| = |\Delta|),
+\end{equation}
+where $w^{-}(S) = -1$. Although \cref{eq:functions1} has more models than its
+counterpart in \Ctwo{}, the negative weight $w^{-}(S) = -1$ causes some of the
+terms in the definition of WFOMC to cancel out. The translation of \bijections{}
+is similar to that of \functions{}. In \Ctwo{}, one could write
+\[
+  (\forall x \in \Delta\text{. }\exists^{=1} y \in \Delta\text{.
+  }P(x, y)) \land (\forall y \in \Delta\text{. }\exists^{=1} x \in \Delta\text{.
+  }P(x, y)).
+\]
+Similarly, in \UFO{}, the equivalent formulation is
+\[
+  (\forall x, y \in \Delta\text{.
+  }R(x) \lor \neg P(x, y)) \land (\forall x, y \in \Delta\text{.
+  }S(x) \lor \neg P(y, x)) \land (|P| = |\Delta|),
+\]
+where $w^{-}(R) = w^{-}(S) = -1$.
+
 The three benchmarks cover a wide range of possibilities. The \friends{}
 benchmark uses multiple predicates and only two variables without employing any
 constructs specific to only one of the (W)FOMC algorithms. The \functions{}
@@ -1006,19 +1146,18 @@ benchmark, on the other hand, can still be handled by all the algorithms, but
 its formulation relies on algorithm-specific constructs. Namely, for
 \textsc{ForcLift} and \Cranetwo{}, the sentence is written using three
 variables. Since \textsc{FastWFOMC} supports at most two variables, we rewrite
-the \cref{eq:functions} with two variables and a \emph{cardinality constraint}
-(see the technical appendix for details about translating the benchmarks to
-other first-order logics). Lastly, the \bijections{} benchmark is an example of
-a sentence that \textsc{FastWFOMC} can handle but \textsc{ForcLift} cannot.
+the \cref{eq:functions} with two variables and a \emph{cardinality constraint}.
+Lastly, the \bijections{} benchmark is an example of a sentence that
+\textsc{FastWFOMC} can handle but \textsc{ForcLift} cannot.
 
 \subsection{Results}
 
-\begin{figure*}[t]
+\begin{figure}[t]
   \centering
   \includegraphics{plot.pdf}
-  \caption{The runtime of the algorithms as a function of domain size. Note that
-    both axes are on a logarithmic scale.}\label{fig:plot}
-\end{figure*}
+  \caption{The (total) runtime of the algorithms as a function of domain size.
+    Note that both axes are on a logarithmic scale.}\label{fig:plot}
+\end{figure}
 
 \Cref{fig:plot} presents a summary of the experimental results. Only
 \textsc{FastWFOMC} and \Cranebfs{} could handle the bijection-counting problem.
@@ -1034,15 +1173,37 @@ similarly on both benchmarks. Similarly to the \bijections{} benchmark,
 \Cranetwo{} significantly outperformed the other two algorithms, scaling up to
 domains of size \num{8192} and \num{67108864}, respectively.
 
+\begin{table}[t]
+  \caption{The compilation times of FOKC algorithms, sorted in ascending
+    order.}\label{tbl:compilation}
+  \centering
+  \begin{tabular}{llr}
+    \toprule
+    Algorithm & Benchmark & Compilation time (s)\\
+    \midrule
+    \rowcolor{gray!10}
+              & \functions{} & 0.44\\
+    \rowcolor{gray!10}
+    \multirow{-2}{*}{\textsc{ForcLift}} & \friends{} & 0.52\\
+              & \friends{} & 2.20\\
+    \multirow{-2}{*}{\Cranegreedy{}} & \functions{} & 2.36\\
+    \rowcolor{gray!10}
+              & \friends{} & 2.23\\
+    \rowcolor{gray!10}
+              & \functions{} & 2.53\\
+    \rowcolor{gray!10}
+    \multirow{-3}{*}{\Cranebfs{}} & \bijections{} & 7.70\\
+  \end{tabular}
+\end{table}
+
 One might notice that the runtime of \textsc{FastWFOMC} and \textsc{ForcLift} is
 slightly higher for the smallest domain size. This peculiarity is the
 consequence of \emph{just-in-time} (JIT) compilation. As \Cranetwo{} is only run
 once per benchmark, we include the JIT compilation time in its overall runtime
-across all domain sizes. Additionally, while the compilation time of
-\textsc{ForcLift} is generally lower compared to \Cranetwo{}, neither
-significantly affects the overall runtime. Specifically, \textsc{ForcLift}
-compilation typically takes around \SI{0.5}{\second}, while \Cranetwo{}
-compilation takes around \SI{2.3}{\second}.
+across all domain sizes. Additionally, \cref{tbl:compilation} summarises the
+compilation time of each FOKC algorithm on each suitable benchmark. While the
+compilation time of \textsc{ForcLift} is generally lower compared to
+\Cranetwo{}, neither significantly affects the overall runtime.
 
 Based on our experiments, which algorithm should one use in practice? If
 \textsc{ForcLift} can handle the sentence and the domain sizes are reasonably
