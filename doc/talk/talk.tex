@@ -6,6 +6,7 @@
 \usepackage[linesnumbered,ruled,vlined]{algorithm2e}
 
 \usetikzlibrary{arrows.meta}
+\usetikzlibrary{backgrounds}
 \usetikzlibrary{decorations.pathreplacing}
 \usetikzlibrary{fit}
 \usetikzlibrary{positioning}
@@ -62,7 +63,9 @@
     \node[draw,rounded rectangle,right=0.1cm of propagate] (simplify) {\Simplify};
 
     % Bounding box and its name
-    \node[draw,fit={(compilewithbasecases) (compilation) (crane) (findbasecases) (propagate)},inner ysep=7pt,yshift=5pt] {};
+    \begin{scope}[on background layer]
+      \node[draw,fit={(compilewithbasecases) (compilation) (crane) (findbasecases) (propagate)},inner ysep=7pt,yshift=5pt,fill=gray!10] {};
+    \end{scope}
     \node at (1.5, 0.5) {\Cranetwo};
 
     % Brace and its arrow
@@ -76,7 +79,46 @@
     \draw[-Latex] (compilation) -- (cpp);
     \draw[-Latex] (sizes) -- (cpp);
     \draw[-Latex] (cpp) -- (count);
-  \end{tikzpicture} % TODO: maybe add colours?
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Friends \& Smokers: The Formula}
+  \[
+    (\forall x,y \in \Delta\text{.
+    } S(x) \land F(x, y) \Rightarrow S(y)) \land (\forall x \in \Delta\text{.
+    }S(x) \Rightarrow C(x))
+  \]
+\end{frame}
+
+\begin{frame}{Friends \& Smokers: The Results}
+  \centering
+  \includegraphics{friends.pdf}
+\end{frame}
+
+\begin{frame}{Functions: The Formula}
+  \begin{gather*}
+    (\forall x \in \Gamma\text{. }\exists y \in \Delta\text{. }P(x, y)) \land{}\\
+    (\forall x \in \Gamma\text{. }\forall y, z \in \Delta\text{. }P(x, y) \land P(x, z) \Rightarrow y = z)
+  \end{gather*}
+\end{frame}
+
+\begin{frame}{Functions: The Results}
+  \centering
+  \includegraphics{functions.pdf}
+\end{frame}
+
+\begin{frame}{Bijections: The Formula}
+  \begin{gather*}
+    (\forall x \in \Gamma\text{. }\exists y \in \Delta\text{. }P(x, y))\land{}\\
+    (\forall y \in \Delta\text{. }\exists x \in \Gamma\text{. }P(x, y))\land{}\\
+    (\forall x \in \Gamma\text{. }\forall y, z \in \Delta\text{. }P(x, y) \land P(x, z) \Rightarrow y = z)\land{}\\
+    (\forall x, z \in \Gamma\text{. }\forall y \in \Delta\text{. }P(x, y) \land P(z, y) \Rightarrow x = z)
+  \end{gather*}
+\end{frame}
+
+\begin{frame}{Bijections: The Results}
+  \centering
+  \includegraphics{bijections.pdf}
 \end{frame}
 
 \end{document}

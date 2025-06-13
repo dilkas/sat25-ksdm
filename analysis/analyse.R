@@ -22,7 +22,8 @@ df$sequence[df$sequence == "functions"] <- "Functions"
 df <- df[df$domain.size > 1,]
 dark2_colors <- brewer.pal(8, "Dark2")
 
-df %>% group_by(algorithm, sequence) %>% summarize(compilation.time = max(compilation.time))
+# df %>% group_by(algorithm, sequence) %>%
+#   summarize(compilation.time = max(compilation.time))
 
 # Sanity check: differences between max and min counts as a percentage of the
 # min count
@@ -50,7 +51,7 @@ ggplot(df, aes(domain.size, time, color = algorithm, linetype = algorithm,
   facet_wrap(vars(sequence))
 dev.off()
 
-tikz(file = "../../misc/talks-and-notes/monthly_talk/bijections.tex",
+tikz(file = "../doc/talk/bijections.tex",
      width = 4.25, height = 3, standAlone = TRUE)
 ggplot(df[df$sequence == "Bijections",],
        aes(domain.size, time, color = algorithm, linetype = algorithm,
@@ -71,9 +72,9 @@ ggplot(df[df$sequence == "Bijections",],
   scale_shape_manual(values = c(16, 15))
 dev.off()
 
-tikz(file = "../../misc/talks-and-notes/monthly_talk/friends.tex",
+tikz(file = "../doc/talk/friends.tex",
      width = 4.25, height = 3, standAlone = TRUE)
-ggplot(df[df$sequence == "Friends",],
+ggplot(df[df$sequence == "Friends \\& Smokers",],
        aes(domain.size, time, color = algorithm, linetype = algorithm,
            shape = algorithm)) +
   geom_line() +
@@ -90,7 +91,7 @@ ggplot(df[df$sequence == "Friends",],
   scale_color_brewer(palette = "Dark2")
 dev.off()
 
-tikz(file = "../../misc/talks-and-notes/monthly_talk/functions.tex",
+tikz(file = "../doc/talk/functions.tex",
      width = 4.25, height = 3, standAlone = TRUE)
 ggplot(df[df$sequence == "Functions",],
        aes(domain.size, time, color = algorithm, linetype = algorithm,
