@@ -4,9 +4,13 @@ library(tikzDevice)
 library(ggpubr)
 library(RColorBrewer)
 
-#df <- read.csv("../results/processed/results_with_counts.csv")
-#df$count <- NULL
-#write.csv(df, "../results/processed/results.csv")
+options(tikzLatexPackages = c(getOption("tikzLatexPackages"),
+                              "\\usepackage{siunitx}",
+                              "\\sisetup{group-separator = {,}}"))
+
+# df <- read.csv("../results/processed/results_with_counts.csv")
+# df$count <- NULL
+# write.csv(df, "../results/processed/results.csv")
 
 df <- read.csv("../results/processed/results.csv")
 df$compilation.time <- df$compilation.time / 1000
@@ -65,11 +69,16 @@ ggplot(df[df$sequence == "Bijections",],
   ylab("Total runtime (s)") +
   xlab("Domain size") +
   labs(color = "", linetype = "", shape = "") +
-  theme_grey(base_size = 9) +
+  theme_bw(base_size = 9) +
   theme(legend.position = "bottom") +
   scale_color_manual(values = c(dark2_colors[1], dark2_colors[3])) +
   scale_linetype_manual(values = c(1, 5)) +
-  scale_shape_manual(values = c(16, 15))
+  scale_shape_manual(values = c(16, 15)) +
+  geom_segment(aes(x = 64, xend = 4096, y = 88, yend = 88),
+               colour = "darkgray", arrow = arrow(ends = "both"),
+               show.legend = FALSE) +
+  geom_label(aes(label = str_wrap("$64 \\times$"), x = 512, y = 88),
+             colour = "darkgray")
 dev.off()
 
 tikz(file = "../doc/talk/friends.tex",
@@ -86,9 +95,14 @@ ggplot(df[df$sequence == "Friends \\& Smokers",],
   ylab("Total runtime (s)") +
   xlab("Domain size") +
   labs(color = "", linetype = "", shape = "") +
-  theme_grey(base_size = 9) +
+  theme_bw(base_size = 9) +
   theme(legend.position = "bottom") +
-  scale_color_brewer(palette = "Dark2")
+  scale_color_brewer(palette = "Dark2") +
+  geom_segment(aes(x = 1024, xend = 8192, y = 1794, yend = 1794),
+               colour = "darkgray", arrow = arrow(ends = "both"),
+               show.legend = FALSE) +
+  geom_label(aes(label = str_wrap("$8 \\times$"), x = 2896, y = 1794),
+             colour = "darkgray")
 dev.off()
 
 tikz(file = "../doc/talk/functions.tex",
@@ -109,9 +123,15 @@ ggplot(df[df$sequence == "Functions",],
   ylab("Total runtime (s)") +
   xlab("Domain size") +
   labs(color = "", linetype = "", shape = "") +
-  theme_grey(base_size = 9) +
+  theme_bw(base_size = 9) +
   theme(legend.position = "bottom") +
-  scale_color_brewer(palette = "Dark2")
+  scale_color_brewer(palette = "Dark2") +
+  geom_segment(aes(x = 128, xend = 67108864, y = 222.261, yend = 222.261),
+               colour = "darkgray", arrow = arrow(ends = "both"),
+               show.legend = FALSE) +
+  geom_label(aes(label = str_wrap("$> \\num{500000} \\times$"), x = 92682,
+                 y = 222.261),
+             colour = "darkgray")
 dev.off()
 
 # ============== DEGREE FINDING (not doing this right now) ================
