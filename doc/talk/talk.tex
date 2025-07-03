@@ -9,6 +9,7 @@
 
 \usetikzlibrary{arrows.meta}
 \usetikzlibrary{backgrounds}
+\usetikzlibrary{cd}
 \usetikzlibrary{decorations.pathreplacing}
 \usetikzlibrary{fit}
 \usetikzlibrary{positioning}
@@ -31,6 +32,7 @@
 \newcommand{\bijections}{\emph{Bijections}}
 
 \beamertemplatenavigationsymbolsempty
+\setbeamertemplate{footline}[frame number]
 \usetheme{default}
 \usecolortheme{beaver}
 
@@ -45,12 +47,12 @@
 
 \maketitle
 
-\begin{frame}{First-Order Model Counting: The Motivation}
+\begin{frame}{Motivation}
   \begin{exampleblock}{Example Setting}
     \begin{itemize}
       \item Let \structure{$\Delta$} be a set of cardinality \structure{$n$}
       \item Suppose we want to count all \structure{$P \subseteq \Delta^{2}$}
-            that are:
+            (as a function of \structure{$n$}) that are:
             \begin{itemize}
               \item functions,
               \item bijections,
@@ -75,8 +77,8 @@
   \end{itemize}
 \end{frame}
 
-% TODO:
-% 1) define FOMC: any number of domains, any number of predicates of any arity
+% TODO: (maybe later, once I know more)
+% 1) define FOMC: any number of domains, any number of predicates of any arity (do I need to define weights?)
 % 2) introduce WFOMC algorithms
 % 3) Introduce Greedy vs BFS?
 \begin{frame}{First-Order Model Counting}
@@ -140,8 +142,51 @@
 \end{frame}
 
 % TODO: 4 more slides explaining the solution (maybe including the theorems)
+% 0. Preprocess
+% 1. Use Crane to compile into functions
+% 2. Simplify
+% 3. FindBaseCases TODO
+% 4. For each base case
+% 4.1. For each constant (TODO?)
+% 4.1.1. Propagate TODO
+% 5. Compile to C++
 
-\begin{frame}{}
+\begin{frame}{Knowledge Compilation Workflow (1/2)}
+  \begin{enumerate}
+    \item Use \textsc{Crane} to compile \structure{$\phi$} into a set of
+          equations \structure{$\mathcal{E}$}
+    \item Simplify them, e.g.,
+          \[
+            g(l, m) = \sum_{k=0}^{m}[0 \le k \le 1]\binom{m}{k}g(l-1, m-k)
+          \]
+          becomes
+          \[
+            g(l, m) = g(l-1, m) + mg(l-1, m-1)
+          \]
+    \item Identify a sufficient set of base cases
+          \begin{itemize}
+            \item e.g., \structure{$\{\, g(0, m), g(l, 0) \,\}$}
+          \end{itemize}
+  \end{enumerate}
+\end{frame}
+
+% TODO:
+% 2) maybe space out
+% 3) add labels for each step
+% 4) add question marks that then change to 0^m and 1
+% 5) make arrows gray
+% 6) make the last line (except C++ code) appear last
+% 8) mark which steps will be explained in more detail
+\begin{frame}[fragile]{Knowledge Compilation Workflow (2/2)}
+  \centering For each base case:
+
+  \begin{tikzcd}
+    g(0, m) \arrow[d] & \phantom{-} \arrow[d, phantom] & g(l, 0) \arrow[d] \\
+    \forall x \in \Gamma\text{. }S(x) \lor \neg S(x) \arrow[d] & \phantom{-} & \top \arrow[d] \\
+    g(0, m) = 0^m \arrow[rd] & & g(l, 0) = 1 \arrow[ld] \\
+    & \mathcal{E} \arrow[d] & \\
+    \text{Domain sizes} \arrow[r] & \text{C++ code} \arrow[r] & \text{Model count}
+  \end{tikzcd}
 \end{frame}
 
 \begin{frame}{Benchmarks}
