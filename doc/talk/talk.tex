@@ -6,6 +6,7 @@
 \usepackage[linesnumbered,ruled,vlined]{algorithm2e}
 \usepackage{complexity}
 \usepackage{fontawesome}
+\usepackage{dashbox}
 
 \usetikzlibrary{arrows.meta}
 \usetikzlibrary{backgrounds}
@@ -14,6 +15,14 @@
 \usetikzlibrary{fit}
 \usetikzlibrary{positioning}
 \usetikzlibrary{shapes.misc}
+
+\tikzset{
+    invisible/.style={opacity=0},
+    visible on/.style={alt={#1{}{invisible}}},
+    alt/.code args={<#1>#2#3}{%
+      \alt<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}}%
+  }
+}
 
 \SetKwFunction{CompileWithBaseCases}{CompileWithBaseCases}
 \SetKwFunction{Compile}{{\normalfont \textsc{Crane}}}
@@ -102,46 +111,46 @@
 % NOTE: after some simplifications
 % NOTE: the first but not the best: it can also find a linear-time solution
 
-\begin{frame}{Knowledge Compilation Workflow}
-  \centering
-  \begin{tikzpicture}
-    % Top row
-    \node[anchor=west] at (-0.5, 0) (formula) {$\phi$};
-    \node[draw,rounded rectangle] at (3, 0) (compilewithbasecases) {\CompileWithBaseCases};
-    \node[draw,rounded rectangle] at (8, 0) (compilation) {Compile to C++};
+% \begin{frame}{Knowledge Compilation Workflow}
+%   \centering
+%   \begin{tikzpicture}
+%     % Top row
+%     \node[anchor=west] at (-0.5, 0) (formula) {$\phi$};
+%     \node[draw,rounded rectangle] at (3, 0) (compilewithbasecases) {\CompileWithBaseCases};
+%     \node[draw,rounded rectangle] at (8, 0) (compilation) {Compile to C++};
 
-    % Bottom row
-    \node[draw,rounded rectangle,dashed] at (8, -3) (cpp) {C++ code};
-    \node[anchor=west] at (-1, -3) (sizes) {Domain sizes};
-    \node at (8, -4) (count) {Model count};
+%     % Bottom row
+%     \node[draw,rounded rectangle,dashed] at (8, -3) (cpp) {C++ code};
+%     \node[anchor=west] at (-1, -3) (sizes) {Domain sizes};
+%     \node at (8, -4) (count) {Model count};
 
-    % Modules
-    \node[draw,rounded rectangle,anchor=north west] at (1.2, -1) (crane) {\Compile};
-    \node[draw,rounded rectangle,right=0.1cm of crane] (findbasecases) {\FindBaseCases};
-    \node[draw,rounded rectangle,anchor=north west] at (1.2, -1.6) (propagate) {\Propagate};
-    \node[draw,rounded rectangle,right=0.1cm of propagate] (simplify) {\Simplify};
+%     % Modules
+%     \node[draw,rounded rectangle,anchor=north west] at (1.2, -1) (crane) {\Compile};
+%     \node[draw,rounded rectangle,right=0.1cm of crane] (findbasecases) {\FindBaseCases};
+%     \node[draw,rounded rectangle,anchor=north west] at (1.2, -1.6) (propagate) {\Propagate};
+%     \node[draw,rounded rectangle,right=0.1cm of propagate] (simplify) {\Simplify};
 
-    % Bounding box and its name
-    \begin{scope}[on background layer]
-      \node[draw,fit={(compilewithbasecases) (compilation) (crane) (findbasecases) (propagate)},inner ysep=7pt,yshift=5pt,fill=gray!10] {};
-    \end{scope}
-    \node at (1.5, 0.5) {\Cranetwo};
+%     % Bounding box and its name
+%     \begin{scope}[on background layer]
+%       \node[draw,fit={(compilewithbasecases) (compilation) (crane) (findbasecases) (propagate)},inner ysep=7pt,yshift=5pt,fill=gray!10] {};
+%     \end{scope}
+%     \node at (1.5, 0.5) {\Cranetwo};
 
-    % Brace and its arrow
-    \node[fit=(crane)(findbasecases)(propagate)(simplify)] (uses) {};
-    \draw[decorate,decoration={brace}] (uses.north west) -- (uses.north east) node[midway] (brace) {};
-    \draw[-Latex,dashed] (compilewithbasecases) -- node[midway,left] {uses} (brace);
+%     % Brace and its arrow
+%     \node[fit=(crane)(findbasecases)(propagate)(simplify)] (uses) {};
+%     \draw[decorate,decoration={brace}] (uses.north west) -- (uses.north east) node[midway] (brace) {};
+%     \draw[-Latex,dashed] (compilewithbasecases) -- node[midway,left] {uses} (brace);
 
-    % All other arrows
-    \draw[-Latex] (formula) -- (compilewithbasecases);
-    \draw[-Latex] (compilewithbasecases) -- node[above] {$\mathcal{E}$} (compilation);
-    \draw[-Latex] (compilation) -- (cpp);
-    \draw[-Latex] (sizes) -- (cpp);
-    \draw[-Latex] (cpp) -- (count);
-  \end{tikzpicture}
-\end{frame}
+%     % All other arrows
+%     \draw[-Latex] (formula) -- (compilewithbasecases);
+%     \draw[-Latex] (compilewithbasecases) -- node[above] {$\mathcal{E}$} (compilation);
+%     \draw[-Latex] (compilation) -- (cpp);
+%     \draw[-Latex] (sizes) -- (cpp);
+%     \draw[-Latex] (cpp) -- (count);
+%   \end{tikzpicture}
+% \end{frame}
 
-% TODO: 4 more slides explaining the solution (maybe including the theorems)
+% TODO: 5 slides explaining the solution (maybe including the theorems)
 % 0. Preprocess
 % 1. Use Crane to compile into functions
 % 2. Simplify
@@ -151,10 +160,11 @@
 % 4.1.1. Propagate TODO
 % 5. Compile to C++
 
+% TODO: (here and on the next slide) mark which steps will be explained in more detail
 \begin{frame}{Knowledge Compilation Workflow (1/2)}
   \begin{enumerate}
     \item Use \textsc{Crane} to compile \structure{$\phi$} into a set of
-          equations \structure{$\mathcal{E}$}
+          equations \structure{$\mathcal{E}$} \pause
     \item Simplify them, e.g.,
           \[
             g(l, m) = \sum_{k=0}^{m}[0 \le k \le 1]\binom{m}{k}g(l-1, m-k)
@@ -162,7 +172,7 @@
           becomes
           \[
             g(l, m) = g(l-1, m) + mg(l-1, m-1)
-          \]
+          \] \pause
     \item Identify a sufficient set of base cases
           \begin{itemize}
             \item e.g., \structure{$\{\, g(0, m), g(l, 0) \,\}$}
@@ -170,22 +180,15 @@
   \end{enumerate}
 \end{frame}
 
-% TODO:
-% 2) maybe space out
-% 3) add labels for each step
-% 4) add question marks that then change to 0^m and 1
-% 5) make arrows gray
-% 6) make the last line (except C++ code) appear last
-% 8) mark which steps will be explained in more detail
 \begin{frame}[fragile]{Knowledge Compilation Workflow (2/2)}
-  \centering For each base case:
+  \centering \structure{4.} For each base case:
 
   \begin{tikzcd}
-    g(0, m) \arrow[d] & \phantom{-} \arrow[d, phantom] & g(l, 0) \arrow[d] \\
-    \forall x \in \Gamma\text{. }S(x) \lor \neg S(x) \arrow[d] & \phantom{-} & \top \arrow[d] \\
-    g(0, m) = 0^m \arrow[rd] & & g(l, 0) = 1 \arrow[ld] \\
-    & \mathcal{E} \arrow[d] & \\
-    \text{Domain sizes} \arrow[r] & \text{C++ code} \arrow[r] & \text{Model count}
+    g(0, m) \arrow[d, gray, visible on=<2->] & \phantom{-} \arrow[d, phantom, visible on=<2->, "\text{\structure{4.1.} Construct the corr.\ sentence}"] & g(l, 0) \arrow[d, gray, visible on=<2->] \\
+    |[visible on=<2->]| \forall x \in \Gamma\text{. }S(x) \lor \neg S(x) \arrow[d, gray, visible on=<3->] & \phantom{-} \arrow[d, phantom, visible on=<3->, "\text{\structure{4.2.} Recurse}"] & |[visible on=<2->]| \top \arrow[d, gray, visible on=<3->] \\
+    |[visible on=<3->]| g(0, m) = \alt<4->{0^m}{\text{???}} \arrow[rd, gray, visible on=<5->] & |[visible on=<5->]| \text{\structure{4.3.} Add to }\structure{\mathcal{E}} & |[visible on=<3->]| g(l, 0) = \alt<4->{1}{???} \arrow[ld, gray, visible on=<5->] \\
+    & |[visible on=<5->]| \mathcal{E} \arrow[d, gray, visible on=<6->, "\text{\color{black}{\structure{5.} Compile to C++}}"] & \\
+    |[visible on=<7->]| \text{Domain sizes} \arrow[r, gray, visible on=<7->] & |[visible on=<6->]| \text{\dbox{C++ code}} \arrow[r, gray, visible on=<7->] & |[visible on=<7->]| \text{Model count}
   \end{tikzcd}
 \end{frame}
 
