@@ -150,17 +150,6 @@
 %   \end{tikzpicture}
 % \end{frame}
 
-% TODO: 5 slides explaining the solution (maybe including the theorems)
-% 0. Preprocess
-% 1. Use Crane to compile into functions
-% 2. Simplify
-% 3. FindBaseCases TODO
-% 4. For each base case
-% 4.1. For each constant (TODO?)
-% 4.1.1. Propagate TODO
-% 5. Compile to C++
-
-% TODO: (here and on the next slide) mark which steps will be explained in more detail
 \begin{frame}{Knowledge Compilation Workflow (1/2)}
   \begin{enumerate}
     \item Use \textsc{Crane} to compile \structure{$\phi$} into a set of
@@ -173,23 +162,94 @@
           \[
             g(l, m) = g(l-1, m) + mg(l-1, m-1)
           \] \pause
-    \item Identify a sufficient set of base cases
+    \item[3. ($\Rightarrow$)] Identify a sufficient set of base cases
           \begin{itemize}
             \item e.g., \structure{$\{\, g(0, m), g(l, 0) \,\}$}
           \end{itemize}
   \end{enumerate}
 \end{frame}
+% NOTE: explain what the arrow means
 
 \begin{frame}[fragile]{Knowledge Compilation Workflow (2/2)}
   \centering \structure{4.} For each base case:
 
   \begin{tikzcd}
-    g(0, m) \arrow[d, gray, visible on=<2->] & \phantom{-} \arrow[d, phantom, visible on=<2->, "\text{\structure{4.1.} Construct the corr.\ sentence}"] & g(l, 0) \arrow[d, gray, visible on=<2->] \\
+    g(0, m) \arrow[d, gray, visible on=<2->] & \phantom{-} \arrow[d, phantom, visible on=<2->, "\text{\structure{4.1. ($\Rightarrow$)} Construct the corr.\ sentence}"] & g(l, 0) \arrow[d, gray, visible on=<2->] \\
     |[visible on=<2->]| \forall x \in \Gamma\text{. }S(x) \lor \neg S(x) \arrow[d, gray, visible on=<3->] & \phantom{-} \arrow[d, phantom, visible on=<3->, "\text{\structure{4.2.} Recurse}"] & |[visible on=<2->]| \top \arrow[d, gray, visible on=<3->] \\
     |[visible on=<3->]| g(0, m) = \alt<4->{0^m}{\text{???}} \arrow[rd, gray, visible on=<5->] & |[visible on=<5->]| \text{\structure{4.3.} Add to }\structure{\mathcal{E}} & |[visible on=<3->]| g(l, 0) = \alt<4->{1}{???} \arrow[ld, gray, visible on=<5->] \\
     & |[visible on=<5->]| \mathcal{E} \arrow[d, gray, visible on=<6->, "\text{\color{black}{\structure{5.} Compile to C++}}"] & \\
     |[visible on=<7->]| \text{Domain sizes} \arrow[r, gray, visible on=<7->] & |[visible on=<6->]| \text{\dbox{C++ code}} \arrow[r, gray, visible on=<7->] & |[visible on=<7->]| \text{Model count}
   \end{tikzcd}
+\end{frame}
+
+\begin{frame}[fragile]{Finding (a Sufficient Set of) Base Cases}
+  \begin{block}{Outline}
+    \begin{enumerate}
+      \item For every function call:
+            \begin{enumerate}
+              \item For every argument of the form
+                    \structure{$\textit{var} - \textit{const}$}:
+                    \begin{enumerate}
+                      \item Replace the signature parameter with
+                            \structure{$0$}, \structure{$1$}, \dots,
+                            \structure{$\textit{const} - 1$}
+                    \end{enumerate}
+              \item For every argument of the form \structure{$\textit{const}$}:
+                    \begin{enumerate}
+                      \item Replace the corresponding signature parameter with
+                            \structure{$\textit{const}$}
+                    \end{enumerate}
+            \end{enumerate}
+    \end{enumerate}
+  \end{block}
+  \begin{example}
+    The signature of \structure{$g$} is \structure{$g(l, m)$}.
+
+    \centering
+    \begin{tikzcd}
+      \text{Function calls:} & g(l-1, m) \arrow[d] & g(l-1, m-1) \arrow[ld] \arrow[d] \\
+      \text{Base cases:} & g(0, m) & g(l, 0)
+    \end{tikzcd}
+  \end{example}
+\end{frame}
+
+\begin{frame}{Theoretical Results}
+  \begin{theorem}
+    The maximum \alert{recursion depth} of the compilation algorithm is upper
+    bounded by the \alert{number of domains}.
+  \end{theorem}
+  \pause
+  \begin{proof}[Proof (hint).]
+    Each recursive call eliminates a domain.
+  \end{proof}
+  \pause
+  \begin{theorem}
+    The \alert{evaluation} of a recursive function always \alert{terminates}.
+  \end{theorem}
+  \pause
+  \begin{proof}[Proof (hints).]
+    \begin{itemize}
+      \item There exists a \alert{topological ordering} of functions
+      \item All function calls follow the \alert{structure} from the previous
+            slide
+      \item Some common-sense assumptions about the \alert{evaluation order} and
+            previous work
+    \end{itemize}
+  \end{proof}
+\end{frame}
+
+% TODO: propagate + maybe smoothing
+\begin{frame}{From a Base Case to a Sentence}
+  \begin{block}{Preliminaries}
+    \begin{itemize}
+      \item \textsc{Crane} associates each function \structure{$f$} with a
+            sentence \structure{$\phi$} such that
+            \structure{$\textsc{Crane}(\phi)$} produces the definition of
+            \structure{$f$}
+      \item There is a bijection between the parameters of \structure{$f$} and
+            the domains of \structure{$\phi$}
+    \end{itemize}
+  \end{block}
 \end{frame}
 
 \begin{frame}{Benchmarks}
