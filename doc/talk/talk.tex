@@ -1,4 +1,5 @@
 \documentclass{beamer}
+\usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage[UKenglish]{babel}
 \usepackage[UKenglish]{isodate}
@@ -7,6 +8,9 @@
 \usepackage{complexity}
 \usepackage{fontawesome}
 \usepackage{dashbox}
+\usepackage[style=authoryear]{biblatex}
+
+\addbibresource{talk.bib}
 
 \usetikzlibrary{arrows.meta}
 \usetikzlibrary{backgrounds}
@@ -175,7 +179,7 @@
 
   \begin{tikzcd}
     g(0, m) \arrow[d, gray, visible on=<2->] & \phantom{-} \arrow[d, phantom, visible on=<2->, "\text{\structure{4.1. ($\Rightarrow$)} Construct the corr.\ sentence}"] & g(l, 0) \arrow[d, gray, visible on=<2->] \\
-    |[visible on=<2->]| \forall x \in \Gamma\text{. }S(x) \lor \neg S(x) \arrow[d, gray, visible on=<3->] & \phantom{-} \arrow[d, phantom, visible on=<3->, "\text{\structure{4.2.} Recurse}"] & |[visible on=<2->]| \top \arrow[d, gray, visible on=<3->] \\
+    |[visible on=<2->]| \forall y \in \Delta\text{. }S(y) \lor \neg S(y) \arrow[d, gray, visible on=<3->] & \phantom{-} \arrow[d, phantom, visible on=<3->, "\text{\structure{4.2.} Recurse}"] & |[visible on=<2->]| \top \arrow[d, gray, visible on=<3->] \\
     |[visible on=<3->]| g(0, m) = \alt<4->{0^m}{\text{???}} \arrow[rd, gray, visible on=<5->] & |[visible on=<5->]| \text{\structure{4.3.} Add to }\structure{\mathcal{E}} & |[visible on=<3->]| g(l, 0) = \alt<4->{1}{???} \arrow[ld, gray, visible on=<5->] \\
     & |[visible on=<5->]| \mathcal{E} \arrow[d, gray, visible on=<6->, "\text{\color{black}{\structure{5.} Compile to C++}}"] & \\
     |[visible on=<7->]| \text{Domain sizes} \arrow[r, gray, visible on=<7->] & |[visible on=<6->]| \text{\dbox{C++ code}} \arrow[r, gray, visible on=<7->] & |[visible on=<7->]| \text{Model count}
@@ -185,16 +189,17 @@
 \begin{frame}[fragile]{Finding (a Sufficient Set of) Base Cases}
   \begin{block}{Outline}
     \begin{enumerate}
-      \item For every function call:
+      \item For every \alert{function call}:
             \begin{enumerate}
-              \item For every argument of the form
+              \item For every \alert{argument} of the form
                     \structure{$\textit{var} - \textit{const}$}:
                     \begin{enumerate}
-                      \item Replace the signature parameter with
+                      \item Replace the \alert{signature parameter} with
                             \structure{$0$}, \structure{$1$}, \dots,
                             \structure{$\textit{const} - 1$}
                     \end{enumerate}
-              \item For every argument of the form \structure{$\textit{const}$}:
+              \item For every \alert{argument} of the form
+                    \structure{$\textit{const}$}:
                     \begin{enumerate}
                       \item Replace the corresponding signature parameter with
                             \structure{$\textit{const}$}
@@ -203,7 +208,7 @@
     \end{enumerate}
   \end{block}
   \begin{example}
-    The signature of \structure{$g$} is \structure{$g(l, m)$}.
+    The \alert{signature} of \structure{$g$} is \structure{$g(l, m)$}.
 
     \centering
     \begin{tikzcd}
@@ -238,9 +243,8 @@
   \end{proof}
 \end{frame}
 
-% TODO: propagate + maybe smoothing
-\begin{frame}{From a Base Case to a Sentence}
-  \begin{block}{Preliminaries}
+\begin{frame}[fragile]{From a Base Case to a Sentence}
+  \begin{block}{From Previous Work~\color{gray}{\parencite{DBLP:conf/kr/DilkasB23}}}
     \begin{itemize}
       \item \textsc{Crane} associates each function \structure{$f$} with a
             sentence \structure{$\phi$} such that
@@ -250,6 +254,19 @@
             the domains of \structure{$\phi$}
     \end{itemize}
   \end{block}
+  \begin{example}
+    \begin{itemize}
+      \item Base case: \structure{$g(\stackrel{\mbox{\color{black}{\tiny\onslide<2->{\ensuremath{\Gamma}}}}}{\stackrel{\mbox{\color{black}{\tiny\onslide<2->{\ensuremath{\updownarrow}}}}}{0}}, \stackrel{\mbox{\color{black}{\tiny\onslide<2->{\ensuremath{\Delta}}}}}{\stackrel{\mbox{\color{black}{\tiny\onslide<2->{\ensuremath{\updownarrow}}}}}{m}})$}
+      \item<3-> \alert{Part} of the sentence of \structure{$g$}:
+            \begin{equation}\label{eq}
+              \forall x \in \Gamma\text{. }\forall y \in \Delta\text{. }S(y) \lor \neg P(x, y)
+            \end{equation}
+      \item<4-> \structure{$g(0, \dots)$} means we need to simplify \eqref{eq}
+            by assuming \structure{$|\Gamma| = 0$}
+      \item<5-> Result: \structure{$\forall y \in \Delta\text{.
+            }S(y) \lor \neg S(y)$} \qquad (\alert{Smoothing})
+    \end{itemize}
+  \end{example}
 \end{frame}
 
 \begin{frame}{Benchmarks}
