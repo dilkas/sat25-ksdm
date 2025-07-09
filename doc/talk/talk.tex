@@ -9,6 +9,7 @@
 \usepackage{fontawesome}
 \usepackage{dashbox}
 \usepackage[style=authoryear]{biblatex}
+\usepackage{mathtools}
 
 \addbibresource{talk.bib}
 
@@ -90,20 +91,57 @@
   \end{itemize}
 \end{frame}
 
-% TODO: (maybe later, once I know more)
-% 1) define FOMC: any number of domains, any number of predicates of any arity (do I need to define weights?)
-% 2) introduce WFOMC algorithms
-% 3) Introduce Greedy vs BFS?
-\begin{frame}{First-Order Model Counting}
+\begin{frame}{More Formally: What Is the Input?}
+  \[
+    \forall x \in \alert<2>{\Gamma}\text{. }\forall y, z \in \alert<2>{\Delta}\text{. }P(x, y) \land P(x, z) \Rightarrow \alert<4>{y=z}
+  \]
+  \begin{block}{\mbox{\alert<2>{Many-Sorted} \alert<3>{Function-Free}
+        First-Order Logic with \alert<4>{Equality}}}
+  \begin{itemize}
+    \item<5-> Any number of variables and constants
+    % \item<5-> All variables are bound (by \alert{$\exists$} or
+    %       \alert{$\forall$})
+    \item<6-> \alert{$\exists$} and \alert{$\forall$} quantifiers can be nested
+          arbitrarily deeply
+    \item<6-> All domains are finite
+          \begin{itemize}
+            \item Solutions are functions that take domain sizes as input
+          \end{itemize}
+    % \item<6-> Predicates can have any arity
+  \end{itemize}
+  \end{block}
+  \onslide<7->{
+    \begin{block}{First-Order Model Counting (FOMC)}
+      \begin{itemize}
+        \item Each predicate acts like a \alert{subset}
+        \begin{itemize}
+          \item of a domain or
+          \item of a Cartesian product of domains
+        \end{itemize}
+        \item Goal: count \alert{combinations of subsets} that satisfy the
+              sentence
+      \end{itemize}
+    \end{block}
+  }
 \end{frame}
 
-\begin{frame}{The Problem with \textsc{Crane}}
-  \begin{block}{A Solution Produced for the Bijection-Counting Problem}
-  \begin{align*}
-    f(m, n) &= \sum_{l=0}^{n} \binom{n}{l}{(-1)}^{n-l}g(l, m),\\
-    g(l, m) &= g(l-1, m) + mg(l-1, m-1)
-  \end{align*}
-  \end{block}
+\begin{frame}{Previous Work:
+    \textsc{Crane}~\color{gray}{\parencite{DBLP:conf/kr/DilkasB23}}}
+  \begin{itemize}
+    \item A knowledge compilation approach:
+          \begin{itemize}
+            \item \alert{Sentences} $\to$ labelled \alert{digraphs} $\to$
+                  function-defining \alert{equations}
+          \end{itemize}
+    \item Capable of constructing recursive solutions
+  \end{itemize}
+  \pause
+  \begin{exampleblock}{An Example Solution for Counting Bijections}
+    \begin{align*}
+      f(m, n) &= \sum_{l=0}^{n} \binom{n}{l}{(-1)}^{n-l}g(l, m),\\
+      g(l, m) &= g(l-1, m) + mg(l-1, m-1)
+    \end{align*}
+  \end{exampleblock}
   \pause
   \begin{alertblock}{Issues}
     \begin{description}
@@ -112,8 +150,8 @@
     \end{description}
   \end{alertblock}
 \end{frame}
-% NOTE: after some simplifications
 % NOTE: the first but not the best: it can also find a linear-time solution
+% NOTE: this slide formulates the problem tackled by this work
 
 % \begin{frame}{Knowledge Compilation Workflow}
 %   \centering
