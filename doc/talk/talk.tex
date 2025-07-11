@@ -11,6 +11,7 @@
 \usepackage[style=authoryear]{biblatex}
 \usepackage{mathtools}
 \usepackage{siunitx}
+\usepackage{libertinus}
 
 \addbibresource{talk.bib}
 
@@ -95,9 +96,13 @@
 \end{frame}
 
 \begin{frame}{More Formally: What Is the Input?}
-  \[
-    \forall x \in \alert<2>{\Gamma}\text{. }\forall y, z \in \alert<2>{\Delta}\text{. }P(x, y) \land P(x, z) \Rightarrow \alert<4>{y=z}
-  \]
+  \begin{exampleblock}{Example Input Sentence}
+    \[
+      \forall x \in \alert<2>{\Gamma}\text{.
+      }\forall y, z \in \alert<2>{\Delta}\text{.
+      }P(x, y) \land P(x, z) \Rightarrow \alert<4>{y=z}
+    \]
+  \end{exampleblock}
   \begin{block}{\mbox{\alert<2>{Many-Sorted} \alert<3>{Function-Free}
         First-Order Logic with \alert<4>{Equality}}}
   \begin{itemize}
@@ -118,8 +123,7 @@
       \begin{itemize}
         \item Each predicate acts like a \alert{subset}
         \begin{itemize}
-          \item of a domain or
-          \item of a Cartesian product of domains
+          \item of a domain or product of domains
         \end{itemize}
         \item Goal: count \alert{combinations of subsets} that satisfy the
               sentence
@@ -137,6 +141,8 @@
                   function-defining \alert{equations}
           \end{itemize}
     \item Capable of constructing recursive solutions
+    \item Two variants: \alert{greedy} search and \alert{breadth-first search}
+          (BFS)
   \end{itemize}
   \pause
   \begin{exampleblock}{An Example Solution for Counting Bijections}
@@ -146,9 +152,10 @@
     \end{align*}
   \end{exampleblock}
   \pause
-  \begin{alertblock}{Issues}
+  \begin{alertblock}{Issues We Are Going to Address}
     \begin{description}
-      \item[Completeness:] what are the base cases of \structure{$g$}?
+      \item[Completeness:] recursive functions (like \structure{$g$}) have
+            \alert{no base cases}
       \item[Usability:] how do I compute, e.g., \structure{$f(7, 7)$}?
     \end{description}
   \end{alertblock}
@@ -195,7 +202,7 @@
 %   \end{tikzpicture}
 % \end{frame}
 
-\begin{frame}{Knowledge Compilation Workflow (1/2)}
+\begin{frame}{Workflow (1/2)}
   \begin{enumerate}
     \item Use \textsc{Crane} to compile \structure{$\phi$} into a set of
           equations \structure{$\mathcal{E}$} \pause
@@ -215,7 +222,7 @@
 \end{frame}
 % NOTE: explain what the arrow means
 
-\begin{frame}[fragile]{Knowledge Compilation Workflow (2/2)}
+\begin{frame}[fragile]{Workflow (2/2)}
   \centering \structure{4.} For each base case:
 
   \begin{tikzcd}
@@ -259,7 +266,7 @@
   \end{example}
 \end{frame}
 
-\begin{frame}{Theoretical Results}
+\begin{frame}{Theoretical Guarantees}
   \begin{theorem}
     The maximum \alert{recursion depth} of the compilation algorithm is upper
     bounded by the \alert{number of domains}.
@@ -350,14 +357,11 @@
   \includegraphics{functions.pdf}
 \end{frame}
 
-\begin{frame}{Summary}
+\begin{frame}{Summary \& Future Work}
   \begin{block}{Contributions}
     \begin{description}
-      \item[Completeness:] recursive functions with base cases
+      \item[Completeness:] recursive solutions now come with \alert{base cases}
       \item[Usability:] compilation to C++ programs
-            \begin{itemize}
-              \item (not covered in this talk)
-            \end{itemize}
       \item[Scalability] compared to other FOMC algorithms
             \begin{itemize}
               \item \numrange{8}{500000} times higher domain sizes
@@ -373,6 +377,13 @@
       \item Fine-grained complexity
     \end{itemize}
   \end{block}
+  % \vspace{0.5em} \small
+  % \begin{itemize}
+  %   \item Implementation:
+  %         \href{https://github.com/dilkas/crane}{\texttt{github.com/dilkas/crane}}
+  %   \item Experimental setup:
+  %         \href{https://github.com/dilkas/sat25-ksdm}{\texttt{github.com/dilkas/sat25-ksdm}}
+  % \end{itemize}
 \end{frame}
 
 \end{document}
