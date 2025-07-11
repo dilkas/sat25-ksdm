@@ -10,6 +10,7 @@
 \usepackage{dashbox}
 \usepackage[style=authoryear]{biblatex}
 \usepackage{mathtools}
+\usepackage{siunitx}
 
 \addbibresource{talk.bib}
 
@@ -44,6 +45,8 @@
 \newcommand{\friends}{\emph{Friends \& Smokers}}
 \newcommand{\functions}{\emph{Functions}}
 \newcommand{\bijections}{\emph{Bijections}}
+
+\sisetup{group-separator = {,}}
 
 \beamertemplatenavigationsymbolsempty
 \setbeamertemplate{footline}[frame number]
@@ -348,7 +351,28 @@
 \end{frame}
 
 \begin{frame}{Summary}
-  TODO: and future work
+  \begin{block}{Contributions}
+    \begin{description}
+      \item[Completeness:] recursive functions with base cases
+      \item[Usability:] compilation to C++ programs
+            \begin{itemize}
+              \item (not covered in this talk)
+            \end{itemize}
+      \item[Scalability] compared to other FOMC algorithms
+            \begin{itemize}
+              \item \numrange{8}{500000} times higher domain sizes
+            \end{itemize}
+    \end{description}
+  \end{block}
+  \pause
+  \begin{block}{Future Work}
+    \begin{itemize}
+      \item Support for weighted counting (trivial)
+      \item Experiments on a large set of benchmarks
+      \item Completeness for fragments of first-order logic
+      \item Fine-grained complexity
+    \end{itemize}
+  \end{block}
 \end{frame}
 
 \end{document}
