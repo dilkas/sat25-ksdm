@@ -4,7 +4,7 @@
 \usepackage[UKenglish]{babel}
 \usepackage[UKenglish]{isodate}
 \usepackage{tikz}
-\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\usepackage[vlined]{algorithm2e}
 \usepackage{complexity}
 \usepackage{fontawesome}
 \usepackage{dashbox}
@@ -12,6 +12,7 @@
 \usepackage{mathtools}
 \usepackage{siunitx}
 \usepackage{libertinus}
+\usepackage{csquotes}
 
 \addbibresource{talk.bib}
 
@@ -31,6 +32,8 @@
   }
 }
 
+\SetKwProg{Fn}{Function}{:}{}
+\SetKwData{Cache}{Cache}
 \SetKwFunction{CompileWithBaseCases}{CompileWithBaseCases}
 \SetKwFunction{Compile}{{\normalfont \textsc{Crane}}}
 \SetKwFunction{Propagate}{Propagate}
@@ -315,6 +318,27 @@
             }S(y) \lor \neg S(y)$} \qquad (\alert{Smoothing})
     \end{itemize}
   \end{example}
+\end{frame}
+
+\begin{frame}{An Outline of the Resulting C++ Program}
+  \begin{algorithm}[H]
+    initialise $\Cache_{\alert{g(0, m)}}$, $\Cache_{\alert{g(l, 0)}}$, $\Cache_{\alert{g}}$, and $\Cache_{\alert{f}}$\; \DontPrintSemicolon\pause
+    \textbf{Function} $\alert{g_{0,m}(m)}$\textbf{:} \dots\;
+    \textbf{Function} $\alert{g_{l,0}(l)}$\textbf{:} \dots\; \PrintSemicolon\pause
+    \Fn{$\alert{g(l, m)}$}{
+      \lIf{$(l, m) \in \Cache_{\alert{g}}$}{\Return{$\Cache_{\alert{g}}(l, m)$}}\label{line:cache}
+      \lIf{$l = 0$}{\Return{$\alert{g_{0,m}(m)}$}}\label{line:basecaseone}
+      \lIf{$m = 0$}{\Return{$\alert{g_{l,0}(l)}$}}\label{line:basecasetwo}
+      $r \gets \alert{g(l-1, m)} + m\alert{g(l-1,m-1)}$\;
+      $\Cache_{\alert{g}}(l, m) \gets r$\;
+      \Return{$r$}\;
+    } \DontPrintSemicolon
+    \textbf{Function} $\alert{f(m, n)}$\textbf{:} \dots\; \PrintSemicolon
+    \Fn{\alert{\Main}}{
+      $(m, n) \gets \Input{}$\;
+      \Return{$\alert{f(m, n)}$}\;
+    }
+  \end{algorithm}
 \end{frame}
 
 \begin{frame}{Benchmarks}
