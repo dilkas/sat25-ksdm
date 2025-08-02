@@ -135,15 +135,57 @@
   }
 \end{frame}
 
+\begin{frame}{Exact Algorithms for FOMC}
+  \begin{block}{Predecessors of This Work}
+    \begin{itemize}
+      \item
+            \alert{\textsc{ForcLift}}~\textcolor{gray}{\parencite{DBLP:conf/ijcai/BroeckTMDR11}}
+            \begin{itemize}
+              \item knowledge compilation to \alert{FO d-DNNF}
+            \end{itemize}
+      \item \alert{\textsc{Crane}}~\textcolor{gray}{\parencite{DBLP:conf/kr/DilkasB23}}
+            \begin{itemize}
+              \item knowledge compilation to $\text{FO
+                    d-DNNF} + \alert{\text{directed cycles}}$
+              \item extends \alert{\textsc{ForcLift}} with support for:
+                    \begin{itemize}
+                      \item more input sentences and
+                      \item recursive solutions
+                    \end{itemize}
+            \end{itemize}
+    \end{itemize}
+  \end{block}
+  \pause
+  \begin{block}{Other Approaches}
+    \begin{itemize}
+      \item \alert{L2C}~\textcolor{gray}{\parencite{DBLP:conf/kr/KazemiP16}}
+            \begin{itemize}
+              \item knowledge compilation to \alert{C++} code
+            \end{itemize}
+      \item
+            \alert{Alchemy}~\textcolor{gray}{\parencite{DBLP:journals/cacm/GogateD16}}
+            \begin{itemize}
+              \item \alert{DPLL}-style search
+            \end{itemize}
+      \item
+            \alert{FastWFOMC}~\textcolor{gray}{\parencite{DBLP:conf/uai/BremenK21}}
+            \begin{itemize}
+              \item based on \alert{cell enumeration}
+              % \item with extensions for \alert{additional axioms}, ordered domains, etc.
+            \end{itemize}
+    \end{itemize}
+  \end{block}
+\end{frame}
+
 \begin{frame}{Previous Work:
-    \textsc{Crane}~\color{gray}{\parencite{DBLP:conf/kr/DilkasB23}}}
+    \textsc{Crane}~\textcolor{gray}{\parencite{DBLP:conf/kr/DilkasB23}}}
   \begin{itemize}
     \item A knowledge compilation approach:
           \begin{itemize}
             \item \alert{Sentences} $\to$ labelled \alert{digraphs} $\to$
                   function-defining \alert{equations}
           \end{itemize}
-    \item Capable of constructing recursive solutions
+    % \item Capable of constructing recursive solutions
     \item Two variants: \alert{greedy} search and \alert{breadth-first search}
           (BFS)
   \end{itemize}
@@ -166,48 +208,9 @@
 % NOTE: the first but not the best: it can also find a linear-time solution
 % NOTE: this slide formulates the problem tackled by this work
 
-% \begin{frame}{Knowledge Compilation Workflow}
-%   \centering
-%   \begin{tikzpicture}
-%     % Top row
-%     \node[anchor=west] at (-0.5, 0) (formula) {$\phi$};
-%     \node[draw,rounded rectangle] at (3, 0) (compilewithbasecases) {\CompileWithBaseCases};
-%     \node[draw,rounded rectangle] at (8, 0) (compilation) {Compile to C++};
-
-%     % Bottom row
-%     \node[draw,rounded rectangle,dashed] at (8, -3) (cpp) {C++ code};
-%     \node[anchor=west] at (-1, -3) (sizes) {Domain sizes};
-%     \node at (8, -4) (count) {Model count};
-
-%     % Modules
-%     \node[draw,rounded rectangle,anchor=north west] at (1.2, -1) (crane) {\Compile};
-%     \node[draw,rounded rectangle,right=0.1cm of crane] (findbasecases) {\FindBaseCases};
-%     \node[draw,rounded rectangle,anchor=north west] at (1.2, -1.6) (propagate) {\Propagate};
-%     \node[draw,rounded rectangle,right=0.1cm of propagate] (simplify) {\Simplify};
-
-%     % Bounding box and its name
-%     \begin{scope}[on background layer]
-%       \node[draw,fit={(compilewithbasecases) (compilation) (crane) (findbasecases) (propagate)},inner ysep=7pt,yshift=5pt,fill=gray!10] {};
-%     \end{scope}
-%     \node at (1.5, 0.5) {\Cranetwo};
-
-%     % Brace and its arrow
-%     \node[fit=(crane)(findbasecases)(propagate)(simplify)] (uses) {};
-%     \draw[decorate,decoration={brace}] (uses.north west) -- (uses.north east) node[midway] (brace) {};
-%     \draw[-Latex,dashed] (compilewithbasecases) -- node[midway,left] {uses} (brace);
-
-%     % All other arrows
-%     \draw[-Latex] (formula) -- (compilewithbasecases);
-%     \draw[-Latex] (compilewithbasecases) -- node[above] {$\mathcal{E}$} (compilation);
-%     \draw[-Latex] (compilation) -- (cpp);
-%     \draw[-Latex] (sizes) -- (cpp);
-%     \draw[-Latex] (cpp) -- (count);
-%   \end{tikzpicture}
-% \end{frame}
-
-\begin{frame}{Workflow (1/2)}
+\begin{frame}{The Workflow of \textsc{Crane2} (1/2)}
   \begin{enumerate}
-    \item Use \textsc{Crane} to compile \structure{$\phi$} into a set of
+    \item Use \alert{\textsc{Crane}} to compile \structure{$\phi$} into a set of
           equations \structure{$\mathcal{E}$} \pause
     \item Simplify them, e.g.,
           \[
@@ -225,14 +228,14 @@
 \end{frame}
 % NOTE: explain what the arrow means
 
-\begin{frame}[fragile]{Workflow (2/2)}
+\begin{frame}[fragile]{The Workflow of \textsc{Crane2} (2/2)}
   \centering \structure{4.} For each base case:
 
   \begin{tikzcd}
     g(0, m) \arrow[d, gray, visible on=<2->] & \phantom{-} \arrow[d, phantom, visible on=<2->, "\text{\structure{4.1. ($\Rightarrow$)} Construct the corr.\ sentence}"] & g(l, 0) \arrow[d, gray, visible on=<2->] \\
     |[visible on=<2->]| \forall y \in \Delta\text{. }S(y) \lor \neg S(y) \arrow[d, gray, visible on=<3->] & \phantom{-} \arrow[d, phantom, visible on=<3->, "\text{\structure{4.2.} Recurse}"] & |[visible on=<2->]| \top \arrow[d, gray, visible on=<3->] \\
     |[visible on=<3->]| g(0, m) = \alt<4->{0^m}{\text{???}} \arrow[rd, gray, visible on=<5->] & |[visible on=<5->]| \text{\structure{4.3.} Add to }\structure{\mathcal{E}} & |[visible on=<3->]| g(l, 0) = \alt<4->{1}{???} \arrow[ld, gray, visible on=<5->] \\
-    & |[visible on=<5->]| \mathcal{E} \arrow[d, gray, visible on=<6->, "\text{\color{black}{\structure{5.} Compile to C++}}"] & \\
+    & |[visible on=<5->]| \mathcal{E} \arrow[d, gray, visible on=<6->, "\text{\textcolor{black}{\structure{5. ($\Rightarrow$)} Compile to C++}}"] & \\
     |[visible on=<7->]| \text{Domain sizes} \arrow[r, gray, visible on=<7->] & |[visible on=<6->]| \text{\dbox{C++ code}} \arrow[r, gray, visible on=<7->] & |[visible on=<7->]| \text{Model count}
   \end{tikzcd}
 \end{frame}
@@ -295,9 +298,10 @@
 \end{frame}
 
 \begin{frame}[fragile]{From a Base Case to a Sentence}
-  \begin{block}{From Previous Work~\color{gray}{\parencite{DBLP:conf/kr/DilkasB23}}}
+  \begin{block}{From Previous
+      Work~\textcolor{gray}{\parencite{DBLP:conf/kr/DilkasB23}}}
     \begin{itemize}
-      \item \textsc{Crane} associates each function \structure{$f$} with a
+      \item \alert{\textsc{Crane}} associates each function \structure{$f$} with a
             sentence \structure{$\phi$} such that
             \structure{$\textsc{Crane}(\phi)$} produces the definition of
             \structure{$f$}
@@ -307,7 +311,7 @@
   \end{block}
   \begin{example}
     \begin{itemize}
-      \item Base case: \structure{$g(\stackrel{\mbox{\color{black}{\tiny\onslide<2->{\ensuremath{\Gamma}}}}}{\stackrel{\mbox{\color{black}{\tiny\onslide<2->{\ensuremath{\updownarrow}}}}}{0}}, \stackrel{\mbox{\color{black}{\tiny\onslide<2->{\ensuremath{\Delta}}}}}{\stackrel{\mbox{\color{black}{\tiny\onslide<2->{\ensuremath{\updownarrow}}}}}{m}})$}
+      \item Base case: \structure{$g(\stackrel{\mbox{\textcolor{black}{\tiny\onslide<2->{\ensuremath{\Gamma}}}}}{\stackrel{\mbox{\textcolor{black}{\tiny\onslide<2->{\ensuremath{\updownarrow}}}}}{0}}, \stackrel{\mbox{\textcolor{black}{\tiny\onslide<2->{\ensuremath{\Delta}}}}}{\stackrel{\mbox{\textcolor{black}{\tiny\onslide<2->{\ensuremath{\updownarrow}}}}}{m}})$}
       \item<3-> \alert{Part} of the sentence of \structure{$g$}:
             \begin{equation}\label{eq}
               \forall x \in \Gamma\text{. }\forall y \in \Delta\text{. }S(y) \lor \neg P(x, y)
