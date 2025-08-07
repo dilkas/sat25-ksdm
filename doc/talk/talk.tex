@@ -63,7 +63,6 @@
 \title{Towards Practical First-Order Model Counting}
 \date{SAT 2025}
 
-% TODO: 20 min / 14 slides (presumably)
 \begin{document}
 
 \maketitle
@@ -71,7 +70,8 @@
 \begin{frame}{Motivation}
   \begin{exampleblock}{Example Setting}
     \begin{itemize}
-      \item Let \structure{$\Delta$} be a set of cardinality \structure{$n$}
+      \item Let \structure{$\Delta$} be a set of cardinality
+            \structure{$n \in \mathbb{N}_0$}
       \item Suppose we want to count all \structure{$P \subseteq \Delta^{2}$}
             (as a function of \structure{$n$}) that are:
             \begin{itemize}
@@ -110,18 +110,16 @@
         First-Order Logic with \alert<4>{Equality}}}
   \begin{itemize}
     \item<5-> Any number of variables and constants
-    % \item<5-> All variables are bound (by \alert{$\exists$} or
-    %       \alert{$\forall$})
-    \item<6-> \alert{$\exists$} and \alert{$\forall$} quantifiers can be nested
-          arbitrarily deeply
-    \item<6-> All domains are finite
+    \item<5-> \structure{$\exists$} and \structure{$\forall$} quantifiers can be
+          nested arbitrarily deeply
+    \item<5-> All domains are finite
           \begin{itemize}
             \item Solutions are functions that take domain sizes as input
           \end{itemize}
-    % \item<6-> Predicates can have any arity
+    \item<5-> Of course, not all valid inputs have tractable solutions
   \end{itemize}
   \end{block}
-  \onslide<7->{
+  \onslide<6->{
     \begin{block}{First-Order Model Counting (FOMC)}
       \begin{itemize}
         \item Each predicate acts like a \alert{subset}
@@ -210,8 +208,8 @@
 
 \begin{frame}{The Workflow of \textsc{Crane2} (1/2)}
   \begin{enumerate}
-    \item Use \alert{\textsc{Crane}} to compile \structure{$\phi$} into a set of
-          equations \structure{$\mathcal{E}$} \pause
+    \item Use \alert{\textsc{Crane}} to compile sentence \structure{$\phi$} into
+          a set of equations \structure{$\mathcal{E}$} \pause
     \item Simplify them, e.g.,
           \[
             g(l, m) = \sum_{k=0}^{m}[0 \le k \le 1]\binom{m}{k}g(l-1, m-k)
@@ -305,8 +303,9 @@
             sentence \structure{$\phi$} such that
             \structure{$\textsc{Crane}(\phi)$} produces the definition of
             \structure{$f$}
-      \item There is a bijection between the parameters of \structure{$f$} and
-            the domains of \structure{$\phi$}
+      \item There is a bijection between the parameters of the \alert{main
+            function} \structure{$f$} and the \alert{domains} of the
+            \alert{input sentence} \structure{$\phi$}
     \end{itemize}
   \end{block}
   \begin{example}
@@ -319,7 +318,7 @@
       \item<4-> \structure{$g(0, \dots)$} means we need to simplify \eqref{eq}
             by assuming \structure{$|\Gamma| = 0$}
       \item<5-> Result: \structure{$\forall y \in \Delta\text{.
-            }S(y) \lor \neg S(y)$} \qquad (\alert{Smoothing})
+            }S(y) \lor \neg S(y)$}\hfill(\alert{Smoothing})
     \end{itemize}
   \end{example}
 \end{frame}
