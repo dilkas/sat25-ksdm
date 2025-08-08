@@ -86,7 +86,7 @@
   \end{exampleblock}
   \pause
   \begin{itemize}
-    \item[\faThumbsODown] Propositional model counting (\structure{$\#\SAT$}) is
+    \item[\faThumbsODown] Propositional model counting (\alert{$\#\SAT$}) is
           \alert{$\#\P$-complete}
     \item[\faThumbsOUp] But many of these counting problems have
           \alert{efficient solutions}
@@ -114,7 +114,7 @@
           nested arbitrarily deeply
     \item<5-> All domains are finite
           \begin{itemize}
-            \item Solutions are functions that take domain sizes as input
+            \item Solutions are functions that take domain sizes as inputs
           \end{itemize}
     \item<5-> Of course, not all valid inputs have tractable solutions
   \end{itemize}
@@ -124,7 +124,7 @@
       \begin{itemize}
         \item Each predicate acts like a \alert{subset}
         \begin{itemize}
-          \item of a domain or product of domains
+          \item of a domain or a Cartesian product of domains
         \end{itemize}
         \item Goal: count \alert{combinations of subsets} that satisfy the
               sentence
@@ -154,7 +154,7 @@
     \end{itemize}
   \end{block}
   \pause
-  \begin{block}{Other Approaches}
+  \begin{block}{Some Other Approaches}
     \begin{itemize}
       \item \alert{L2C}~\textcolor{gray}{\parencite{DBLP:conf/kr/KazemiP16}}
             \begin{itemize}
@@ -183,8 +183,7 @@
             \item \alert{Sentences} $\to$ labelled \alert{digraphs} $\to$
                   function-defining \alert{equations}
           \end{itemize}
-    % \item Capable of constructing recursive solutions
-    \item Two variants: \alert{greedy} search and \alert{breadth-first search}
+    \item Two variants: \alert{greedy} search and \alert{breadth-first} search
           (BFS)
   \end{itemize}
   \pause
@@ -218,7 +217,8 @@
           \[
             g(l, m) = g(l-1, m) + mg(l-1, m-1)
           \] \pause
-    \item[3. ($\Rightarrow$)] Identify a sufficient set of base cases
+    \item[3. ($\Rightarrow$)] Identify a \alert{sufficient set of base cases} of
+          all recursive functions
           \begin{itemize}
             \item e.g., \structure{$\{\, g(0, m), g(l, 0) \,\}$}
           \end{itemize}
@@ -303,9 +303,8 @@
             sentence \structure{$\phi$} such that
             \structure{$\textsc{Crane}(\phi)$} produces the definition of
             \structure{$f$}
-      \item There is a bijection between the parameters of the \alert{main
-            function} \structure{$f$} and the \alert{domains} of the
-            \alert{input sentence} \structure{$\phi$}
+      \item And there is a bijection between the \alert{parameters} of
+            \structure{$f$} and the \alert{domains} of \structure{$\phi$}
     \end{itemize}
   \end{block}
   \begin{example}
@@ -323,7 +322,7 @@
   \end{example}
 \end{frame}
 
-\begin{frame}{An Outline of the Resulting C++ Program}
+\begin{frame}{The Structure of the Resulting C++ Program}
   \begin{algorithm}[H]
     initialise $\Cache_{\alert{g(0, m)}}$, $\Cache_{\alert{g(l, 0)}}$, $\Cache_{\alert{g}}$, and $\Cache_{\alert{f}}$\; \DontPrintSemicolon\pause
     \textbf{Function} $\alert{g_{0,m}(m)}$\textbf{:} \dots\;
