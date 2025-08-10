@@ -57,6 +57,8 @@
 \usetheme{default}
 \usecolortheme{beaver}
 
+\definecolor{mygreen}{RGB}{0, 128, 0}
+
 \author{Ananth K. Kidambi\inst{1} \and Guramrit Singh\inst{1} \and \textbf{Paulius Dilkas}\inst{2,3} \and Kuldeep S. Meel\inst{4,2}}
 \institute{\inst{1} IIT Bombay, India \and \inst{2} University of Toronto, Canada \and \inst{3} Vector Institute, Canada \and \inst{4} Georgia Tech, USA}
 
@@ -198,7 +200,8 @@
     \begin{description}
       \item[Completeness:] recursive functions (like \structure{$g$}) have
             \alert{no base cases}
-      \item[Usability:] how do I compute, e.g., \structure{$f(7, 7)$}?
+      \item[Usability:] how do I compute, e.g., \structure{$f(7, 7)$}? \hfill
+            \textcolor{mygreen}{(C++ to the rescue!)}
     \end{description}
   \end{alertblock}
 \end{frame}
@@ -270,16 +273,16 @@
   \end{example}
 \end{frame}
 
-\begin{frame}{Theoretical Guarantees}
-  \begin{theorem}
-    The maximum \alert{recursion depth} of the compilation algorithm is upper
-    bounded by the \alert{number of domains}.
-  \end{theorem}
-  \pause
-  \begin{proof}[Proof (hint).]
-    Each recursive call eliminates a domain.
-  \end{proof}
-  \pause
+\begin{frame}{No Infinite Cycles}
+  % \begin{theorem}
+  %   The maximum \alert{recursion depth} of the compilation algorithm is upper
+  %   bounded by the \alert{number of domains}.
+  % \end{theorem}
+  % \pause
+  % \begin{proof}[Proof (hint).]
+  %   Each recursive call eliminates a domain.
+  % \end{proof}
+  % \pause
   \begin{theorem}
     The \alert{evaluation} of a recursive function always \alert{terminates}.
   \end{theorem}
